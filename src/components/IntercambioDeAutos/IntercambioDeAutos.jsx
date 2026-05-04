@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone } from 'lucide-react';
+import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import './IntercambioDeAutos.css';
 
 const darkSwal = {
@@ -434,6 +435,10 @@ const IntercambioDeAutos = () => {
       <div className="vender-auto-header">
         <h1>Intercambio de Vehículo</h1>
         <p>El valor asignado a tu auto tras la revisión administrativa se aplicará como una reducción al precio total del vehículo que deseas comprar.</p>
+      </div>
+
+      <div style={{ padding: '0 2rem', marginBottom: '2rem' }}>
+        <FacebookPromo type="banner" reverse={false} />
       </div>
 
       <div className="vender-auto-layout">

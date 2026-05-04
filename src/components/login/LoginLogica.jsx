@@ -53,7 +53,7 @@ export const useLoginLogic = () => {
       const inputEmail = formData.email.trim().toLowerCase();
       const user = allUsers.find(u => 
         (u.email || '').toLowerCase() === inputEmail && 
-        u.password === formData.password
+        u.password === formData.password.trim()
       );
 
       if (user) {

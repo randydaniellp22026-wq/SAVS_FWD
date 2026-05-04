@@ -68,6 +68,17 @@ export const useRedireccionContactosLogica = () => {
       return;
     }
 
+    if (message.trim().length < 10 && !initialVehicle) {
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Mensaje demasiado corto',
+        text: 'Por favor, describe tu consulta con al menos 10 caracteres.',
+        confirmButtonColor: '#eab308'
+      });
+      return;
+    }
+
     // Validación de formato de correo
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regexEmail.test(user_email)) {

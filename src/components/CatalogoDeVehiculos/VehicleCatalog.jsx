@@ -17,6 +17,7 @@ import ShimmerText from '../ShimmerText/ShimmerText';
 import SlideTextButton from '../SlideTextButton/SlideTextButton';
 import BorderBeam from '../BorderBeam/BorderBeam';
 import { Magnetic } from '../core/Magnetic';
+import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import './VehicleCatalog.css';
 
 const localImages = import.meta.glob('../../img/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' });
@@ -42,6 +43,23 @@ const FavoriteButton = ({ vehicleId }) => {
   );
 };
 
+const FilterSection = ({ id, title, icon: Icon, expandedSection, toggleSection, children }) => (
+  <div className={`filter-section ${expandedSection === id ? 'expanded' : ''}`}>
+    <Magnetic style={{ width: "100%", display: "block" }}>
+      <button className="section-header" onClick={() => toggleSection(id)}>
+        <div className="section-title-wrapper">
+          <Icon size={18} className="section-icon" />
+          <ShimmerText className="section-title" text={title} as="span" />
+        </div>
+        {expandedSection === id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+    </Magnetic>
+    <div className="section-content">
+      {children}
+    </div>
+  </div>
+);
+
 const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false }) => {
   const {
     expandedSection,
@@ -54,23 +72,6 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
     resetFilters
   } = useCatalogoLogica(initialVehicles);
   const navigate = useNavigate();
-
-  const FilterSection = ({ id, title, icon: Icon, children }) => (
-    <div className={`filter-section ${expandedSection === id ? 'expanded' : ''}`}>
-      <Magnetic style={{ width: "100%", display: "block" }}>
-        <button className="section-header" onClick={() => toggleSection(id)}>
-          <div className="section-title-wrapper">
-            <Icon size={18} className="section-icon" />
-            <ShimmerText className="section-title" text={title} as="span" />
-          </div>
-          {expandedSection === id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-      </Magnetic>
-      <div className="section-content">
-        {children}
-      </div>
-    </div>
-  );
 
   if (loading) return <div className="loading-container"><div className="loader"></div><span>Cargando catálogo...</span></div>;
 
@@ -89,7 +90,7 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
               <h3>Filtros Especializados</h3>
             </div>
 
-          <FilterSection id="technical" title="Técnicos" icon={Settings}>
+          <FilterSection id="technical" title="Técnicos" icon={Settings} expandedSection={expandedSection} toggleSection={toggleSection}>
             <div className="filter-group">
               <label>Transmisión</label>
               <div className="button-grid">
@@ -122,7 +123,7 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
             </div>
           </FilterSection>
 
-          <FilterSection id="vehicle" title="Vehículo" icon={Car}>
+          <FilterSection id="vehicle" title="Vehículo" icon={Car} expandedSection={expandedSection} toggleSection={toggleSection}>
             <div className="filter-row">
               <div className="filter-group half"><label>Marca</label><input type="text" name="make" placeholder="BMW" value={activeFilters.make} onChange={handleInputChange} /></div>
               <div className="filter-group half"><label>Modelo</label><input type="text" name="model" placeholder="M4" value={activeFilters.model} onChange={handleInputChange} /></div>
@@ -139,7 +140,7 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
             </div>
           </FilterSection>
 
-          <FilterSection id="purchase" title="Compra" icon={DollarSign}>
+          <FilterSection id="purchase" title="Compra" icon={DollarSign} expandedSection={expandedSection} toggleSection={toggleSection}>
             <div className="filter-group">
               <label>Rango de Precio</label>
               <div className="filter-row">
@@ -157,19 +158,24 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
           <Magnetic style={{ width: "100%", display: "block", marginTop: "1rem" }}>
             <button className="btn btn-secondary reset-btn" style={{ marginTop: 0 }} onClick={resetFilters}>Limpiar Filtros</button>
           </Magnetic>
+          
+          <div style={{ marginTop: '2rem' }}>
+            <FacebookPromo type="card" />
+          </div>
           </aside>
         )}
 
         <main className={`catalog-main ${!showFilters ? 'full-width' : ''}`}>
           {filteredVehicles.length > 0 ? (
             <div className="catalog-grid">
-              {filteredVehicles.map((car) => {
+              {filteredVehicles.map((car, index) => {
                 // Buscar imagen en el glob (por nombre de archivo o ruta completa)
                 const imageSrc = Object.keys(localImages).find(k => k.includes(car.image)) 
                   ? localImages[Object.keys(localImages).find(k => k.includes(car.image))] 
                   : car.image;
                 return (
-                <div key={car.id} className="card vehicle-card" style={{ position: 'relative', borderRadius: '20px' }}>
+                <React.Fragment key={car.id}>
+                <div className="card vehicle-card" style={{ position: 'relative', borderRadius: '20px' }}>
                   <BorderBeam duration={10} size={25} borderWidth={1.2} />
                   <div className="vehicle-image-container">
                     <img src={imageSrc} alt={car.name} className="vehicle-image" referrerPolicy="no-referrer" />
@@ -196,6 +202,10 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
                     </div>
                   </div>
                 </div>
+                {(index + 1) % 6 === 0 && (
+                  <FacebookPromo key={`promo-card-${index}`} type="card" />
+                )}
+                </React.Fragment>
                 );
               })}
             </div>

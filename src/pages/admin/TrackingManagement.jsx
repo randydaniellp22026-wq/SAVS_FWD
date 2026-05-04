@@ -30,13 +30,7 @@ const stageBadge = (step) => {
   const s = STAGES.find(x => x.step === step);
   if (!s) return null;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: '6px',
-      background: `${s.color}22`, color: s.color,
-      border: `1px solid ${s.color}55`,
-      padding: '4px 12px', borderRadius: '100px',
-      fontSize: '0.78rem', fontWeight: 700
-    }}>
+    <span className={`stage-badge stage-${step}`}>
       <s.icon size={13} /> {s.label}
     </span>
   );
@@ -166,25 +160,16 @@ const TrackingManagement = () => {
 
   /* ─── Mini progress bar ─── */
   const MiniProgress = ({ step }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px' }}>
+    <div className="mini-progress-container">
       {STAGES.map((s, i) => (
         <React.Fragment key={s.step}>
-          <div style={{
-            width: 28, height: 28, borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: step >= s.step ? s.color : 'rgba(255,255,255,0.08)',
-            border: `2px solid ${step >= s.step ? s.color : 'rgba(255,255,255,0.15)'}`,
-            transition: 'all 0.3s',
-            flexShrink: 0,
-          }}>
+          <div className={`progress-step-icon ${step >= s.step ? 'active' : ''}`} 
+               style={{ '--step-color': s.color }}>
             <s.icon size={13} color={step >= s.step ? '#fff' : '#555'} />
           </div>
           {i < STAGES.length - 1 && (
-            <div style={{
-              flex: 1, height: 3, borderRadius: 4,
-              background: step > s.step ? s.color : 'rgba(255,255,255,0.08)',
-              transition: 'all 0.3s'
-            }} />
+            <div className={`progress-step-line ${step > s.step ? 'active' : ''}`}
+                 style={{ '--step-color': s.color }}></div>
           )}
         </React.Fragment>
       ))}
@@ -192,81 +177,61 @@ const TrackingManagement = () => {
   );
 
   return (
-    <div style={{ padding: '0 0 4rem', maxWidth: 1100, margin: '0 auto', color: '#fff' }}>
+    <div className="admin-container tracking-mgmt">
 
       {/* ── Header ── */}
-      <header style={{ marginBottom: '2.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
-          <div style={{ background: 'rgba(234,179,8,0.12)', padding: 12, borderRadius: 14 }}>
-            <Ship size={28} color="#eab308" />
+      <header className="tracking-header">
+        <div className="tracking-title-row">
+          <div className="tracking-icon-wrapper">
+            <Ship size={28} />
           </div>
-          <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '2.4rem', margin: 0 }}>
-            Tracking de <span style={{ color: '#eab308' }}>Importaciones</span>
+          <h1 className="admin-title">
+            Tracking de <span className="highlight-gold">Importaciones</span>
           </h1>
         </div>
-        <p style={{ color: '#9ca3af', margin: 0, fontSize: '1rem' }}>
+        <p className="admin-subtitle">
           Gestiona y actualiza el estado del proceso de importación de cada cliente.
         </p>
       </header>
 
       {/* ── KPIs ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: '1.2rem', marginBottom: '2rem' }}>
+      <div className="tracking-kpis-grid">
         {[
           { label: 'Total Clientes',       value: users.length,             icon: User,    color: '#3b82f6' },
           { label: 'Con Tracking Activo',  value: clientsWithTracking,      icon: Ship,    color: '#10b981' },
           { label: 'Sin Tracking Asignado',value: clientsWithoutTracking,   icon: AlertCircle, color: '#ef4444' },
           { label: 'En Aduanas',           value: users.filter(u=>u.tracking?.importStatus===3).length, icon: Clock, color: '#eab308' },
         ].map(k => (
-          <div key={k.label} style={{
-            background: 'linear-gradient(145deg,#161616,#0a0a0a)',
-            border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 16, padding: '1.4rem 1.6rem',
-            display: 'flex', alignItems: 'center', gap: '1rem'
-          }}>
-            <div style={{ background: `${k.color}18`, padding: 10, borderRadius: 12, flexShrink: 0 }}>
-              <k.icon size={22} color={k.color} />
+          <div key={k.label} className="tracking-kpi-card">
+            <div className="kpi-icon" style={{ '--kpi-color': k.color }}>
+              <k.icon size={22} />
             </div>
-            <div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 700, lineHeight: 1 }}>{k.value}</div>
-              <div style={{ color: '#9ca3af', fontSize: '0.82rem', marginTop: 4 }}>{k.label}</div>
+            <div className="kpi-content">
+              <div className="kpi-value">{k.value}</div>
+              <div className="kpi-label">{k.label}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* ── Búsqueda + filtros ── */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.8rem', flexWrap: 'wrap' }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: '#111', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 10, padding: '0.6rem 1rem', flex: 1, minWidth: 220
-        }}>
-          <Search size={18} color="#6b7280" />
+      <div className="tracking-filters-row">
+        <div className="tracking-search-bar">
+          <Search size={18} />
           <input
             type="text"
             placeholder="Buscar cliente por nombre o email..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ background: 'transparent', border: 'none', outline: 'none', color: '#fff', width: '100%', fontSize: '0.95rem' }}
           />
         </div>
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+        <div className="tracking-stage-filters">
           {[{ step: 0, label: 'Todos' }, ...STAGES.map(s => ({ step: s.step, label: s.label }))].map(f => (
-            <button key={f.step} onClick={() => setStageFilter(f.step)} style={{
-              padding: '0.5rem 1rem', borderRadius: 100, cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-              border: `1px solid ${stageFilter === f.step ? '#eab308' : 'rgba(255,255,255,0.15)'}`,
-              background: stageFilter === f.step ? 'rgba(234,179,8,0.15)' : 'rgba(255,255,255,0.04)',
-              color: stageFilter === f.step ? '#eab308' : '#9ca3af',
-              transition: 'all 0.2s'
-            }}>
+            <button key={f.step} onClick={() => setStageFilter(f.step)} className={`stage-filter-btn ${stageFilter === f.step ? 'active' : ''}`}>
               {f.label}
             </button>
           ))}
-          <button onClick={fetchUsers} style={{
-            padding: '0.5rem 1rem', borderRadius: 100, cursor: 'pointer', fontWeight: 600, fontSize: '0.82rem',
-            border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.04)', color: '#9ca3af',
-            display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s'
-          }}>
+          <button onClick={fetchUsers} className="refresh-btn">
             <RefreshCw size={14} /> Actualizar
           </button>
         </div>
@@ -274,124 +239,97 @@ const TrackingManagement = () => {
 
       {/* ── Lista de clientes ── */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: '#6b7280' }}>
-          <Ship size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
+        <div className="tracking-placeholder loading">
+          <Ship size={40} />
           <p>Cargando clientes...</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '4rem', color: '#6b7280' }}>
-          <AlertCircle size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
+        <div className="tracking-placeholder empty">
+          <AlertCircle size={40} />
           <p>No se encontraron clientes con esos criterios.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="tracking-list">
           {filtered.map(user => {
             const t        = user.tracking || {};
             const hasTrack = !!t.vehicleName;
             const isOpen   = expanded === user.id;
 
             return (
-              <div key={user.id} style={{
-                background: 'linear-gradient(145deg,#121212,#0d0d0d)',
-                border: `1px solid ${isOpen ? 'rgba(234,179,8,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: 16,
-                overflow: 'hidden',
-                transition: 'border-color 0.3s',
-                boxShadow: isOpen ? '0 8px 32px rgba(0,0,0,0.4)' : 'none'
-              }}>
+            return (
+              <div key={user.id} className={`tracking-user-card ${isOpen ? 'expanded' : ''}`}>
 
                 {/* ── Fila principal ── */}
                 <div
                   onClick={() => setExpanded(isOpen ? null : user.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '1rem',
-                    padding: '1.2rem 1.5rem', cursor: 'pointer',
-                    transition: 'background 0.2s'
-                  }}
+                  className="tracking-card-header"
                 >
                   {/* Avatar */}
-                  <div style={{
-                    width: 46, height: 46, borderRadius: '50%', flexShrink: 0,
-                    background: 'rgba(234,179,8,0.12)',
-                    border: '2px solid rgba(234,179,8,0.3)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden', fontSize: '1.2rem', fontWeight: 700, color: '#eab308'
-                  }}>
+                  <div className="tracking-avatar">
                     {user.image
-                      ? <img src={user.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={user.image} alt="" />
                       : (user.nombre?.charAt(0) || 'U')}
                   </div>
 
                   {/* Info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '1rem', color: '#fff' }}>{user.nombre}</div>
-                    <div style={{ color: '#6b7280', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                  <div className="tracking-user-info">
+                    <div className="user-name-text">{user.nombre}</div>
+                    <div className="user-email-text">
                       <Mail size={12} /> {user.email}
                     </div>
                   </div>
 
                   {/* Vehículo */}
-                  <div style={{ textAlign: 'center', minWidth: 160 }}>
+                  <div className="tracking-vehicle-summary">
                     {hasTrack ? (
                       <>
-                        <div style={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>
-                          <Package size={13} style={{ marginRight: 5, color: '#eab308' }} />
+                        <div className="vehicle-name-display">
+                          <Package size={13} className="icon-gold" />
                           {t.vehicleName}
                         </div>
-                        <div style={{ marginTop: 6 }}>{stageBadge(t.importStatus)}</div>
+                        <div className="badge-wrapper">{stageBadge(t.importStatus)}</div>
                       </>
                     ) : (
-                      <span style={{ color: '#4b5563', fontStyle: 'italic', fontSize: '0.85rem' }}>Sin tracking</span>
+                      <span className="no-tracking-text">Sin tracking</span>
                     )}
                   </div>
 
                   {/* Chevron */}
-                  <div style={{ color: '#6b7280', marginLeft: 8 }}>
+                  <div className="tracking-chevron">
                     {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                   </div>
                 </div>
 
                 {/* ── Panel expandido ── */}
                 {isOpen && (
-                  <div style={{
-                    borderTop: '1px solid rgba(255,255,255,0.07)',
-                    padding: '1.5rem 1.8rem',
-                    background: 'rgba(0,0,0,0.3)',
-                    animation: 'fadeIn 0.25s ease'
-                  }}>
+                  <div className="tracking-expanded-panel">
                     {hasTrack ? (
                       <>
                         {/* Progress */}
-                        <div style={{ marginBottom: '1.5rem' }}>
-                          <div style={{ color: '#9ca3af', fontSize: '0.8rem', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <div className="tracking-progress-section">
+                          <div className="progress-label">
                             Progreso de importación
                           </div>
                           <MiniProgress step={t.importStatus || 0} />
                         </div>
 
                         {/* Detalles en grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                        <div className="tracking-details-grid">
                           {[
                             { label: 'Fecha Estimada',  value: t.estimatedDate || 'N/A' },
                             { label: 'Ubicación',       value: t.location || 'N/A' },
                             { label: 'Barco / Naviera', value: t.vessel || 'N/A' },
                             { label: 'Estado',          value: t.statusText || 'N/A' },
                           ].map(d => (
-                            <div key={d.label} style={{
-                              background: 'rgba(255,255,255,0.04)',
-                              border: '1px solid rgba(255,255,255,0.07)',
-                              borderRadius: 10, padding: '0.8rem 1rem'
-                            }}>
-                              <div style={{ color: '#6b7280', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-                                {d.label}
-                              </div>
-                              <div style={{ color: '#e5e7eb', fontWeight: 600, fontSize: '0.92rem' }}>{d.value}</div>
+                            <div key={d.label} className="detail-item-box">
+                              <div className="detail-label">{d.label}</div>
+                              <div className="detail-value">{d.value}</div>
                             </div>
                           ))}
                         </div>
                       </>
                     ) : (
-                      <div style={{ color: '#6b7280', marginBottom: '1.5rem', fontStyle: 'italic', fontSize: '0.9rem' }}>
+                      <div className="no-tracking-msg">
                         Este cliente aún no tiene información de importación asignada.
                       </div>
                     )}
@@ -399,17 +337,7 @@ const TrackingManagement = () => {
                     {/* Botón de editar */}
                     <button
                       onClick={() => handleEditTracking(user)}
-                      style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 8,
-                        background: 'rgba(234,179,8,0.12)',
-                        border: '1px solid rgba(234,179,8,0.4)',
-                        color: '#eab308', padding: '0.65rem 1.4rem',
-                        borderRadius: 10, cursor: 'pointer',
-                        fontWeight: 700, fontSize: '0.9rem',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseOver={e => { e.currentTarget.style.background = '#eab308'; e.currentTarget.style.color = '#000'; }}
-                      onMouseOut={e => { e.currentTarget.style.background = 'rgba(234,179,8,0.12)'; e.currentTarget.style.color = '#eab308'; }}
+                      className="btn-update-tracking"
                     >
                       <Edit3 size={16} />
                       {hasTrack ? 'Actualizar Tracking' : 'Asignar Tracking'}

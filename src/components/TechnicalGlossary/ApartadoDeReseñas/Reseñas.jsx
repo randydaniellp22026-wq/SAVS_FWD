@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
+import FacebookPromo from '../../FacebookPromo/FacebookPromo';
 import './DiseñoReseñas.css';
 
 const darkSwal = {
@@ -253,6 +254,10 @@ const Reseñas = () => {
                         {filter}
                     </button>
                 ))}
+            </div>
+
+            <div style={{ marginBottom: '2rem', marginTop: '1rem', padding: '0 2rem' }}>
+                <FacebookPromo type="banner" reverse={true} />
             </div>
 
             <div className="reviews-grid">

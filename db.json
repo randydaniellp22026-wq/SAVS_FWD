@@ -583,6 +583,18 @@
       "ubicacion": "Costa Rica",
       "createdAt": "2026-03-24T14:23:15.511Z",
       "favorites": []
+    },
+    {
+      "nombre": "Starlight",
+      "email": "fvarvil@gmail.com",
+      "correo": "fvarvil@gmail.com",
+      "telefono": "+506 7834-2342",
+      "password": "yosi12345.",
+      "rol": "Cliente",
+      "ubicacion": "Costa Rica",
+      "createdAt": "2026-04-27T21:05:54.940Z",
+      "favorites": [],
+      "id": "u9UQUdBBDVI"
     }
   ],
   "technical_glossary": [

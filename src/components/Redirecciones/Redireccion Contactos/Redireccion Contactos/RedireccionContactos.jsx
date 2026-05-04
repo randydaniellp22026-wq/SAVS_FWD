@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRedireccionContactosLogica } from "./RedireccionContactosLogica";
 import { Clock, MapPin, Phone, Mail, Send, Car } from 'lucide-react';
 import { useLocation } from "react-router-dom";
+import FacebookPromo from '../../../FacebookPromo/FacebookPromo';
 import "./DiseñoContacto.css";
 
 const RedireccionContactos = () => {
@@ -64,8 +65,19 @@ const RedireccionContactos = () => {
       <div style={{ paddingTop: '100px' }}></div>
 
       <header className="headerContacto">
-        <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Contacta con Importadora SAVS</h1>
-        <p style={{ fontSize: '1.2rem', maxWidth: '800px' }}>Expertos en importación directa. Tu próximo vehículo de alta gama está a un mensaje de distancia.</p>
+        <div className="headerInfo">
+          <h1>Contacta con Importadora SAVS</h1>
+          <p>Expertos en importación directa. Tu próximo vehículo de alta gama está a un mensaje de distancia.</p>
+        </div>
+        <div className="headerPromoContainer">
+          <FacebookPromo 
+            type="horizontal" 
+            className="header-promo" 
+            reverse={false}
+            title="Únete a la Comunidad"
+            desc="Sé el primero en ver los nuevos ingresos y primicias de importación."
+          />
+        </div>
       </header>
 
       <section className="contenidoContacto" style={{ gap: '20px', paddingBottom: '100px' }}>
@@ -199,6 +211,7 @@ const RedireccionContactos = () => {
               </a>
             </div>
           </form>
+          
         </div>
 
         {/* Lado Derecho: Info y Sedes (Expandido) */}

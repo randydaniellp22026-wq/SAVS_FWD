@@ -1,0 +1,264 @@
+.fb-promo-card {
+  cursor: pointer;
+  overflow: hidden;
+  border: 1px solid rgba(234, 179, 8, 0.3) !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 380px;
+}
+
+.fb-promo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(234, 179, 8, 0.15);
+}
+
+.fb-promo-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.fb-promo-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+.fb-promo-overlay {
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 100%);
+  height: 100%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-align: center;
+}
+
+.fb-promo-title {
+  color: #eab308;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.fb-promo-desc {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.fb-promo-btn {
+  width: 100%;
+  margin-top: auto;
+  font-weight: 600;
+  background-color: #1877F2;
+  border-color: #1877F2;
+}
+
+.fb-promo-btn:hover {
+  background-color: #166FE5;
+}
+
+/* Banner Horizontal */
+.fb-promo-banner {
+  cursor: pointer;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  margin: 3rem 0;
+}
+
+.fb-promo-banner:hover {
+  transform: translateY(-3px);
+  border-color: rgba(234, 179, 8, 0.5);
+}
+
+.fb-promo-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fb-promo-text {
+  flex: 1;
+  padding: 3rem;
+}
+
+.fb-badge {
+  background: rgba(234, 179, 8, 0.1);
+  color: #eab308;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.fb-promo-text h2 {
+  font-size: 2.2rem;
+  color: #fff;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.fb-promo-text p {
+  color: #a1a1aa;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.fb-promo-img-wrapper {
+  flex: 1;
+  max-width: 400px;
+  height: 300px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fb-promo-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: linear-gradient(to right, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
+}
+
+.fb-reverse .fb-promo-banner-inner {
+  flex-direction: row-reverse;
+}
+
+.fb-reverse .fb-promo-img-wrapper img {
+  mask-image: linear-gradient(to left, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to left, transparent, black 30%);
+}
+
+@media (max-width: 768px) {
+  .fb-promo-banner-inner {
+    flex-direction: column;
+  }
+  
+  .fb-promo-img-wrapper {
+    max-width: 100%;
+    height: 200px;
+  }
+  
+  .fb-promo-img-wrapper img {
+    mask-image: linear-gradient(to bottom, transparent, black 30%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%);
+  }
+  
+  .fb-promo-text {
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .fb-promo-text p {
+    margin: 0 auto 2rem;
+  }
+}
+
+/* Vertical Layout */
+.fb-promo-vertical {
+  cursor: pointer;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 450px;
+}
+
+.fb-promo-vertical:hover {
+  transform: translateY(-5px);
+  border-color: rgba(234, 179, 8, 0.5);
+  box-shadow: 0 10px 30px rgba(234, 179, 8, 0.15);
+}
+
+.fb-promo-img-top {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.fb-promo-img-top img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+}
+
+.fb-promo-text-bottom {
+  padding: 1.5rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.fb-promo-text-bottom h2 {
+  font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 0.8rem;
+  line-height: 1.2;
+}
+
+.fb-promo-text-bottom p {
+  color: #a1a1aa;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+/* Extra Large Ad for Home */
+.home-large-ad {
+  margin: 4rem 0;
+  border-width: 2px;
+  background: linear-gradient(135deg, #050505 0%, #151515 100%);
+  box-shadow: 0 0 40px rgba(234, 179, 8, 0.05);
+}
+
+.home-large-ad .fb-promo-text {
+  padding: 5rem 4rem;
+}
+
+.home-large-ad h2 {
+  font-size: 3.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  background: linear-gradient(to right, #fff, #eab308);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-large-ad p {
+  font-size: 1.4rem;
+  max-width: 600px;
+}
+
+@media (max-width: 1024px) {
+  .home-large-ad h2 { font-size: 2.8rem; }
+}
+
+@media (max-width: 768px) {
+  .home-large-ad .fb-promo-text { padding: 3rem 2rem; }
+  .home-large-ad h2 { font-size: 2.2rem; }
+  .home-large-ad p { font-size: 1.1rem; }
+}

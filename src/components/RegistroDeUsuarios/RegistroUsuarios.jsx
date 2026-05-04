@@ -89,6 +89,19 @@ function RegistroUsuarios() {
             />
           </div>
 
+          <div style={{ marginBottom: "1.5rem" }}>
+            <AnimatedInput
+              label="Confirmar Contraseña"
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              placeholder="Repite tu contraseña"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           <button type="submit">Crear Cuenta</button>
 
           <p className="loginText">

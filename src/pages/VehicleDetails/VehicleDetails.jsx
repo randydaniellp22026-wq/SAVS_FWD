@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useVehicleDetailsLogica } from './VehicleDetailsLogica';
 import VehicleCarousel from '../../components/VehicleCarousel/VehicleCarousel';
 import ShimmerText from '../../components/ShimmerText/ShimmerText';
+import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
 import './VehicleDetails.css';
 
 const localImages = import.meta.glob('../../carros/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' });
@@ -156,6 +157,11 @@ const VehicleDetails = () => {
             <span style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Color Exterior</span>
             <span style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600' }}>{vehicle.color || 'N/D'}</span>
           </div>
+        </div>
+        
+        {/* Banner Promo de Facebook */}
+        <div style={{ marginTop: '3rem' }}>
+          <FacebookPromo type="banner" reverse={true} />
         </div>
       </section>
 
