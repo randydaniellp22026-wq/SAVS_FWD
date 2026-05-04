@@ -158,7 +158,7 @@ const BranchManagement = () => {
         </button>
       </div>
 
-      <div className="admin-card">
+      <div className="admin-card branches-mgmt-card">
         {isLoading ? (
           <div className="loading-req">Cargando sedes...</div>
         ) : branches.length === 0 ? (
@@ -173,10 +173,10 @@ const BranchManagement = () => {
                     <h3>{branch.name}</h3>
                   </div>
                   <div className="branch-actions">
-                    <button className="btn-icon edit" onClick={() => openModal(branch)} title="Editar">
+                    <button className="btn-icon-sm edit" onClick={() => openModal(branch)} title="Editar">
                       <Edit2 size={16} />
                     </button>
-                    <button className="btn-icon delete" onClick={() => handleDelete(branch.id)} title="Eliminar">
+                    <button className="btn-icon-sm delete" onClick={() => handleDelete(branch.id)} title="Eliminar">
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -226,11 +226,12 @@ const BranchManagement = () => {
                   value={currentBranch.location} 
                   onChange={handleInputChange} 
                   placeholder="Provincia, Cantón, señas exactas..."
+                  className="admin-textarea"
                   required
                 />
               </div>
 
-              <div className="form-row">
+              <div className="form-row branch-form-row">
                 <div className="form-group flex-1">
                   <label>Teléfono</label>
                   <input 
@@ -262,7 +263,7 @@ const BranchManagement = () => {
                   onChange={handleInputChange} 
                   placeholder="https://www.google.com/maps/embed?..."
                 />
-                <small style={{ color: '#71717a', marginTop: '5px', display: 'block' }}>
+                <small className="form-help-text">
                   Copia el enlace del 'src' del iframe de Google Maps.
                 </small>
               </div>
@@ -278,142 +279,9 @@ const BranchManagement = () => {
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .branches-admin-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 20px;
-          margin-top: 20px;
-        }
-        .branch-admin-card {
-          background: #18181b;
-          border: 1px solid #27272a;
-          border-radius: 12px;
-          padding: 20px;
-          transition: all 0.3s ease;
-        }
-        .branch-admin-card:hover {
-          border-color: #eab308;
-          transform: translateY(-2px);
-        }
-        .branch-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin-bottom: 15px;
-        }
-        .branch-icon-label {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .branch-icon-label h3 {
-          margin: 0;
-          font-size: 1.1rem;
-          color: #fff;
-        }
-        .branch-actions {
-          display: flex;
-          gap: 8px;
-        }
-        .btn-icon {
-          background: #27272a;
-          border: none;
-          color: #a1a1aa;
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .btn-icon.edit:hover { background: #eab308; color: #000; }
-        .btn-icon.delete:hover { background: #ef4444; color: #fff; }
-        .branch-body p {
-          margin: 8px 0;
-          font-size: 0.9rem;
-          color: #a1a1aa;
-        }
-        .branch-loc {
-          color: #e4e4e7 !important;
-          line-height: 1.4;
-        }
-        .branch-info {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .map-preview-tag {
-          margin-top: 12px;
-          font-size: 0.8rem;
-          color: #eab308;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(234, 179, 8, 0.1);
-          padding: 4px 10px;
-          border-radius: 20px;
-          width: fit-content;
-        }
-        .admin-modal {
-          max-width: 600px;
-          width: 90%;
-        }
-        .form-row {
-          display: flex;
-          gap: 15px;
-        }
-        .flex-1 { flex: 1; }
-        
-        .modal-footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 12px;
-          margin-top: 30px;
-          padding-top: 20px;
-          border-top: 1px solid #27272a;
-        }
-
-        .btn-secondary {
-          background: transparent;
-          border: 1px solid #3f3f46;
-          color: #a1a1aa;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-          background: #27272a;
-          color: #fff;
-          border-color: #52525b;
-        }
-
-        .btn-primary-gold {
-          background: #eab308;
-          color: #000;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-weight: 700;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .btn-primary-gold:hover {
-          background: #facc15;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
-        }
-      `}</style>
+    </div>
+  );
+};
     </div>
   );
 };

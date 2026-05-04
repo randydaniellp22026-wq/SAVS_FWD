@@ -55,20 +55,72 @@ font-weight:600;
 
 /* TITULO */
 .headerContacto{
-padding:40px;
-background: #000;
+  padding: 40px;
+  background: #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.headerInfo {
+  flex: 1;
+  min-width: 300px;
+}
+
+.headerPromoContainer {
+  flex: 1.5;
+  min-width: 350px;
+  max-width: 750px;
+}
+
+.header-promo.fb-promo-banner {
+  margin: 0 !important;
+  max-height: 200px; 
+}
+
+.header-promo .fb-promo-text {
+  padding: 1.5rem 2.5rem !important;
+}
+
+.header-promo .fb-promo-text h2 {
+  font-size: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.header-promo .fb-badge {
+  margin-bottom: 0.5rem !important;
+}
+
+.header-promo .fb-promo-text p {
+  font-size: 0.9rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.header-promo .fb-promo-img-wrapper {
+  height: 200px !important;
+}
+
+.header-promo .fb-promo-btn {
+  padding: 8px 20px !important;
+  font-size: 0.8rem !important;
 }
 
 .headerContacto h1{
-font-size:42px;
-margin-bottom:10px;
-color:#ffffff;
-font-family:'Outfit', sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1.1;
 }
 
 .headerContacto p{
-color:#9ca3af;
-max-width:600px;
+  color: #9ca3af;
+  max-width: 600px;
+  font-size: 1.2rem;
+  line-height: 1.5;
 }
 
 /* CONTENIDO */
@@ -235,28 +287,69 @@ text-align:center;
 color:#6b7280;
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE DESIGN - FULL COMPATIBILITY */
+@media (max-width: 1200px) {
+  .headerContacto h1 {
+    font-size: 2.5rem;
+  }
+}
+
 @media (max-width: 968px) {
   .contenidoContacto {
     flex-direction: column;
-    padding: 0 20px 40px 20px;
+    padding: 0 20px 60px 20px;
+    gap: 30px;
   }
   
   .headerContacto {
-    padding: 40px 20px;
+    padding: 60px 20px 40px;
+    flex-direction: column;
     text-align: center;
+    gap: 30px;
   }
   
+  .headerInfo {
+    min-width: auto;
+  }
+
   .headerContacto h1 {
-    font-size: 32px;
+    font-size: 2.2rem;
   }
-  
+
+  .headerContacto p {
+    margin: 0 auto !important;
+  }
+
+  .headerPromoContainer {
+    width: 100%;
+    max-width: 600px;
+    min-width: auto;
+  }
+
   .infoContacto {
-    order: -1; /* Mostrar sedes arriba en móvil si se desea, o quitar para dejar flujo natural */
+    order: -1;
   }
 
   .footerGrid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-promo.fb-promo-banner {
+    max-height: none !important;
+  }
+
+  .header-promo .fb-promo-img-wrapper {
+    height: 180px !important;
+  }
+
+  .formulario {
+    padding: 30px 20px;
+  }
+
+  .mapa {
+    height: 350px !important;
   }
 }
 
@@ -272,5 +365,28 @@ color:#6b7280;
   
   .branches-grid {
     grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContacto h1 {
+    font-size: 1.8rem;
+  }
+
+  .headerContacto p {
+    font-size: 1rem;
+  }
+
+  .btnEnviar {
+    font-size: 1rem;
+    padding: 15px;
+  }
+
+  .header-promo .fb-promo-text {
+    padding: 1.5rem !important;
+  }
+
+  .header-promo .fb-promo-text h2 {
+    font-size: 1.3rem !important;
   }
 }

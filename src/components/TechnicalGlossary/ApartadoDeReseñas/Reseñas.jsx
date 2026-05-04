@@ -257,7 +257,7 @@ const Reseñas = () => {
             </div>
 
             <div style={{ marginBottom: '2rem', marginTop: '1rem', padding: '0 2rem' }}>
-                <FacebookPromo type="banner" />
+                <FacebookPromo type="banner" reverse={true} />
             </div>
 
             <div className="reviews-grid">

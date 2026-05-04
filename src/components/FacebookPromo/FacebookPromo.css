@@ -139,6 +139,15 @@
   -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
 }
 
+.fb-reverse .fb-promo-banner-inner {
+  flex-direction: row-reverse;
+}
+
+.fb-reverse .fb-promo-img-wrapper img {
+  mask-image: linear-gradient(to left, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to left, transparent, black 30%);
+}
+
 @media (max-width: 768px) {
   .fb-promo-banner-inner {
     flex-direction: column;
@@ -217,4 +226,39 @@
   font-size: 1rem;
   margin-bottom: 1.5rem;
   flex: 1;
+}
+/* Extra Large Ad for Home */
+.home-large-ad {
+  margin: 4rem 0;
+  border-width: 2px;
+  background: linear-gradient(135deg, #050505 0%, #151515 100%);
+  box-shadow: 0 0 40px rgba(234, 179, 8, 0.05);
+}
+
+.home-large-ad .fb-promo-text {
+  padding: 5rem 4rem;
+}
+
+.home-large-ad h2 {
+  font-size: 3.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  background: linear-gradient(to right, #fff, #eab308);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-large-ad p {
+  font-size: 1.4rem;
+  max-width: 600px;
+}
+
+@media (max-width: 1024px) {
+  .home-large-ad h2 { font-size: 2.8rem; }
+}
+
+@media (max-width: 768px) {
+  .home-large-ad .fb-promo-text { padding: 3rem 2rem; }
+  .home-large-ad h2 { font-size: 2.2rem; }
+  .home-large-ad p { font-size: 1.1rem; }
 }

@@ -214,7 +214,7 @@ const UserManagement = () => {
               <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Cargando usuarios...</td></tr>
             ) : filteredUsers.map(user => (
               <tr key={user.id}>
-                <td>
+                <td data-label="Usuario">
                   <div className="user-cell">
                     <div className="user-avatar-small">
                       {user.image ? <img src={user.image} alt="" /> : user.nombre.charAt(0)}
@@ -225,24 +225,24 @@ const UserManagement = () => {
                     </div>
                   </div>
                 </td>
-                <td>
+                <td data-label="Contacto">
                   <div className="contact-cell">
                     <div className="contact-item"><Mail size={14} /> {user.email}</div>
                     <div className="contact-item"><Phone size={14} /> {user.telefono || 'Sin tel.'}</div>
                   </div>
                 </td>
-                <td>
+                <td data-label="Ubicación">
                   <div className="location-cell">
                     <MapPin size={14} /> {user.ubicacion || 'Costa Rica'}
                   </div>
                 </td>
-                <td>
+                <td data-label="Rol / Rango">
                   <span className={`role-badge ${user.rol?.toLowerCase()}`}>
                     {user.rol === 'admin' ? <Shield size={14} /> : user.rol === 'gerente' ? <ShieldAlert size={14} /> : <UserCheck size={14} />}
                     {user.rol}
                   </span>
                 </td>
-                <td>
+                <td data-label="Acciones">
                   <div className="actions-cell">
                     {(isGerente || user.rol !== 'gerente') && (
                       <button className="action-btn" onClick={() => handleEditUser(user)} title="Editar"><Edit3 size={18} /></button>

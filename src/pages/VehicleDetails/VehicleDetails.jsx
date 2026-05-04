@@ -161,7 +161,7 @@ const VehicleDetails = () => {
         
         {/* Banner Promo de Facebook */}
         <div style={{ marginTop: '3rem' }}>
-          <FacebookPromo type="banner" />
+          <FacebookPromo type="banner" reverse={true} />
         </div>
       </section>
 

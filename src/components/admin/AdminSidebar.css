@@ -166,3 +166,18 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 10px;
 }
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 250;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .admin-sidebar.open {
+    left: 0;
+  }
+}

@@ -16,12 +16,12 @@ import {
 } from 'lucide-react';
 import './AdminSidebar.css';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, closeSidebar }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const isManager = user.rol === 'gerente';
 
   return (
-    <aside className="admin-sidebar">
+    <aside className={`admin-sidebar ${isOpen ? 'open' : ''}`}>
       <div className="admin-sidebar-header">
         <div className="admin-logo">
           SAVS<span>Admin</span>
@@ -31,12 +31,12 @@ const AdminSidebar = () => {
       <nav className="admin-nav">
         <div className="nav-section">
           <label>General</label>
-          <NavLink to="/admin" end className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin" end className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <LayoutDashboard size={20} />
             <span>Dashboard</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
-          <NavLink to="/" className="nav-item view-site-link">
+          <NavLink to="/" className="nav-item view-site-link" onClick={closeSidebar}>
             <ExternalLink size={20} />
             <span>Ver Sitio Público</span>
           </NavLink>
@@ -44,43 +44,43 @@ const AdminSidebar = () => {
 
         <div className="nav-section">
           <label>Gestión</label>
-          <NavLink to="/admin/users" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/users" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <Users size={20} />
             <span>Usuarios</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
           
-          <NavLink to="/admin/requests" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/requests" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <ClipboardList size={20} />
             <span>Solicitudes</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/admin/tracking" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/tracking" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <Ship size={20} />
             <span>Tracking</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/admin/reviews" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/reviews" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <Star size={20} />
             <span>Reseñas</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/admin/branches" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/branches" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <MapPin size={20} />
             <span>Sedes</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/admin/create-vehicle" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/admin/create-vehicle" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <Car size={20} />
             <span>Inventario</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/vender-auto" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'}>
+          <NavLink to="/vender-auto" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <RefreshCw size={20} />
             <span>Gestión Trade-in</span>
             <ChevronRight size={14} className="arrow" />

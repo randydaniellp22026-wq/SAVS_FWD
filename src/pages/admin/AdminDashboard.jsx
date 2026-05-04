@@ -219,80 +219,66 @@ const AdminDashboard = () => {
         <p className="admin-subtitle">Bienvenido, {user.nombre}. Gestiona el inventario y usuarios de SAVS.</p>
       </div>
       
-      <div className="dashboard-stats-grid" style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
-        gap: '1.5rem', 
-        marginTop: '2rem' 
-      }}>
+      <div className="dashboard-stats-grid">
         
         {/* Card: Vehículos */}
-        <div className="stat-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div style={{ background: 'rgba(234, 179, 8, 0.1)', padding: '10px', borderRadius: '10px', color: '#eab308' }}>
+        <div className="stat-card stat-vehicles">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrapper fuel-icon">
               <Car size={24} />
             </div>
-            <ArrowUpRight size={16} style={{ color: '#4b5563' }} />
+            <ArrowUpRight size={16} className="stat-arrow" />
           </div>
-          <h3 style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Inventario Total</h3>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-            <span style={{ fontSize: '2rem', fontWeight: '700', color: '#fff' }}>{loading ? '...' : stats.vehicles}</span>
-            <span style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: '600' }}>Unidades</span>
+          <h3 className="stat-label">Inventario Total</h3>
+          <div className="stat-value-container">
+            <span className="stat-number">{loading ? '...' : stats.vehicles}</span>
+            <span className="stat-unit">Unidades</span>
           </div>
         </div>
 
         {/* Card: Usuarios */}
-        <div className="stat-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '10px', borderRadius: '10px', color: '#3b82f6' }}>
+        <div className="stat-card stat-users">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrapper users-icon">
               <Users size={24} />
             </div>
           </div>
-          <h3 style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Usuarios Registrados</h3>
-          <span style={{ fontSize: '2rem', fontWeight: '700', color: '#fff' }}>{loading ? '...' : stats.users}</span>
+          <h3 className="stat-label">Usuarios Registrados</h3>
+          <span className="stat-number">{loading ? '...' : stats.users}</span>
         </div>
 
         {/* Card: Solicitudes */}
-        <div className="stat-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '10px', borderRadius: '10px', color: '#10b981' }}>
+        <div className="stat-card stat-requests">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrapper req-icon">
               <ClipboardList size={24} />
             </div>
           </div>
-          <h3 style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Solicitudes Pendientes</h3>
-          <span style={{ fontSize: '2rem', fontWeight: '700', color: '#fff' }}>{loading ? '...' : stats.requests}</span>
+          <h3 className="stat-label">Solicitudes Pendientes</h3>
+          <span className="stat-number">{loading ? '...' : stats.requests}</span>
         </div>
 
         {/* Card: Trade-in */}
-        <div className="stat-card" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-            <div style={{ background: 'rgba(168, 85, 247, 0.1)', padding: '10px', borderRadius: '10px', color: '#a855f7' }}>
+        <div className="stat-card stat-tradein">
+          <div className="stat-card-header">
+            <div className="stat-icon-wrapper trade-icon">
               <RefreshCw size={24} />
             </div>
           </div>
-          <h3 style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Trade-in (Auto Pago)</h3>
-          <span style={{ fontSize: '2rem', fontWeight: '700', color: '#fff' }}>{loading ? '...' : stats.tradeIn}</span>
+          <h3 className="stat-label">Trade-in (Auto Pago)</h3>
+          <span className="stat-number">{loading ? '...' : stats.tradeIn}</span>
         </div>
       </div>
 
       {!loading && (
-        <div className="dashboard-charts-container" style={{ marginTop: '3rem' }}>
-          <h2 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-            <TrendingUp size={24} style={{ color: '#eab308' }} /> Análisis de Inventario y Solicitudes
-          </h2>
-
-          <div className="charts-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-            gap: '2rem' 
-          }}>
+        <div className="charts-grid">
             
             {/* Gráfico 1: Distribución de Combustible */}
-            <div className="chart-card" style={{ background: 'rgba(15,15,15,0.7)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h3 style={{ color: '#9ca3af', fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="chart-card">
+              <h3 className="chart-label">
                  <PieIcon size={18} /> Tipos de Combustible
               </h3>
-              <div style={{ height: '300px', width: '100%' }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -316,11 +302,11 @@ const AdminDashboard = () => {
             </div>
 
             {/* Gráfico 2: Solicitudes por Estado */}
-            <div className="chart-card" style={{ background: 'rgba(15,15,15,0.7)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h3 style={{ color: '#9ca3af', fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="chart-card">
+              <h3 className="chart-label">
                  <BarIcon size={18} /> Gestión de Solicitudes
               </h3>
-              <div style={{ height: '300px', width: '100%' }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={dataSets.reqData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -338,11 +324,11 @@ const AdminDashboard = () => {
             </div>
 
             {/* Gráfico 3: Inventario por Año */}
-            <div className="chart-card" style={{ background: 'rgba(15,15,15,0.7)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h3 style={{ color: '#9ca3af', fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="chart-card">
+              <h3 className="chart-label">
                  <TrendingUp size={18} /> Tendencia de Inventario (Año)
               </h3>
-              <div style={{ height: '300px', width: '100%' }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dataSets.yearData}>
                     <defs>
@@ -362,11 +348,11 @@ const AdminDashboard = () => {
             </div>
 
             {/* Gráfico 4: Transmisión */}
-            <div className="chart-card" style={{ background: 'rgba(15,15,15,0.7)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h3 style={{ color: '#9ca3af', fontSize: '1rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="chart-card">
+              <h3 className="chart-label">
                  <PieIcon size={18} /> Tipos de Transmisión
               </h3>
-              <div style={{ height: '300px', width: '100%' }}>
+              <div className="chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -388,32 +374,21 @@ const AdminDashboard = () => {
             </div>
 
             {/* Gráfico 5: Estadísticas Detalladas de Trade-in */}
-            <div className="chart-card tradein-full-chart" style={{ 
-              background: 'linear-gradient(145deg, rgba(15,15,15,0.9) 0%, rgba(5,5,5,1) 100%)', 
-              padding: '2.5rem', 
-              borderRadius: '24px', 
-              border: '1px solid rgba(168, 85, 247, 0.15)',
-              gridColumn: '1 / -1',
-              marginTop: '1rem',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '2rem'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="chart-card tradein-full-chart">
+              <div className="tradein-chart-header">
                 <div>
-                  <h3 style={{ color: '#fff', fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                    <RefreshCw size={26} style={{ color: '#a855f7' }} /> Estado de Solicitudes Trade-in
+                  <h3 className="tradein-chart-title">
+                    <RefreshCw size={26} className="tradein-icon" /> Estado de Solicitudes Trade-in
                   </h3>
-                  <p style={{ color: '#6b7280', fontSize: '0.95rem' }}>Análisis de distribución de vehículos de clientes en proceso de canje.</p>
+                  <p className="tradein-chart-desc">Análisis de distribución de vehículos de clientes en proceso de canje.</p>
                 </div>
-                <div style={{ textAlign: 'right', background: 'rgba(168, 85, 247, 0.05)', padding: '15px 25px', borderRadius: '15px', border: '1px solid rgba(168, 85, 247, 0.1)' }}>
-                  <span style={{ display: 'block', color: '#a855f7', fontSize: '2.2rem', fontWeight: '900', lineHeight: 1 }}>{stats.tradeIn}</span>
-                  <span style={{ color: '#4b5563', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' }}>Solicitudes Totales</span>
+                <div className="tradein-stats-badge">
+                  <span className="tradein-count">{stats.tradeIn}</span>
+                  <span className="tradein-label">Solicitudes Totales</span>
                 </div>
               </div>
               
-              <div style={{ height: '350px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="tradein-chart-wrapper">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -459,52 +434,36 @@ const AdminDashboard = () => {
       )}
 
       {/* Gestión Directa de Trade-ins */}
-      <div className="tradein-management-section" style={{ marginTop: '3rem' }}>
-        <h2 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <RefreshCw size={24} style={{ color: '#a855f7' }} /> Gestión de Solicitudes Trade-in
+      <div className="tradein-management-section">
+        <h2 className="tradein-section-title">
+          <RefreshCw size={24} /> Gestión de Solicitudes Trade-in
         </h2>
         
-        <div className="tradein-list" style={{ display: 'grid', gap: '1rem' }}>
-          {tradeInList.length === 0 ? (
-            <p style={{ color: '#4b5563' }}>No hay solicitudes de trade-in pendientes.</p>
-          ) : (
-            tradeInList.slice(0, 5).map(item => (
-              <div key={item.id} style={{ 
-                background: 'rgba(255,255,255,0.02)', 
-                padding: '1.5rem', 
-                borderRadius: '16px', 
-                border: '1px solid rgba(255,255,255,0.05)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                  <img src={item.imagen} alt={item.marca} style={{ width: '80px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />
-                  <div>
-                    <h4 style={{ color: '#fff', margin: 0 }}>{item.marca} {item.modelo} ({item.anio})</h4>
-                    <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '4px 0' }}>Precio pretendido: <span style={{ color: '#eab308' }}>₡{parseInt(item.precio).toLocaleString()}</span></p>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={{ 
-                        fontSize: '0.7rem', 
-                        padding: '2px 8px', 
-                        borderRadius: '4px', 
-                        background: item.estado === 'Aprobado' ? 'rgba(16,185,129,0.1)' : item.estado === 'Rechazado' ? 'rgba(239,68,68,0.1)' : 'rgba(234,179,8,0.1)',
-                        color: item.estado === 'Aprobado' ? '#10b981' : item.estado === 'Rechazado' ? '#ef4444' : '#eab308'
-                      }}>
-                        {item.estado || 'En revisión'}
-                      </span>
-                      {item.respuesta_admin && (
-                        <span style={{ color: '#6b7280', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                          - {item.respuesta_admin}
+          <div className="tradein-list">
+            {tradeInList.length === 0 ? (
+              <p className="empty-text">No hay solicitudes de trade-in pendientes.</p>
+            ) : (
+              tradeInList.slice(0, 5).map(item => (
+                <div key={item.id} className="tradein-item">
+                  <div className="tradein-info-content">
+                    <img src={item.imagen} alt={item.marca} className="tradein-img" />
+                    <div className="tradein-text">
+                      <h4 className="tradein-model">{item.marca} {item.modelo} ({item.anio})</h4>
+                      <p className="tradein-price">Precio pretendido: <span className="price-value">₡{parseInt(item.precio).toLocaleString()}</span></p>
+                      <div className="tradein-status-container">
+                        <span className={`tradein-badge status-${item.estado?.toLowerCase().replace(' ', '-') || 'revision'}`}>
+                          {item.estado || 'En revisión'}
                         </span>
-                      )}
+                        {item.respuesta_admin && (
+                          <span className="admin-note">
+                            - {item.respuesta_admin}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div className="tradein-actions">
                   <button 
                     onClick={() => {
                       Swal.fire({
@@ -521,7 +480,7 @@ const AdminDashboard = () => {
                         if (res.isConfirmed) updateTradeInStatus(item.id, 'Aprobado', res.value);
                       });
                     }}
-                    style={{ background: '#10b981', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    className="btn-tradein approve"
                   >
                     <ShieldCheck size={16} /> Aprobar
                   </button>
@@ -541,7 +500,7 @@ const AdminDashboard = () => {
                         if (res.isConfirmed) updateTradeInStatus(item.id, 'En revisión', res.value);
                       });
                     }}
-                    style={{ background: '#333', color: '#eab308', border: '1px solid #eab308', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                    className="btn-tradein review"
                   >
                     Revisión
                   </button>
@@ -564,7 +523,7 @@ const AdminDashboard = () => {
                         if (res.isConfirmed) updateTradeInStatus(item.id, 'Rechazado', res.value);
                       });
                     }}
-                    style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+                    className="btn-tradein reject"
                   >
                     Rechazar
                   </button>
@@ -576,52 +535,20 @@ const AdminDashboard = () => {
       </div>
 
       {/* Recuadro de Estado Servidor en Grande al final */}
-      <div className="server-status-footer" style={{ 
-        marginTop: '4rem', 
-        padding: '3rem', 
-        background: 'linear-gradient(180deg, rgba(20,20,20,0) 0%, rgba(16, 185, 129, 0.05) 100%)',
-        borderRadius: '30px',
-        border: '1px solid rgba(16, 185, 129, 0.1)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        marginBottom: '2rem'
-      }}>
-        <div style={{ 
-          background: 'rgba(16, 185, 129, 0.1)', 
-          padding: '20px', 
-          borderRadius: '24px', 
-          color: '#10b981',
-          marginBottom: '1.5rem',
-          boxShadow: '0 10px 30px rgba(16, 185, 129, 0.2)'
-        }}>
+      <div className="server-status-footer">
+        <div className="server-icon-wrapper">
           <Activity size={48} />
         </div>
-        <h3 style={{ color: '#fff', fontSize: '1.5rem', marginBottom: '0.5rem', letterSpacing: '2px' }}>{stats.serverStatus?.title || 'ESTADO DEL SERVIDOR'}</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-          <div style={{ 
-            width: '12px', 
-            height: '12px', 
-            borderRadius: '50%', 
-            background: stats.serverStatus?.is_online ? '#10b981' : '#ef4444', 
-            boxShadow: `0 0 15px ${stats.serverStatus?.is_online ? '#10b981' : '#ef4444'}`,
-            animation: 'pulse 2s infinite'
-          }}></div>
-          <span style={{ color: stats.serverStatus?.is_online ? '#10b981' : '#ef4444', fontWeight: '700', fontSize: '1.2rem' }}>
+        <h3 className="server-status-title">{stats.serverStatus?.title || 'ESTADO DEL SERVIDOR'}</h3>
+        <div className="server-status-indicator">
+          <div className={`status-dot ${stats.serverStatus?.is_online ? 'online' : 'offline'}`}></div>
+          <span className={`status-text ${stats.serverStatus?.is_online ? 'online' : 'offline'}`}>
             {stats.serverStatus?.status_text || 'SISTEMA EN LÍNEA'}
           </span>
         </div>
-        <p style={{ color: '#4b5563', marginTop: '1rem', fontSize: '0.9rem' }}>{stats.serverStatus?.region_text || 'Todos los servicios están funcionando correctamente.'}</p>
+        <p className="server-region-text">{stats.serverStatus?.region_text || 'Todos los servicios están funcionando correctamente.'}</p>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.2); opacity: 0.7; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}} />
     </div>
   );
 };

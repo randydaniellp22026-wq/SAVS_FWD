@@ -438,7 +438,7 @@ const IntercambioDeAutos = () => {
       </div>
 
       <div style={{ padding: '0 2rem', marginBottom: '2rem' }}>
-        <FacebookPromo type="banner" />
+        <FacebookPromo type="banner" reverse={false} />
       </div>
 
       <div className="vender-auto-layout">

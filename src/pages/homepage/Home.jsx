@@ -24,37 +24,9 @@ const Home = () => {
         <PublicidadSAVS />
       </section>
 
-      <section className="section-spacing container">
-        <FacebookPromo type="banner" />
-      </section>
-
-      <div className="home-divider" />
-      
-      <div className="container">
-        <section className="catalogs-container">
-          <VehicleCatalog 
-            title="1. Bestias del asfalto" 
-            vehicles={motorCatalogo} 
-          />
-
-          <VehicleCatalog 
-            title="2. Poco Kilometraje" 
-            vehicles={kilometrajeCatalogo} 
-          />
-          
-          <div style={{ margin: '3rem 0' }}>
-            <FacebookPromo type="banner" />
-          </div>
-
-          <VehicleCatalog 
-            title="3. Cómodos y familiares" 
-            vehicles={tipoCatalogo} 
-          />
-
-          <VehicleCatalog 
-            title="4. Re-estrenos" 
-            vehicles={anioCatalogo} 
-          />
+      <div className="container" style={{ paddingBottom: '5rem', marginTop: '4rem' }}>
+        <section className="home-ad-section">
+          <FacebookPromo type="banner" className="home-large-ad" reverse={true} />
         </section>
       </div>
     </main>

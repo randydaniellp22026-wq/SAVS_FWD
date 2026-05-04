@@ -253,7 +253,7 @@ const ReviewRequests = () => {
                   <button className="btn-action reply" onClick={() => handleAction(req, 'reply')}><Send size={18}/> Responder</button>
                 )}
                 {(userRole === 'gerente' || userRole === 'admin') && (req.status === 'accepted' || req.status === 'rejected' || req.status === 'replied') && (
-                  <button className="btn-action delete" style={{ background: '#333', color: '#e63946', marginLeft: 'auto' }} onClick={() => handleAction(req, 'delete')}>
+                  <button className="btn-action delete" onClick={() => handleAction(req, 'delete')}>
                     <Trash2 size={18}/> Eliminar
                   </button>
                 )}

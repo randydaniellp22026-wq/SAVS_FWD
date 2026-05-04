@@ -65,8 +65,19 @@ const RedireccionContactos = () => {
       <div style={{ paddingTop: '100px' }}></div>
 
       <header className="headerContacto">
-        <h1 style={{ fontSize: '3rem', fontWeight: 800 }}>Contacta con Importadora SAVS</h1>
-        <p style={{ fontSize: '1.2rem', maxWidth: '800px' }}>Expertos en importación directa. Tu próximo vehículo de alta gama está a un mensaje de distancia.</p>
+        <div className="headerInfo">
+          <h1>Contacta con Importadora SAVS</h1>
+          <p>Expertos en importación directa. Tu próximo vehículo de alta gama está a un mensaje de distancia.</p>
+        </div>
+        <div className="headerPromoContainer">
+          <FacebookPromo 
+            type="horizontal" 
+            className="header-promo" 
+            reverse={false}
+            title="Únete a la Comunidad"
+            desc="Sé el primero en ver los nuevos ingresos y primicias de importación."
+          />
+        </div>
       </header>
 
       <section className="contenidoContacto" style={{ gap: '20px', paddingBottom: '100px' }}>
@@ -201,9 +212,6 @@ const RedireccionContactos = () => {
             </div>
           </form>
           
-          <div style={{ marginTop: '20px' }}>
-            <FacebookPromo type="vertical"/>
-          </div>
         </div>
 
         {/* Lado Derecho: Info y Sedes (Expandido) */}
