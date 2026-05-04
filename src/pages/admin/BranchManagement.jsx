@@ -282,8 +282,5 @@ const BranchManagement = () => {
     </div>
   );
 };
-    </div>
-  );
-};
 
 export default BranchManagement;

@@ -430,8 +430,7 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Gestión Directa de Trade-ins */}
       <div className="tradein-management-section">
