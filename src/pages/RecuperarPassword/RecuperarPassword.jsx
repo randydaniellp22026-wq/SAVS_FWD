@@ -11,7 +11,7 @@ const darkSwal = {
   confirmButtonColor: '#eab308'
 };
 
-const API_URL = 'http://localhost:5000/users';
+const API_URL = 'http://localhost:5000/api/auth';
 
 const RecuperarPassword = () => {
   const [step, setStep] = useState(1); // 1: Email, 2: Code, 3: New Password
@@ -29,14 +29,19 @@ const RecuperarPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const resp = await fetch(API_URL);
-      const users = await resp.json();
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
-
-      if (!user) {
-        throw new Error('No encontramos ninguna cuenta vinculada a este correo.');
+      // Llamamos a un endpoint específico que no requiere token
+      const resp = await fetch(`${API_URL}/check-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || 'No encontramos ninguna cuenta vinculada a este correo.');
       }
 
+      const user = await resp.json();
       setUserFound(user);
       const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       setGeneratedCode(tempCode);
@@ -78,10 +83,13 @@ const RecuperarPassword = () => {
 
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/${userFound.id}`, {
-        method: 'PATCH',
+      const resp = await fetch(`${API_URL}/reset-password`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: newPassword })
+        body: JSON.stringify({ 
+          userId: userFound.id,
+          newPassword: newPassword 
+        })
       });
 
       if (resp.ok) {
@@ -91,9 +99,12 @@ const RecuperarPassword = () => {
           title: 'Contraseña Actualizada',
           text: 'Ya puedes iniciar sesión con tu nueva contraseña.'
         }).then(() => navigate('/login'));
+      } else {
+        const errorData = await resp.json();
+        throw new Error(errorData.error || 'No se pudo actualizar la contraseña.');
       }
     } catch (err) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar la contraseña.' });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.message });
     } finally {
       setLoading(false);
     }

@@ -53,7 +53,8 @@ export const useLoginLogic = () => {
         u.password === formData.password.trim()
       );
 
-      if (user) {
+      if (usuario) {
+        // Guardamos los datos del usuario para el frontend
         localStorage.setItem('user', JSON.stringify({ 
           id: user.id, 
           nombre: user.nombre, 
@@ -65,18 +66,16 @@ export const useLoginLogic = () => {
           image: user.image || ''
         }));
         
-        toast.success(`¡Bienvenido de nuevo, ${user.nombre.split(' ')[0]}!`);
+        toast.success(`¡Bienvenido de nuevo, ${usuario.nombre.split(' ')[0]}!`);
         
         Swal.fire({
           ...darkSwal,
           icon: 'success',
           title: '¡Bienvenido!',
-          text: `Sesión iniciada como ${user.nombre}`
+          text: `Sesión iniciada como ${usuario.nombre}`
         }).then(() => {
           navigate('/');
         });
-      } else {
-        throw new Error('Credenciales incorrectas. Verifica tu correo y contraseña.');
       }
     } catch (err) {
       setError(err.response?.data?.error || err.message);
