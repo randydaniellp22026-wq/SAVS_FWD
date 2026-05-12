@@ -1,26 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './FacebookPromo.css';
-import fbPromoImg from '../../img/fb_promo.png';
+import imgPromo1 from '../../img/Anuncios/Gemini_Generated_Image_49ys9i49ys9i49ys.png';
+import imgPromo2 from '../../img/Anuncios/Gemini_Generated_Image_emr4vhemr4vhemr4.png';
+import imgPromo3 from '../../img/Anuncios/Gemini_Generated_Image_wji4fewji4fewji4.png';
 
 const FacebookPromo = ({ 
   type = 'horizontal', 
   className = '', 
+  images = [],
   image = null,
   title = "¿Buscas el mejor trato?",
   desc = "Llévate vehículos seleccionados a precios irrepetibles. Solo en nuestras redes.",
   reverse = false
 }) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  // Setup carousel images: use 'images' array if provided, else default to the promotional images array
+  const defaultImages = [imgPromo1, imgPromo2, imgPromo3];
+  const carouselImages = images.length > 0 
+    ? images 
+    : (image ? [image] : defaultImages);
+
+  useEffect(() => {
+    if (carouselImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % carouselImages.length);
+    }, 3500); // 3.5 seconds per slide
+    return () => clearInterval(interval);
+  }, [carouselImages.length]);
+
   const handlePromoClick = () => {
-    window.open('https://www.facebook.com/importadorasavs', '_blank');
+    window.open('https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/', '_blank');
   };
 
-  const displayImg = image || fbPromoImg;
+  const renderCarousel = () => (
+    <div className="fb-carousel">
+      {carouselImages.map((img, idx) => (
+        <img 
+          key={idx} 
+          src={img} 
+          alt={`Promoción ${idx}`} 
+          className={`fb-carousel-img ${idx === currentIdx ? 'active' : ''}`} 
+        />
+      ))}
+      {carouselImages.length > 1 && (
+        <div className="fb-carousel-indicators">
+          {carouselImages.map((_, idx) => (
+            <span 
+              key={idx} 
+              className={`fb-carousel-dot ${idx === currentIdx ? 'active' : ''}`}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setCurrentIdx(idx); 
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   if (type === 'card') {
     return (
       <div className={`card vehicle-card fb-promo-card ${className}`} onClick={handlePromoClick}>
         <div className="fb-promo-content">
-          <img src={displayImg} alt="Promoción en Facebook" className="fb-promo-bg" />
+          {renderCarousel()}
           <div className="fb-promo-overlay">
             <h3 className="fb-promo-title">{title}</h3>
             <p className="fb-promo-desc">{desc}</p>
@@ -37,7 +81,7 @@ const FacebookPromo = ({
     return (
       <div className={`fb-promo-vertical ${className}`} onClick={handlePromoClick}>
         <div className="fb-promo-img-top">
-          <img src={displayImg} alt="Promoción en Facebook" />
+          {renderCarousel()}
         </div>
         <div className="fb-promo-text-bottom">
           <span className="fb-badge">🔥 OFERTA DE LA SEMANA</span>
@@ -63,7 +107,7 @@ const FacebookPromo = ({
           </button>
         </div>
         <div className="fb-promo-img-wrapper">
-          <img src={displayImg} alt="Promoción en Facebook" />
+          {renderCarousel()}
         </div>
       </div>
     </div>

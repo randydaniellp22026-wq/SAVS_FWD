@@ -256,7 +256,6 @@ const TrackingManagement = () => {
             const isOpen   = expanded === user.id;
 
             return (
-            return (
               <div key={user.id} className={`tracking-user-card ${isOpen ? 'expanded' : ''}`}>
 
                 {/* ── Fila principal ── */}

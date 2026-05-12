@@ -88,8 +88,9 @@
 
 .fb-promo-banner-inner {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
+  min-height: 420px;
 }
 
 .fb-promo-text {
@@ -125,28 +126,20 @@
 
 .fb-promo-img-wrapper {
   flex: 1;
-  max-width: 400px;
-  height: 300px;
+  max-width: 500px;
+  align-self: stretch;
   overflow: hidden;
   position: relative;
+  min-height: 420px;
 }
 
-.fb-promo-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  mask-image: linear-gradient(to right, transparent, black 30%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
-}
+/* removed img */
 
 .fb-reverse .fb-promo-banner-inner {
   flex-direction: row-reverse;
 }
 
-.fb-reverse .fb-promo-img-wrapper img {
-  mask-image: linear-gradient(to left, transparent, black 30%);
-  -webkit-mask-image: linear-gradient(to left, transparent, black 30%);
-}
+
 
 @media (max-width: 768px) {
   .fb-promo-banner-inner {
@@ -155,13 +148,11 @@
   
   .fb-promo-img-wrapper {
     max-width: 100%;
-    height: 200px;
+    height: 240px;
+    min-height: 240px;
   }
   
-  .fb-promo-img-wrapper img {
-    mask-image: linear-gradient(to bottom, transparent, black 30%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%);
-  }
+  /* removed img */
   
   .fb-promo-text {
     padding: 2rem;
@@ -245,6 +236,7 @@
   font-weight: 800;
   background: linear-gradient(to right, #fff, #eab308);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -261,4 +253,111 @@
   .home-large-ad .fb-promo-text { padding: 3rem 2rem; }
   .home-large-ad h2 { font-size: 2.2rem; }
   .home-large-ad p { font-size: 1.1rem; }
+}
+
+/* Carousel Styles */
+.fb-carousel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.fb-promo-vertical .fb-carousel,
+.fb-promo-img-wrapper .fb-carousel {
+  position: relative;
+}
+
+.fb-carousel-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.fb-carousel-img.active {
+  opacity: 1;
+}
+
+/* Card variant background */
+.fb-promo-card .fb-carousel-img {
+  opacity: 0; 
+}
+.fb-promo-card .fb-carousel-img.active {
+  opacity: 0.7; /* Match original .fb-promo-bg */
+}
+
+/* Vertical variant mask */
+.fb-promo-vertical .fb-carousel-img {
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+  object-position: center top;
+}
+
+/* Horizontal Banner variant mask */
+.fb-promo-banner .fb-carousel-img {
+  mask-image: linear-gradient(to right, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 30%);
+  object-position: center;
+}
+
+.fb-reverse .fb-promo-banner .fb-carousel-img {
+  mask-image: linear-gradient(to left, transparent, black 30%);
+  -webkit-mask-image: linear-gradient(to left, transparent, black 30%);
+}
+
+@media (max-width: 768px) {
+  .fb-promo-banner .fb-carousel-img {
+    mask-image: linear-gradient(to bottom, transparent, black 30%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%);
+  }
+}
+
+/* Carousel Indicators */
+.fb-carousel-indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.fb-promo-banner .fb-carousel-indicators {
+  left: 65%; /* Offset to the right for the banner layout */
+  bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .fb-promo-banner .fb-carousel-indicators {
+    left: 50%;
+  }
+}
+
+.fb-carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.fb-carousel-dot:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.fb-carousel-dot.active {
+  background-color: #eab308;
+  transform: scale(1.3);
 }

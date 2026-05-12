@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, User, Bot, ArrowLeft, ExternalLink } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
+// import { GoogleGenerativeAI } from "@google/generative-ai"; // No longer using Gemini SDK
 import './Chatbot.css';
+
+// Clave de API desde el entorno
+const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
-    const [steps, setSteps] = useState('initial');
-    const [brands, setBrands] = useState([]);
-    const [whatsappNumber, setWhatsappNumber] = useState('');
+    const [input, setInput] = useState('');
+    const [vehicles, setVehicles] = useState([]);
+    const [whatsappNumber, setWhatsappNumber] = useState('+506 6476-9091');
     const [isTyping, setIsTyping] = useState(false);
+    const [error, setError] = useState(null);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -21,145 +26,175 @@ const Chatbot = () => {
                 {
                     id: 1,
                     type: 'bot',
-                    text: '👋 ¡Hola! Bienvenido a IMPORTADORA SAVS. Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?',
-                    options: [
-                        { label: '💰 Formas de pago', value: 'pagos' },
-                        { label: '🚗 Recibir auto parte de pago', value: 'trade_in' },
-                        { label: '🔍 Buscar por marca', value: 'brands' }
-                    ]
+                    text: '👋 ¡Hola! Bienvenido a IMPORTADORA SAVS. Soy tu asistente virtual impulsado por IA. ¿En qué puedo ayudarte hoy?'
                 }
             ]);
         }
-        scrollToBottom();
-    }, [isOpen, messages]);
+    }, [isOpen]);
 
     useEffect(() => {
+        scrollToBottom();
+    }, [messages, isTyping]);
 
-        // Carga de marcas y configuración
+    useEffect(() => {
         fetch('http://localhost:5000/vehicles')
             .then(res => res.json())
-            .then(data => {
-                // Extraemos la marca (primer palabra del nombre del vehículo)
-                const uniqueBrands = [...new Set(data.map(v => v.brand || v.name.split(' ')[0]))];
-                setBrands(uniqueBrands);
-            });
+            .then(data => setVehicles(data))
+            .catch(err => console.error("Error fetching vehicles:", err));
 
         fetch('http://localhost:5000/settings')
             .then(res => res.json())
             .then(data => {
-                setWhatsappNumber(data.company?.whatsapp || '+506 6476-9091');
-            });
+                if (data.company?.whatsapp) setWhatsappNumber(data.company.whatsapp);
+            })
+            .catch(err => console.error("Error fetching settings:", err));
     }, []);
 
-    const handleOptionClick = (option) => {
-        // Enviar mensaje del usuario
-        const userMsg = { id: Date.now(), type: 'user', text: option.label };
-        setMessages(prev => [...prev, userMsg]);
-
+    const generateAIResponse = async (userText, history) => {
         setIsTyping(true);
-        setTimeout(() => {
-            processBotResponse(option.value);
+        setError(null);
+
+        try {
+            // Usamos Groq Cloud: Extremadamente rápido y con plan gratuito generoso.
+            const url = "https://api.groq.com/openai/v1/chat/completions";
+            
+            const inventoryContext = vehicles.length > 0 
+                ? vehicles.map(v => `- ${v.name} (${v.year}) [ID: ${v.id}]: ₡${v.price.toLocaleString()}.`).join('\n')
+                : "Consultar inventario en la web.";
+
+            const systemPrompt = `Eres el asistente experto de IMPORTADORA SAVS, Costa Rica. 
+            
+            REGLAS CRÍTICAS:
+            1. Solo responde preguntas relacionadas con IMPORTADORA SAVS (venta de autos, inventario, financiamiento, trámites, etc.).
+            2. Si el usuario pregunta algo fuera de contexto (chistes, temas personales, política, etc.), declina amablemente indicando que eres un asistente especializado en la importadora.
+            3. Si el usuario pregunta por un auto del inventario, DEBES dar el link usando este formato: [Ver detalles del auto](/inventory/details/ID).
+            4. Si no sabes la respuesta, el usuario pide hablar con un humano, o se llega a una conclusión/acuerdo de interés, DEBES invitar al usuario a contactar por WhatsApp.
+            5. Responde siempre de forma amable y profesional.
+            
+            INVENTARIO DISPONIBLE:
+            ${inventoryContext}
+            
+            WhatsApp de la empresa: ${whatsappNumber}`;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userText }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1024
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+
+            if (!data.choices || data.choices.length === 0) {
+                throw new Error("No se recibió respuesta de la IA.");
+            }
+
+            const text = data.choices[0].message.content;
+
+            if (!text) {
+                throw new Error("No se recibió respuesta de la IA.");
+            }
+            
+            const showWhatsapp = text.toLowerCase().includes('whatsapp') || 
+                               text.toLowerCase().includes('asesor') || 
+                               text.toLowerCase().includes('contactar') ||
+                               text.toLowerCase().includes('conclusión') ||
+                               text.toLowerCase().includes('gracias') ||
+                               text.toLowerCase().includes('terminar');
+
+            setMessages(prev => [...prev, { 
+                id: Date.now(), 
+                type: 'bot', 
+                text: text,
+                whatsapp: showWhatsapp ? `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` : null
+            }]);
+        } catch (err) {
+            console.error("AI Error:", err);
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                type: 'bot',
+                text: `❌ Error: ${err.message}`
+            }]);
+        } finally {
             setIsTyping(false);
-        }, 1500); // Dar sensación de "escribiendo"
+        }
     };
 
-    const processBotResponse = (value) => {
-        let botMsg = { id: Date.now() + 1, type: 'bot' };
-        const whatsappLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`;
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || isTyping) return;
 
-        const fallbackPrompt = `\n\n¿No pude resolver tu duda? Comunícate a nuestro WhatsApp para una atención personalizada:`;
+        const userMsg = { id: Date.now(), type: 'user', text: input };
+        setMessages(prev => [...prev, userMsg]);
+        const currentInput = input;
+        setInput('');
+        
+        await generateAIResponse(currentInput, [...messages, userMsg]);
+    };
 
-        switch (value) {
-            case 'pagos':
-                botMsg.text = `Contamos con diversas formas de pago para tu comodidad:\n\n• Transferencia Bancaria Directa\n• Financiamiento con Bancos (BAC, Nacional, BCR)\n• Crédito Interno Directo\n• Pagos con Cripto-activos (Bitcoin/Ethereum)` + fallbackPrompt;
-                botMsg.whatsapp = whatsappLink;
-                botMsg.options = [{ label: '⬅️ Volver al inicio', value: 'initial' }];
-                break;
-            case 'trade_in':
-                botMsg.text = `¡Claro! Recibimos tu vehículo actual como parte de pago tras una valoración técnica en nuestras sedes. Solo debe ser del año 2012 en adelante y estar en buen estado.` + fallbackPrompt;
-                botMsg.whatsapp = whatsappLink;
-                botMsg.options = [{ label: '⬅️ Volver al inicio', value: 'initial' }];
-                break;
-            case 'brands':
-                botMsg.text = 'Estas son las marcas que tenemos disponibles actualmente en nuestro inventario:';
-                botMsg.options = brands.map(b => ({ label: b, value: `brand_${b}` }));
-                botMsg.options.push({ label: '⬅️ Volver', value: 'initial' });
-                break;
-            case 'initial':
-                botMsg.text = '¿Hay algo más en lo que pueda asistirte?';
-                botMsg.options = [
-                    { label: '💰 Formas de pago', value: 'pagos' },
-                    { label: '🚗 Recibir auto parte de pago', value: 'trade_in' },
-                    { label: '🔍 Buscar por marca', value: 'brands' }
-                ];
-                break;
-            default:
-                if (value.startsWith('brand_')) {
-                    const selectedBrand = value.replace('brand_', '');
-                    botMsg.text = `Actualmente tenemos varias unidades de ${selectedBrand} en stock. Puedes ver los detalles en nuestro catálogo o solicitar una cotización directa.` + fallbackPrompt;
-                    botMsg.whatsapp = whatsappLink;
-                    botMsg.options = [
-                        { label: 'Ver Catálogo', value: 'go_catalog' },
-                        { label: '⬅️ Volver a Marcas', value: 'brands' }
-                    ];
-                } else if (value === 'go_catalog') {
-                    window.location.href = '/inventory';
-                    return;
-                }
-                break;
+    const handleOptionClick = (option) => {
+        if (option.value === 'mostrar_catalogo') {
+            window.location.href = '/inventory';
+            return;
         }
-
-        setMessages(prev => [...prev, botMsg]);
+        const userMsg = { id: Date.now(), type: 'user', text: option.label };
+        setMessages(prev => [...prev, userMsg]);
+        generateAIResponse(option.value, [...messages, userMsg]);
     };
 
     return (
         <div className={`chatbot-wrapper ${isOpen ? 'is-open' : ''}`}>
-            {/* Botón flotante */}
             <button className="chatbot-toggle" onClick={() => setIsOpen(!isOpen)}>
                 {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-                {!isOpen && <span className="notification-badge">1</span>}
+                {!isOpen && <span className="notification-badge">AI</span>}
             </button>
 
-            {/* Ventana de chat */}
             <div className="chatbot-window">
                 <div className="chatbot-header">
                     <div className="bot-info">
-                        <div className="bot-avatar">
-                            <Bot size={20} color="#000" />
-                        </div>
+                        <div className="bot-avatar"><Bot size={20} color="#000" /></div>
                         <div>
-                            <h4>SAVS Assistant</h4>
-                            <span className="online-status">En línea</span>
+                            <h4>SAVS AI Assistant</h4>
+                            <span className="online-status">IA SAVS (Impulsada por Groq)</span>
                         </div>
                     </div>
-                    <button className="close-btn" onClick={() => setIsOpen(false)}><X size={18} /></button>
+                    <div className="header-actions">
+                        <button className="action-btn" onClick={() => setMessages([])}><RefreshCw size={16} /></button>
+                        <button className="action-btn" onClick={() => setIsOpen(false)}><X size={18} /></button>
+                    </div>
                 </div>
 
                 <div className="messages-container">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`message-row ${msg.type}`}>
-                            {msg.type === 'bot' && (
-                                <div className="avatar-small"><Bot size={14} color="#eab308" /></div>
-                            )}
+                            {msg.type === 'bot' && <div className="avatar-small"><Bot size={14} color="#eab308" /></div>}
                             <div className="message-content">
-                                <p>{msg.text}</p>
-                                
+                                <div className="text-wrapper">
+                                    {msg.text.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+                                </div>
                                 {msg.whatsapp && (
                                     <a href={msg.whatsapp} target="_blank" rel="noreferrer" className="whatsapp-call-btn">
-                                        <ExternalLink size={14} /> WhatsApp SAVS
+                                        <ExternalLink size={14} /> Contactar Asesor
                                     </a>
                                 )}
-
                                 {msg.options && (
                                     <div className="options-container">
                                         {msg.options.map((opt, idx) => (
-                                            <button 
-                                                key={idx} 
-                                                className="option-btn" 
-                                                onClick={() => handleOptionClick(opt)}
-                                            >
-                                                {opt.label}
-                                            </button>
+                                            <button key={idx} className="option-btn" onClick={() => handleOptionClick(opt)}>{opt.label}</button>
                                         ))}
                                     </div>
                                 )}
@@ -177,9 +212,16 @@ const Chatbot = () => {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className="chatbot-footer">
-                    <p>Powered by YSR Collective</p>
-                </div>
+                <form className="chatbot-input-form" onSubmit={handleSendMessage}>
+                    <input 
+                        type="text" 
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder={isTyping ? "Esperando respuesta..." : "Escribe tu consulta..."}
+                        disabled={isTyping}
+                    />
+                    <button type="submit" disabled={isTyping || !input.trim()}><Send size={18} /></button>
+                </form>
             </div>
         </div>
     );

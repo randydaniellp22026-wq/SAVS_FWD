@@ -404,8 +404,6 @@ const CreateVehicle = () => {
               </button>
             </form>
           </div>
-        </div>
-
         {/* Lado derecho: Lista */}
         <div className="vender-auto-list-section">
           <div className="inventory-list-header">
