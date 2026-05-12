@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import api from '../../api/axios';
 import { 
   ArrowLeft, 
   CarFront, 
@@ -26,8 +27,6 @@ const darkSwal = {
   confirmButtonColor: '#eab308',
   cancelButtonColor: '#333'
 };
-
-const API_URL = 'http://localhost:5000/vehicles';
 
 const initialFormState = {
   id: '',
@@ -63,8 +62,8 @@ const CreateVehicle = () => {
   const [detailImagesDraft, setDetailImagesDraft] = useState([]);
 
   const filteredVehicles = vehiculos.filter(v => 
-    v.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    v.tag.toLowerCase().includes(searchTerm.toLowerCase())
+    (v.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (v.tag || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -72,11 +71,10 @@ const CreateVehicle = () => {
   }, []);
 
   useEffect(() => {
-    // Manejar parámetro de edición desde el dashboard
     const params = new URLSearchParams(location.search);
     const editId = params.get('edit');
     if (editId && vehiculos.length > 0) {
-      const v = vehiculos.find(car => car.id === editId);
+      const v = vehiculos.find(car => String(car.id) === String(editId));
       if (v) handleEdit(v);
     }
   }, [location.search, vehiculos]);
@@ -84,11 +82,8 @@ const CreateVehicle = () => {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data = await response.json();
-        setVehiculos(data.slice().reverse());
-      }
+      const response = await api.get('/vehicles');
+      setVehiculos(response.data.slice().reverse());
     } catch (error) {
       console.error("Error fetching admin vehicles:", error);
     } finally {
@@ -130,7 +125,6 @@ const CreateVehicle = () => {
     Promise.all(readers).then(results => {
       setDetailImagesDraft(prev => [...prev, ...results]);
     });
-    // Reset input so same files can be re-added if needed
     e.target.value = '';
   };
 
@@ -152,47 +146,45 @@ const CreateVehicle = () => {
         return;
       }
     }
-    // Merge detailImages draft into formData
     const mergedDetailImages = detailImagesDraft.length > 0 ? detailImagesDraft : (formData.detailImages || []);
 
     const priceNum = Number(formData.price);
     const yearNum = Number(formData.year);
 
-    const cleanData = { ...formData, price: priceNum, year: yearNum, detailImages: mergedDetailImages };
+    // Mapeando a los nombres que espera el backend pero manteniendo los originales para el frontend
+    const cleanData = { 
+      ...formData, 
+      price: priceNum, 
+      precio: priceNum,
+      year: yearNum, 
+      anio: yearNum,
+      marca: formData.name.split(' ')[0],
+      modelo: formData.name,
+      detailImages: mergedDetailImages 
+    };
 
     setLoading(true);
     try {
       if (isEditing) {
-        const response = await fetch(`${API_URL}/${cleanData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cleanData)
-        });
-        if (response.ok) {
-          const updated = await response.json();
-          setVehiculos(vehiculos.map(v => v.id === updated.id ? updated : v));
-          Swal.fire({ ...darkSwal, icon: 'success', title: '¡Actualizado!', timer: 1500, showConfirmButton: false });
-          setIsEditing(false);
-          setFormData(initialFormState);
-          setDetailImagesDraft([]);
-        }
+        const response = await api.put(`/vehicles/${cleanData.id}`, cleanData);
+        const updated = response.data;
+        setVehiculos(vehiculos.map(v => v.id === updated.id ? updated : v));
+        Swal.fire({ ...darkSwal, icon: 'success', title: '¡Actualizado!', timer: 1500, showConfirmButton: false });
+        setIsEditing(false);
+        setFormData(initialFormState);
+        setDetailImagesDraft([]);
       } else {
         const payload = { ...cleanData, id: String(Date.now()) };
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (response.ok) {
-          const newCar = await response.json();
-          setVehiculos([newCar, ...vehiculos]);
-          Swal.fire({ ...darkSwal, icon: 'success', title: '¡Publicado!', timer: 1500, showConfirmButton: false });
-          setFormData(initialFormState);
-          setDetailImagesDraft([]);
-        }
+        const response = await api.post('/vehicles', payload);
+        const newCar = response.data;
+        setVehiculos([newCar, ...vehiculos]);
+        Swal.fire({ ...darkSwal, icon: 'success', title: '¡Publicado!', timer: 1500, showConfirmButton: false });
+        setFormData(initialFormState);
+        setDetailImagesDraft([]);
       }
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo guardar.' });
+      console.error("Error saving vehicle:", error);
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo guardar en la base de datos MySQL.' });
     } finally {
       setLoading(false);
     }
@@ -202,8 +194,8 @@ const CreateVehicle = () => {
     setIsEditing(true);
     setFormData({
       ...vehiculo,
-      price: String(vehiculo.price),
-      year: String(vehiculo.year),
+      price: String(vehiculo.price || vehiculo.precio),
+      year: String(vehiculo.year || vehiculo.anio),
       detailImages: vehiculo.detailImages || []
     });
     setDetailImagesDraft(vehiculo.detailImages || []);
@@ -215,7 +207,7 @@ const CreateVehicle = () => {
       ...darkSwal,
       icon: 'warning',
       title: '¿Eliminar vehículo?',
-      text: `Esta acción borrará definitivamente el ${vehiculo.name} del catálogo.`,
+      text: `Esta acción borrará definitivamente el ${vehiculo.name || vehiculo.modelo} del catálogo.`,
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
@@ -229,13 +221,11 @@ const CreateVehicle = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setVehiculos(prev => prev.filter(v => v.id !== id));
-        Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
-      }
+      await api.delete(`/vehicles/${id}`);
+      setVehiculos(prev => prev.filter(v => v.id !== id));
+      Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error al eliminar' });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error al eliminar de MySQL' });
     }
   };
 
@@ -338,7 +328,6 @@ const CreateVehicle = () => {
                 </div>
               </div>
 
-              {/* ── Galería de Detalles del Vehículo ── */}
               <div className="form-group gallery-section">
                 <label className="gallery-label">
                   <ImageIcon size={14} />
@@ -346,7 +335,6 @@ const CreateVehicle = () => {
                   <span className="optional-tag">(opcional — se muestran en el carrusel de la página de detalles)</span>
                 </label>
 
-                {/* Zona de carga de múltiples imágenes */}
                 <label
                   htmlFor="detail-images-input"
                   className="multi-upload-zone"
@@ -364,7 +352,6 @@ const CreateVehicle = () => {
                   />
                 </label>
 
-                {/* Vista previa de imágenes cargadas */}
                 {detailImagesDraft.length > 0 && (
                   <div className="preview-gallery-container">
                     <p className="preview-count-text">
@@ -404,7 +391,6 @@ const CreateVehicle = () => {
               </button>
             </form>
           </div>
-        {/* Lado derecho: Lista */}
         <div className="vender-auto-list-section">
           <div className="inventory-list-header">
              <h2 className="list-title">Inventario Actual ({vehiculos.length})</h2>
@@ -425,9 +411,9 @@ const CreateVehicle = () => {
               <div key={v.id} className="inventory-item">
                 <img src={v.image} alt="" className="item-thumbnail" />
                 <div className="item-details">
-                  <h4 className="item-name">{v.name}</h4>
-                  <p className="item-price">₡{Number(v.price).toLocaleString()}</p>
-                  <small className="item-meta">{v.year} • {v.fuel}</small>
+                  <h4 className="item-name">{v.name || v.modelo}</h4>
+                  <p className="item-price">₡{Number(v.price || v.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                  <small className="item-meta">{(v.year || v.anio)} • {v.fuel}</small>
                 </div>
                 <div className="item-actions">
                   <button onClick={() => handleEdit(v)} className="btn-icon-sm edit"><Edit size={16}/></button>

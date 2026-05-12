@@ -193,7 +193,7 @@ const VehicleCatalog = ({ title, vehicles: initialVehicles, showFilters = false 
                       <div className="spec-item"><Droplet size={16} className="spec-icon" /><span>{car.color}</span></div>
                     </div>
                     <div className="vehicle-footer">
-                      <ShimmerText className="vehicle-price" text={`₡${car.price.toLocaleString('es-CR')}`} as="span" shimmerWidth={100} />
+                      <ShimmerText className="vehicle-price" text={`₡${Number(car.price || car.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} as="span" shimmerWidth={100} />
                       <SlideTextButton 
                         text="Detalles" 
                         hoverText="Ver más" 

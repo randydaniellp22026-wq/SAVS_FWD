@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-
-const API_URL = 'http://localhost:5000';
+import api from '../../api/axios';
 
 export const useHomeLogica = () => {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/vehicles`)
-      .then(res => res.json())
-      .then(data => setVehicles(data || []))
+    api.get('/vehicles')
+      .then(res => setVehicles(res.data || []))
       .catch(err => console.error("Error loading home vehicles:", err));
   }, []);
 

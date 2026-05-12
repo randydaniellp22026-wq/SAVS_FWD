@@ -118,8 +118,8 @@ function PerfilUsuarios() {
 
         // Buscamos todas las peticiones para filtrar manualmente por email (case-insensitive) y userId
         const [contactRes, tradeInRes] = await Promise.all([
-          fetch(`http://localhost:5000/requests`),
-          fetch(`http://localhost:5000/sale_requests?userId=${user.id}`)
+          fetch(`http://localhost:5000/api/requests`),
+          fetch(`http://localhost:5000/api/sale_requests?userId=${user.id}`)
         ]);
 
         const allContactRequests = await contactRes.json();
@@ -181,7 +181,7 @@ function PerfilUsuarios() {
       });
 
       try {
-        const res = await fetch('http://localhost:5000/vehicles');
+        const res = await fetch('http://localhost:5000/api/vehicles');
         const allVehiclesFromDb = await res.json();
         setAllVehicles(allVehiclesFromDb);
 
@@ -591,7 +591,7 @@ function PerfilUsuarios() {
 
     const inputOptions = {};
     availableVehicles.forEach(car => {
-      inputOptions[car.id] = `${car.name} (${car.year}) - ₡${car.price.toLocaleString('es-CR')}`;
+      inputOptions[car.id] = `${car.name} (${car.year}) - ₡${Number(car.price || car.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
     });
 
     Swal.fire({
