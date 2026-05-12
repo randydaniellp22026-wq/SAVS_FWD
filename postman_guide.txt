@@ -1,0 +1,73 @@
+🚀 Guía de Pruebas con Postman - The Destiny Vault API
+
+Esta guía te permitirá probar todos los endpoints de tu nuevo backend en MySQL. Asegúrate de que el servidor esté corriendo (npm run dev:full).
+
+URL Base: http://localhost:5000/api
+
+---
+
+1. Autenticación (Auth)
+Para probar las rutas protegidas, primero debes iniciar sesión para obtener una cookie de autenticación.
+
+🔹 Login (Iniciar Sesión)
+- Método: POST
+- URL: http://localhost:5000/api/auth/login
+- Body (JSON):
+{
+  "email": "yosimarvv@gmail.com",
+  "password": "yosi12345."
+}
+(Postman guardará la cookie automáticamente si usas la configuración por defecto).
+
+🔹 Perfil Actual (Ver mis datos)
+- Método: GET
+- URL: http://localhost:5000/api/auth/me
+
+---
+
+2. Vehículos (Inventario)
+Aquí puedes ver los autos que migramos desde el db.json.
+
+🔹 Listar todos los autos
+- Método: GET
+- URL: http://localhost:5000/api/vehicles
+
+🔹 Ver un auto específico (Detalle)
+- Método: GET
+- URL: http://localhost:5000/api/vehicles/1
+(Cambia el 1 por cualquier ID que exista en tu base de datos).
+
+---
+
+3. IA Chatbot (¡El nuevo sistema!)
+Prueba cómo la IA utiliza tu base de datos de MySQL para responder.
+
+🔹 Preguntar al Chatbot
+- Método: POST
+- URL: http://localhost:5000/api/chatbot
+- Body (JSON):
+{
+  "message": "¿Qué autos tienes disponibles en color blanco?"
+}
+La IA debería responderte mencionando autos específicos que ahora están en tu base de datos.
+
+---
+
+4. Usuarios (Gestión)
+🔹 Listar todos los usuarios (Solo Admin)
+- Método: GET
+- URL: http://localhost:5000/api/users
+
+---
+
+5. Otros Endpoints Útiles
+- Sucursales (GET): http://localhost:5000/api/branches
+- Glosario (GET): http://localhost:5000/api/technical_glossary
+- Settings (GET): http://localhost:5000/api/settings
+
+---
+
+💡 Tips para Postman:
+1. Headers: Postman suele manejar el Content-Type: application/json automáticamente cuando eliges "Raw" -> "JSON" en el Body.
+2. Cookies: Como tu sistema usa httpOnly cookies para el JWT, Postman las gestionará solo. No necesitas copiar y pegar tokens manualmente.
+3. Logs: Revisa la terminal para ver las consultas SQL en tiempo real.

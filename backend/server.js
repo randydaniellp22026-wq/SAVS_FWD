@@ -26,6 +26,9 @@ app.use('/api/sale_requests', require('./routes/saleRequests'));
 app.use('/api/branches', require('./routes/branches'));
 app.use('/api/technical_glossary', require('./routes/technicalGlossary'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/chatbot', require('./routes/chatbot'));
+
 
 // Base de Datos
 sequelize.authenticate()
