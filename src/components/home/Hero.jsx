@@ -23,7 +23,7 @@ const Hero = () => {
   };
 
   const handleFacebookClick = () => {
-    window.open('https://www.facebook.com/importadorasavs', '_blank');
+    window.open('https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/', '_blank');
   };
 
   useEffect(() => {
@@ -69,8 +69,15 @@ const Hero = () => {
           <img src={fbPromoImg} alt="Hero Background 2" className="hero-bg-img" style={{ objectFit: 'cover', objectPosition: 'center' }} />
           <div className="hero-overlay gold-overlay"></div>
           <div className="hero-content">
-            <div className="hero-text-content" style={{ marginTop: '15rem' }}>
-              <div className="hero-actions">
+            <div className="hero-text-content">
+              <h1 className="hero-title" style={{ fontSize: '3.5rem', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                Ofertas Exclusivas<br />
+                <span style={{ color: '#eab308' }}>en Facebook</span>
+              </h1>
+              <p className="hero-subtitle" style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                Vehículos seleccionados a precios irrepetibles. Solo en nuestras redes.
+              </p>
+              <div className="hero-actions" style={{ justifyContent: 'center' }}>
                 <button className="btn btn-gold" onClick={handleFacebookClick} style={{ padding: '15px 30px', fontSize: '1.2rem' }}>
                   <Facebook size={24} />
                   Ir a Facebook

@@ -30,7 +30,7 @@ const FacebookPromo = ({
   }, [carouselImages.length]);
 
   const handlePromoClick = () => {
-    window.open('https://www.facebook.com/importadorasavs', '_blank');
+    window.open('https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/', '_blank');
   };
 
   const renderCarousel = () => (
