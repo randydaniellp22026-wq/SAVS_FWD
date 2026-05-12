@@ -2,13 +2,11 @@ const express = require('express');
 const router = express.Router();
 const saleRequestController = require('../controllers/saleRequestController');
 
-const { verificarToken, esAdmin } = require('../middlewares/authMiddleware');
-
-router.get('/', verificarToken, esAdmin, saleRequestController.getAll);
-router.get('/:id', verificarToken, esAdmin, saleRequestController.getById);
-router.post('/', verificarToken, saleRequestController.create); // Cualquier usuario autenticado puede crear
-router.put('/:id', verificarToken, esAdmin, saleRequestController.update);
-router.patch('/:id', verificarToken, esAdmin, saleRequestController.update);
-router.delete('/:id', verificarToken, esAdmin, saleRequestController.remove);
+router.get('/', saleRequestController.getAll);
+router.get('/:id', saleRequestController.getById);
+router.post('/', saleRequestController.create);
+router.put('/:id', saleRequestController.update);
+router.patch('/:id', saleRequestController.update);
+router.delete('/:id', saleRequestController.remove);
 
 module.exports = router;
