@@ -3,8 +3,6 @@ import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle } fro
 // import { GoogleGenerativeAI } from "@google/generative-ai"; // No longer using Gemini SDK
 import './Chatbot.css';
 
-// Clave de API desde el entorno
-const API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -55,72 +53,41 @@ const Chatbot = () => {
         setError(null);
 
         try {
-            // Usamos Groq Cloud: Extremadamente rápido y con plan gratuito generoso.
-            const url = "https://api.groq.com/openai/v1/chat/completions";
-            
-            const inventoryContext = vehicles.length > 0 
-                ? vehicles.map(v => `- ${v.name} (${v.year}) [ID: ${v.id}]: ₡${v.price.toLocaleString()}.`).join('\n')
-                : "Consultar inventario en la web.";
-
-            const systemPrompt = `Eres el asistente experto de IMPORTADORA SAVS, Costa Rica. 
-            
-            REGLAS CRÍTICAS:
-            1. Solo responde preguntas relacionadas con IMPORTADORA SAVS (venta de autos, inventario, financiamiento, trámites, etc.).
-            2. Si el usuario pregunta algo fuera de contexto (chistes, temas personales, política, etc.), declina amablemente indicando que eres un asistente especializado en la importadora.
-            3. Si el usuario pregunta por un auto del inventario, DEBES dar el link usando este formato: [Ver detalles del auto](/inventory/details/ID).
-            4. Si no sabes la respuesta, el usuario pide hablar con un humano, o se llega a una conclusión/acuerdo de interés, DEBES invitar al usuario a contactar por WhatsApp.
-            5. Responde siempre de forma amable y profesional.
-            
-            INVENTARIO DISPONIBLE:
-            ${inventoryContext}
-            
-            WhatsApp de la empresa: ${whatsappNumber}`;
+            // Ahora la lógica reside en el backend para mayor seguridad y acceso a la BD real
+            // Esto cumple con el pedido de que la IA utilice el backend.
+            const url = "http://localhost:5000/api/chatbot";
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: "llama-3.3-70b-versatile",
-                    messages: [
-                        { role: "system", content: systemPrompt },
-                        { role: "user", content: userText }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 1024
+                    message: userText
                 })
             });
 
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Error al conectar con el servidor de IA.");
+            }
+
             const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message);
-            }
-
-            if (!data.choices || data.choices.length === 0) {
-                throw new Error("No se recibió respuesta de la IA.");
-            }
-
-            const text = data.choices[0].message.content;
-
-            if (!text) {
-                throw new Error("No se recibió respuesta de la IA.");
-            }
+            const text = data.reply;
+            const whatsappNum = data.whatsapp || whatsappNumber;
             
             const showWhatsapp = text.toLowerCase().includes('whatsapp') || 
-                               text.toLowerCase().includes('asesor') || 
-                               text.toLowerCase().includes('contactar') ||
-                               text.toLowerCase().includes('conclusión') ||
-                               text.toLowerCase().includes('gracias') ||
-                               text.toLowerCase().includes('terminar');
+                                text.toLowerCase().includes('asesor') || 
+                                text.toLowerCase().includes('contactar') ||
+                                text.toLowerCase().includes('conclusión') ||
+                                text.toLowerCase().includes('gracias') ||
+                                text.toLowerCase().includes('terminar');
 
             setMessages(prev => [...prev, { 
                 id: Date.now(), 
                 type: 'bot', 
                 text: text,
-                whatsapp: showWhatsapp ? `https://wa.me/${whatsappNumber.replace(/\D/g, '')}` : null
+                whatsapp: showWhatsapp ? `https://wa.me/${whatsappNum.replace(/\D/g, '')}` : null
             }]);
         } catch (err) {
             console.error("AI Error:", err);
