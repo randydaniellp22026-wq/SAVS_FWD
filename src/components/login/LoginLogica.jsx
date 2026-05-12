@@ -42,28 +42,21 @@ export const useLoginLogic = () => {
     }
 
     try {
-      // Usando el nuevo endpoint del backend
-      const response = await api.get('/users');
-      const allUsers = response.data;
-      
-      // Búsqueda manual (por ahora, hasta implementar login real en backend)
-      const inputEmail = formData.email.trim().toLowerCase();
-      const user = allUsers.find(u => 
-        (u.email || u.correo || '').toLowerCase() === inputEmail && 
-        u.password === formData.password.trim()
-      );
+      // LLAMADA AL LOGIN REAL DEL BACKEND
+      const response = await api.post('/auth/login', {
+        email: formData.email.trim(),
+        password: formData.password.trim()
+      });
+
+      const { usuario } = response.data;
 
       if (usuario) {
         // Guardamos los datos del usuario para el frontend
         localStorage.setItem('user', JSON.stringify({ 
-          id: user.id, 
-          nombre: user.nombre, 
-          email: user.email || user.correo,
-          rol: user.rol || (user.rolId === 1 ? 'admin' : 'Cliente'),
-          telefono: user.telefono || '',
-          ubicacion: user.ubicacion || 'Costa Rica',
-          favorites: user.favorites || [],
-          image: user.image || ''
+          id: usuario.id, 
+          nombre: usuario.nombre, 
+          email: usuario.email,
+          rol: usuario.rol
         }));
         
         toast.success(`¡Bienvenido de nuevo, ${usuario.nombre.split(' ')[0]}!`);
@@ -78,7 +71,8 @@ export const useLoginLogic = () => {
         });
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      // Manejar error de credenciales o servidor
+      setError(err.response?.data?.error || 'Error al iniciar sesión. Verifica tus credenciales.');
     } finally {
       setLoading(false);
     }
