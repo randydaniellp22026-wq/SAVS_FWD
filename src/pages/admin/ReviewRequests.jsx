@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Admin.css';
 import { Mail, Phone, Calendar, CheckCircle, XCircle, Clock, Send, FileText, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
-
-const API_URL = 'http://localhost:5000/requests';
+import api from '../../api/axios';
 
 const darkSwal = {
   background: '#141414',
@@ -29,15 +28,13 @@ const ReviewRequests = () => {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Error al cargar solicitudes');
-      const data = await res.json();
-      // Ordenar: las más nuevas primero
+      const res = await api.get('/requests');
+      const data = res.data;
       const sorted = data.sort((a, b) => new Date(b.date) - new Date(a.date));
       setRequests(sorted);
     } catch (error) {
       console.error(error);
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Oops...', text: 'No se pudieron cargar las solicitudes.' });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Oops...', text: 'No se pudieron cargar las solicitudes desde MySQL.' });
     } finally {
       setLoading(false);
     }
@@ -48,14 +45,8 @@ const ReviewRequests = () => {
       const updateData = { status: newStatus };
       if (replyMsg) updateData.reply = replyMsg;
 
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData)
-      });
-      if (!res.ok) throw new Error('Error al actualizar');
+      await api.put(`/requests/${id}`, updateData);
       
-      // Actualizar estado local
       setRequests(prev => prev.map(req => req.id === id ? { ...req, ...updateData } : req));
       
       Swal.fire({
@@ -67,7 +58,7 @@ const ReviewRequests = () => {
         showConfirmButton: false
       });
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se procesó la actualización.' });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar en la base de datos.' });
     }
   };
 
@@ -119,7 +110,6 @@ const ReviewRequests = () => {
         }
       }).then((result) => {
         if (result.isConfirmed) {
-          // Simulamos enviar el correo electrónico...
           Swal.fire({
             ...darkSwal,
             title: 'Enviando correo...',
@@ -141,7 +131,7 @@ const ReviewRequests = () => {
       Swal.fire({
         ...darkSwal,
         title: '¿Eliminar Solicitud?',
-        text: 'Esta acción es permanente y eliminará el registro.',
+        text: 'Esta acción es permanente y eliminará el registro de MySQL.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#e63946',
@@ -155,11 +145,8 @@ const ReviewRequests = () => {
 
   const deleteRequest = async (id) => {
     try {
-      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Error al eliminar');
-      
+      await api.delete(`/requests/${id}`);
       setRequests(prev => prev.filter(req => req.id !== id));
-      
       Swal.fire({
         ...darkSwal,
         icon: 'success',
@@ -245,7 +232,7 @@ const ReviewRequests = () => {
                       <button className="btn-action check" onClick={() => handleAction(req, 'accept')}><CheckCircle size={18}/> Aceptar</button>
                     )}
                     {req.status !== 'rejected' && (
-                      <button className="btn-action close" onClick={() => handleAction(req, 'reject')}><XCircle size={18}/> Rechazar</button>
+                      <button className="btn-action close" onClick={() => handleAction(req, 'reject')}><XCircle size={18}/> Rechazada</button>
                     )}
                   </>
                 )}

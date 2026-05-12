@@ -65,7 +65,7 @@ const VehicleCard = ({ vehicle }) => {
         </div>
 
         <div className="card-footer">
-          <ShimmerText className="vehicle-price" text={`₡${vehicle.price.toLocaleString('es-CR')}`} as="div" shimmerWidth={100} />
+          <ShimmerText className="vehicle-price" text={`₡${Number(vehicle.price || vehicle.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} as="div" shimmerWidth={100} />
           <SlideTextButton
             text="Detalles"
             hoverText="Ver más"

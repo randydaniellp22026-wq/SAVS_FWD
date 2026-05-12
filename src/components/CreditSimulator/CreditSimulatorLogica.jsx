@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import api from '../../api/axios';
 
 export const useCreditSimulatorLogica = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -26,10 +27,9 @@ export const useCreditSimulatorLogica = () => {
   // Fetch logic for credit simulator vehicles
   useEffect(() => {
     setLoading(true);
-    fetch('http://localhost:5000/vehicles')
-      .then(res => res.json())
-      .then(data => {
-        setVehicles(data || []);
+    api.get('/vehicles')
+      .then(res => {
+        setVehicles(res.data || []);
         setLoading(false);
       })
       .catch(err => {
