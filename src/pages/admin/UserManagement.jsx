@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import api from '../../api/axios';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -23,14 +24,11 @@ const UserManagement = () => {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   const isGerente = currentUser.rol === 'gerente';
 
-  const API_URL = 'http://localhost:5000/users';
-
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      setUsers(data);
+      const res = await api.get('/users');
+      setUsers(res.data);
     } catch (error) {
       console.error("Error loading users:", error);
     } finally {
@@ -73,12 +71,8 @@ const UserManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${API_URL}/${user.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(result.value)
-          });
-          if (res.ok) {
+          const res = await api.put(`/users/${user.id}`, result.value);
+          if (res.status === 200) {
             Swal.fire('Actualizado', 'El usuario ha sido modificado con éxito.', 'success');
             fetchUsers();
           }
@@ -111,11 +105,9 @@ const UserManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${API_URL}/${user.id}`, { method: 'DELETE' });
-          if (res.ok) {
-            Swal.fire('Eliminado', 'El usuario ha sido removido.', 'success');
-            fetchUsers();
-          }
+          await api.delete(`/users/${user.id}`);
+          Swal.fire('Eliminado', 'El usuario ha sido removido.', 'success');
+          fetchUsers();
         } catch (error) {
           Swal.fire('Error', 'Ocurrió un fallo al intentar eliminar.', 'error');
         }
@@ -128,6 +120,7 @@ const UserManagement = () => {
     
     const isPromoting = user.rol !== 'admin';
     const newRole = isPromoting ? 'admin' : 'Cliente';
+    const newRolId = isPromoting ? 1 : 3;
     
     const title = isPromoting ? '¡Ascenso de Rango!' : 'Cambio de Responsabilidades';
     const text = isPromoting 
@@ -148,23 +141,17 @@ const UserManagement = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`${API_URL}/${user.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rol: newRole })
+          await api.put(`/users/${user.id}`, { rolId: newRolId, rol: newRole });
+          Swal.fire({
+            title: isPromoting ? '¡Promovido!' : 'Actualizado',
+            text: isPromoting ? `${user.nombre} ahora es parte del equipo administrativo.` : 'Permisos actualizados correctamente.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            background: '#141414',
+            color: '#fff'
           });
-          if (res.ok) {
-            Swal.fire({
-              title: isPromoting ? '¡Promovido!' : 'Actualizado',
-              text: isPromoting ? `${user.nombre} ahora es parte del equipo administrativo.` : 'Permisos actualizados correctamente.',
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false,
-              background: '#141414',
-              color: '#fff'
-            });
-            fetchUsers();
-          }
+          fetchUsers();
         } catch (error) {
           Swal.fire('Error', 'No se pudo procesar el cambio de rango.', 'error');
         }
@@ -173,8 +160,8 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(u => 
-    u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (u.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (u.email || u.correo || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -227,7 +214,7 @@ const UserManagement = () => {
                 </td>
                 <td data-label="Contacto">
                   <div className="contact-cell">
-                    <div className="contact-item"><Mail size={14} /> {user.email}</div>
+                    <div className="contact-item"><Mail size={14} /> {user.email || user.correo}</div>
                     <div className="contact-item"><Phone size={14} /> {user.telefono || 'Sin tel.'}</div>
                   </div>
                 </td>
@@ -237,9 +224,9 @@ const UserManagement = () => {
                   </div>
                 </td>
                 <td data-label="Rol / Rango">
-                  <span className={`role-badge ${user.rol?.toLowerCase()}`}>
+                  <span className={`role-badge ${user.rol?.toLowerCase() || (user.rolId === 1 ? 'admin' : 'cliente')}`}>
                     {user.rol === 'admin' ? <Shield size={14} /> : user.rol === 'gerente' ? <ShieldAlert size={14} /> : <UserCheck size={14} />}
-                    {user.rol}
+                    {user.rol || (user.rolId === 1 ? 'admin' : 'Cliente')}
                   </span>
                 </td>
                 <td data-label="Acciones">

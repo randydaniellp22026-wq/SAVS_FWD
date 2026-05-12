@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../api/axios';
 import { Car, Truck, Zap, Flame, ChevronLeft, ChevronRight, X, Bus, ArrowLeft } from 'lucide-react';
 import './VehicleSelectionModal.css';
 
@@ -26,9 +27,8 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   // Fetch all vehicles once when the modal opens
   useEffect(() => {
     if (isOpen) {
-      fetch('http://localhost:5000/vehicles')
-        .then(res => res.json())
-        .then(data => setAllVehicles(data || []))
+      api.get('/vehicles')
+        .then(res => setAllVehicles(res.data || []))
         .catch(err => console.error("Error loading vehicles for selection:", err));
     }
   }, [isOpen]);

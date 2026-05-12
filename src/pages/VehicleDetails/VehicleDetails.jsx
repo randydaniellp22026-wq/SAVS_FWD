@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, ChevronRight, Zap, Shield, Sparkles, Navigation } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useVehicleDetailsLogica } from './VehicleDetailsLogica';
+import api from '../../api/axios';
 import VehicleCarousel from '../../components/VehicleCarousel/VehicleCarousel';
 import ShimmerText from '../../components/ShimmerText/ShimmerText';
 import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
@@ -14,22 +15,19 @@ const VehicleDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [vehicle, setVehicle] = React.useState(location.state?.vehicle);
-  const [loading, setLoading] = React.useState(!location.state?.vehicle || !location.state?.vehicle.engine_size);
+  const [loading, setLoading] = React.useState(!location.state?.vehicle || !(location.state?.vehicle.engine_size || location.state?.vehicle.motor));
   const { getMonthlyPayment } = useVehicleDetailsLogica(vehicle);
 
   React.useEffect(() => {
-    // Si no tenemos vehículo en state, o si le faltan los nuevos campos técnicos, lo pedimos al API
-    const needsUpdate = !vehicle || !vehicle.engine_size;
+    const needsUpdate = !vehicle || !(vehicle.engine_size || vehicle.motor);
     
     if (needsUpdate && (id || vehicle?.id)) {
       setLoading(true);
       const vehicleId = id || vehicle.id;
-      const API_URL = 'http://localhost:5000/vehicles';
       
-      fetch(`${API_URL}/${vehicleId}`)
-        .then(res => res.json())
-        .then(data => {
-          setVehicle(data);
+      api.get(`/vehicles/${vehicleId}`)
+        .then(res => {
+          setVehicle(res.data);
           setLoading(false);
         })
         .catch(err => {
@@ -48,7 +46,7 @@ const VehicleDetails = () => {
       <section className="details-hero">
         <img 
           src={localImages[vehicle.image] || vehicle.image} 
-          alt={vehicle.name} 
+          alt={vehicle.name || vehicle.modelo} 
           className="hero-background-img"
           referrerPolicy="no-referrer"
         />
@@ -66,23 +64,23 @@ const VehicleDetails = () => {
           <span className="hero-tag right-tag">{vehicle.tag || 'NUEVO INGRESO'}</span>
           
           <div className="hero-text-content">
-            <ShimmerText className="hero-title" text={vehicle.name} as="h1" />
+            <ShimmerText className="hero-title" text={vehicle.name || `${vehicle.marca} ${vehicle.modelo}`} as="h1" />
             <p className="hero-subtitle">{vehicle.heroSubtitle || 'Importado con los más altos estándares de calidad. Diseñado para brindar rendimiento y confiabilidad excepcionales.'}</p>
             
             <div className="hero-stats-row">
               <div className="hero-stat">
                 <span className="stat-label">Año</span>
-                <span className="stat-value">{vehicle.year}</span>
+                <span className="stat-value">{vehicle.year || vehicle.anio}</span>
               </div>
               <div className="stat-divider"></div>
               <div className="hero-stat">
                 <span className="stat-label">Precio</span>
-                <ShimmerText className="stat-value" text={`₡${vehicle.price.toLocaleString('es-CR')}`} as="span" shimmerWidth={100} />
+                <ShimmerText className="stat-value" text={`₡${Number(vehicle.price || vehicle.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`} as="span" shimmerWidth={100} />
               </div>
               <div className="stat-divider"></div>
               <div className="hero-stat">
                 <span className="stat-label">Cuota desde</span>
-                <ShimmerText className="stat-value" text={`₡${getMonthlyPayment().toLocaleString('es-CR')}/mes`} as="span" shimmerWidth={100} />
+                <ShimmerText className="stat-value" text={`₡${getMonthlyPayment().toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/mes`} as="span" shimmerWidth={100} />
               </div>
             </div>
           </div>
@@ -123,7 +121,6 @@ const VehicleDetails = () => {
           </div>
         </div>
 
-        {/* 2.1 Tabla de Especificaciones Técnicas Detalladas */}
         <div className="technical-grid" style={{ marginTop: '4rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
           <div className="tech-item" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <span style={{ color: '#9ca3af', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Cilindraje</span>
@@ -159,13 +156,11 @@ const VehicleDetails = () => {
           </div>
         </div>
         
-        {/* Banner Promo de Facebook */}
         <div style={{ marginTop: '3rem' }}>
           <FacebookPromo type="banner" reverse={true} />
         </div>
       </section>
 
-      {/* 2.5. Carrusel de Vehículo */}
       <section className="vehicle-gallery-section" style={{ margin: '6rem 0', backgroundColor: '#080808', position: 'relative' }}>
         <div className="container" style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
           <ShimmerText className="section-heading" text="Explora Cada Detalle" as="h2" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }} />
@@ -174,7 +169,6 @@ const VehicleDetails = () => {
         <VehicleCarousel vehicle={vehicle} />
       </section>
 
-      {/* 3. Resumen del Vehículo */}
       <section className="features-section">
         <div className="container wrapper-padding">
           <h2 className="section-heading centered">Conoce más sobre este vehículo</h2>
@@ -206,7 +200,6 @@ const VehicleDetails = () => {
         </div>
       </section>
 
-      {/* 4. Llamado a la Acción Final */}
       <section className="cta-section">
         <div className="container cta-content">
           <h2 className="cta-title">Dé el Siguiente Paso</h2>

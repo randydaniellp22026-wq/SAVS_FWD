@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-
-const API_URL = 'http://localhost:5000';
+import api from '../../api/axios';
 
 const darkSwal = {
   background: '#0a0a0a',
@@ -43,16 +42,14 @@ export const useLoginLogic = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/users`);
-
-      if (!response.ok) throw new Error('Error al conectar con el servidor.');
-
-      const allUsers = await response.json();
+      // Usando el nuevo endpoint del backend
+      const response = await api.get('/users');
+      const allUsers = response.data;
       
-      // Búsqueda manual insensible a mayúsculas en el email
+      // Búsqueda manual (por ahora, hasta implementar login real en backend)
       const inputEmail = formData.email.trim().toLowerCase();
       const user = allUsers.find(u => 
-        (u.email || '').toLowerCase() === inputEmail && 
+        (u.email || u.correo || '').toLowerCase() === inputEmail && 
         u.password === formData.password.trim()
       );
 
@@ -60,8 +57,8 @@ export const useLoginLogic = () => {
         localStorage.setItem('user', JSON.stringify({ 
           id: user.id, 
           nombre: user.nombre, 
-          email: user.email,
-          rol: user.rol || 'Usuario',
+          email: user.email || user.correo,
+          rol: user.rol || (user.rolId === 1 ? 'admin' : 'Cliente'),
           telefono: user.telefono || '',
           ubicacion: user.ubicacion || 'Costa Rica',
           favorites: user.favorites || [],
@@ -82,7 +79,7 @@ export const useLoginLogic = () => {
         throw new Error('Credenciales incorrectas. Verifica tu correo y contraseña.');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
