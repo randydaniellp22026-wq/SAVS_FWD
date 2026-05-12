@@ -1,0 +1,69 @@
+const express = require('express');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+require('dotenv').config();
+
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+const app = express();
+
+// --- SEGURIDAD AVANZADA ---
+app.use(helmet());
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: 'Demasiadas peticiones desde esta IP, por favor intente más tarde.'
+});
+app.use('/api/', limiter);
+
+// Limitador de auth (desactivado en tests para no bloquear peticiones)
+if (process.env.NODE_ENV !== 'test') {
+    const authLimiter = rateLimit({
+        windowMs: 60 * 60 * 1000,
+        max: 10,
+        message: 'Demasiados intentos de acceso, su IP ha sido bloqueada temporalmente por seguridad.'
+    });
+    app.use('/api/auth/login', authLimiter);
+    app.use('/api/auth/register', authLimiter);
+}
+
+// Middlewares estándar
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+}));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
+
+// Rutas
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/vehicles', require('./routes/vehicles'));
+app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/requests', require('./routes/requests'));
+app.use('/api/sale_requests', require('./routes/saleRequests'));
+app.use('/api/branches', require('./routes/branches'));
+app.use('/api/technical_glossary', require('./routes/technicalGlossary'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/chatbot', require('./routes/chatbot'));
+
+app.get('/', (req, res) => {
+    res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
+});
+
+// --- MANEJO DE ERRORES CENTRALIZADO ---
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Error interno del servidor';
+    res.status(statusCode).json({
+        success: false,
+        error: message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
+
+module.exports = app;
