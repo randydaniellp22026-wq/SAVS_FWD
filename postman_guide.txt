@@ -1,12 +1,12 @@
 🚀 Guía de Pruebas con Postman - The Destiny Vault API
 
-Esta guía te permitirá probar todos los endpoints de tu nuevo backend en MySQL. Asegúrate de que el servidor esté corriendo (npm run dev:full).
+Esta guía te permitirá probar todos los endpoints de tu nuevo backend en MySQL, cubriendo el CRUD completo (Create, Read, Update, Delete) incluyendo el método PATCH. Asegúrate de que el servidor esté corriendo (`npm run dev:full`).
 
 URL Base: http://localhost:5000/api
 
 ---
 
-1. Autenticación (Auth)
+## 1. Autenticación (Auth)
 Para probar las rutas protegidas, primero debes iniciar sesión para obtener una cookie de autenticación.
 
 🔹 Login (Iniciar Sesión)
@@ -17,7 +17,6 @@ Para probar las rutas protegidas, primero debes iniciar sesión para obtener una
   "email": "yosimarvv@gmail.com",
   "password": "yosi12345."
 }
-(Postman guardará la cookie automáticamente si usas la configuración por defecto).
 
 🔹 Perfil Actual (Ver mis datos)
 - Método: GET
@@ -25,21 +24,108 @@ Para probar las rutas protegidas, primero debes iniciar sesión para obtener una
 
 ---
 
-2. Vehículos (Inventario)
-Aquí puedes ver los autos que migramos desde el db.json.
+## 2. Vehículos (Inventario) - CRUD COMPLETO
+Puedes gestionar los autos usando estos endpoints:
 
-🔹 Listar todos los autos
+🔹 1. Crear un Auto (Create)
+- Método: POST
+- URL: http://localhost:5000/api/vehicles
+- Body (JSON):
+{
+  "brand": "Toyota",
+  "model": "Corolla",
+  "year": 2024,
+  "price": 25000,
+  "mileage": 0,
+  "color": "Blanco",
+  "status": "Disponible",
+  "image_url": "https://example.com/corolla.jpg"
+}
+
+🔹 2. Listar todos los autos (Read)
 - Método: GET
 - URL: http://localhost:5000/api/vehicles
 
-🔹 Ver un auto específico (Detalle)
+🔹 3. Ver un auto específico (Read)
 - Método: GET
 - URL: http://localhost:5000/api/vehicles/1
-(Cambia el 1 por cualquier ID que exista en tu base de datos).
+
+🔹 4. Actualizar un auto completo (Update)
+- Método: PUT
+- URL: http://localhost:5000/api/vehicles/1
+- Body (JSON):
+{
+  "brand": "Toyota",
+  "model": "Corolla XSE",
+  "year": 2025,
+  "price": 28000,
+  "mileage": 10,
+  "color": "Rojo",
+  "status": "Vendido",
+  "image_url": "https://example.com/corolla.jpg"
+}
+
+🔹 5. Actualizar un campo específico de un auto (Patch)
+- Método: PATCH
+- URL: http://localhost:5000/api/vehicles/1
+- Body (JSON):
+{
+  "price": 26000
+}
+
+🔹 6. Eliminar un auto (Delete)
+- Método: DELETE
+- URL: http://localhost:5000/api/vehicles/1
 
 ---
 
-3. IA Chatbot (¡El nuevo sistema!)
+## 3. Usuarios (Gestión) - CRUD COMPLETO (Solo Admin)
+Requiere haber iniciado sesión como administrador.
+
+🔹 1. Crear un Usuario (Create)
+- Método: POST
+- URL: http://localhost:5000/api/users
+- Body (JSON):
+{
+  "name": "Nuevo Usuario",
+  "email": "nuevo@ejemplo.com",
+  "password": "password123",
+  "role": "user"
+}
+
+🔹 2. Listar todos los usuarios (Read)
+- Método: GET
+- URL: http://localhost:5000/api/users
+
+🔹 3. Ver un usuario específico (Read)
+- Método: GET
+- URL: http://localhost:5000/api/users/2
+
+🔹 4. Actualizar un usuario completo (Update)
+- Método: PUT
+- URL: http://localhost:5000/api/users/2
+- Body (JSON):
+{
+  "name": "Usuario Modificado",
+  "email": "modificado@ejemplo.com",
+  "role": "admin"
+}
+
+🔹 5. Actualizar estado/rol de un usuario (Patch)
+- Método: PATCH
+- URL: http://localhost:5000/api/users/2
+- Body (JSON):
+{
+  "role": "admin"
+}
+
+🔹 6. Eliminar un usuario (Delete)
+- Método: DELETE
+- URL: http://localhost:5000/api/users/2
+
+---
+
+## 4. IA Chatbot
 Prueba cómo la IA utiliza tu base de datos de MySQL para responder.
 
 🔹 Preguntar al Chatbot
@@ -49,18 +135,10 @@ Prueba cómo la IA utiliza tu base de datos de MySQL para responder.
 {
   "message": "¿Qué autos tienes disponibles en color blanco?"
 }
-La IA debería responderte mencionando autos específicos que ahora están en tu base de datos.
 
 ---
 
-4. Usuarios (Gestión)
-🔹 Listar todos los usuarios (Solo Admin)
-- Método: GET
-- URL: http://localhost:5000/api/users
-
----
-
-5. Otros Endpoints Útiles
+## 5. Otros Endpoints Útiles
 - Sucursales (GET): http://localhost:5000/api/branches
 - Glosario (GET): http://localhost:5000/api/technical_glossary
 - Settings (GET): http://localhost:5000/api/settings
@@ -69,5 +147,5 @@ La IA debería responderte mencionando autos específicos que ahora están en tu
 
 💡 Tips para Postman:
 1. Headers: Postman suele manejar el Content-Type: application/json automáticamente cuando eliges "Raw" -> "JSON" en el Body.
-2. Cookies: Como tu sistema usa httpOnly cookies para el JWT, Postman las gestionará solo. No necesitas copiar y pegar tokens manualmente.
-3. Logs: Revisa la terminal para ver las consultas SQL en tiempo real.
+2. Cookies: Como tu sistema usa httpOnly cookies para el JWT, Postman las gestionará solo. No necesitas copiar y pegar tokens manualmente para los métodos de usuarios.
+3. Logs: Revisa la terminal de tu backend para ver las consultas SQL generadas.
