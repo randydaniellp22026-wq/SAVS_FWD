@@ -1,0 +1,47 @@
+==========================================================
+   ROADMAP DE DESARROLLO - THE DESTINY VAULT
+==========================================================
+
+Este documento detalla las tareas pendientes para completar la 
+integración total entre el Backend y el Frontend.
+
+--- 🚀 BACKEND (Prioridad: Alta) ---
+
+1. PAGINACIÓN: Implementar parámetros 'page' y 'limit' en los 
+   listados (especialmente en vehículos).
+2. FILTROS DINÁMICOS: Permitir filtrado por marca, precio, año 
+   y kilometraje vía Query Strings (?brand=...&price=...).
+3. BÚSQUEDA: Implementar búsqueda por texto libre (Search) 
+   usando operadores LIKE en Sequelize.
+4. UPLOAD DE ARCHIVOS: Configurar Multer para la subida de 
+   imágenes de los vehículos.
+5. SEGURIDAD: Revisar y asegurar que todos los endpoints 
+   tengan el middleware de protección y roles (esAdmin).
+6. HTTP STATUS: Estandarizar códigos de respuesta (201 para 
+   Created, 204 para Deleted, 400/401/403 para errores).
+
+--- 🎨 FRONTEND (Prioridad: Media-Alta) ---
+
+1. INTEGRACIÓN API: Reemplazar datos estáticos (mocks) por 
+   llamadas a /api/v1/ usando Axios o Fetch.
+2. LÓGICA DE FILTROS: Conectar los componentes de filtrado 
+   con los nuevos parámetros del Backend.
+3. DASHBOARD ADMIN: Crear/Finalizar las vistas para crear, 
+   editar y eliminar vehículos desde la web.
+4. PROTECCIÓN DE RUTAS: Implementar lógica para que solo 
+   usuarios autenticados vean ciertas páginas.
+5. MANEJO DE ESTADOS: Agregar Spinners (loading) y mensajes 
+   de error claros para el usuario final.
+
+--- 📝 DOCUMENTACIÓN Y CALIDAD ---
+
+1. .ENV.EXAMPLE: Crear ejemplo de variables de entorno 
+   necesarias para el despliegue.
+2. POSTMAN: Exportar la colección actualizada de todos 
+   los endpoints funcionales.
+3. VALIDACIONES: Asegurar que los formularios tengan 
+   validación tanto en cliente como en servidor.
+
+==========================================================
+Generado el: 14/05/2026
+==========================================================
