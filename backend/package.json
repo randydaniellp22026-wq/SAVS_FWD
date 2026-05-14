@@ -4,17 +4,15 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-<<<<<<< HEAD
-    "test": "jest",
-=======
     "test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate && cross-env NODE_ENV=test jest",
     "test:watch": "jest --watch",
->>>>>>> 1a0abb0ae686349fc379837802fecc6cd04152ad
     "start": "node server.js"
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["**/__tests__/**/*.test.js"]
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -36,15 +34,9 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "jest": "^29.7.0",
-    "sequelize-cli": "^6.6.5",
-    "supertest": "^7.0.0"
-=======
     "cross-env": "^10.1.0",
     "jest": "^30.4.2",
     "sequelize-cli": "^6.6.5",
     "supertest": "^7.2.2"
->>>>>>> 1a0abb0ae686349fc379837802fecc6cd04152ad
   }
 }
