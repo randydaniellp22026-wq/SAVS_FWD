@@ -40,8 +40,17 @@ export const useNavbarStatus = () => {
     }
   };
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     if (e) e.stopPropagation();
+    try {
+      // Llamar al backend para limpiar la cookie httpOnly del JWT
+      await fetch('http://localhost:5000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (err) {
+      console.error('Error al cerrar sesión en el servidor:', err);
+    }
     toast('Sesión cerrada', { icon: '👋' });
     localStorage.removeItem('user');
     setUser(null);

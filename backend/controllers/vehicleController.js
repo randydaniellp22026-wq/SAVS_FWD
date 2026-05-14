@@ -1,8 +1,10 @@
 const { Auto } = require('../models');
 const { Op } = require('sequelize');
+const path = require('path');
+const fs = require('fs');
 
 /**
- * GET /api/v1/vehicles
+ * GET /api/vehicles
  * Soporta paginación, búsqueda, filtros y ordenamiento vía query params.
  *
  * Query params disponibles:
@@ -133,43 +135,101 @@ exports.getById = async (req, res) => {
     }
 };
 
+/**
+ * POST /api/vehicles
+ * Acepta JSON o multipart/form-data (con imagen vía Multer).
+ * Si se envía un archivo, se guarda en /uploads y se almacena la ruta en el campo 'image'.
+ */
 exports.create = async (req, res) => {
     try {
         // Validación de campos requeridos
         const requiredFields = ['name', 'price', 'year'];
         const missing = requiredFields.filter(field => !req.body[field] && req.body[field] !== 0);
         if (missing.length > 0) {
+            // Si se subió un archivo pero faltan campos, limpiarlo
+            if (req.file) {
+                fs.unlink(req.file.path, () => {});
+            }
             return res.status(400).json({ 
                 error: `Campos requeridos faltantes: ${missing.join(', ')}` 
             });
         }
 
-        const data = await Auto.create(req.body);
+        const vehicleData = { ...req.body };
+
+        // Si se subió una imagen con Multer, guardar la ruta relativa
+        if (req.file) {
+            vehicleData.image = `/uploads/${req.file.filename}`;
+        }
+
+        const data = await Auto.create(vehicleData);
         res.status(201).json(data);
     } catch (error) {
+        // Limpiar archivo si la creación falla
+        if (req.file) {
+            fs.unlink(req.file.path, () => {});
+        }
         res.status(500).json({ error: error.message });
     }
 };
 
+/**
+ * PUT/PATCH /api/vehicles/:id
+ * Acepta JSON o multipart/form-data (con imagen vía Multer).
+ * Si se envía una nueva imagen, elimina la anterior del disco.
+ */
 exports.update = async (req, res) => {
     try {
-        const [updated] = await Auto.update(req.body, { where: { id: req.params.id } });
+        const vehicleData = { ...req.body };
+
+        // Si se subió una nueva imagen, actualizar la ruta y eliminar la vieja
+        if (req.file) {
+            vehicleData.image = `/uploads/${req.file.filename}`;
+
+            // Intentar eliminar la imagen anterior del disco
+            const existingVehicle = await Auto.findByPk(req.params.id);
+            if (existingVehicle && existingVehicle.image && existingVehicle.image.startsWith('/uploads/')) {
+                const oldPath = path.join(__dirname, '..', existingVehicle.image);
+                fs.unlink(oldPath, () => {}); // Silenciar error si no existe
+            }
+        }
+
+        const [updated] = await Auto.update(vehicleData, { where: { id: req.params.id } });
         if (updated) {
             const data = await Auto.findByPk(req.params.id);
             res.json(data);
         } else {
+            // Limpiar archivo si el vehículo no existe
+            if (req.file) {
+                fs.unlink(req.file.path, () => {});
+            }
             res.status(404).json({ error: 'No encontrado' });
         }
     } catch (error) {
+        if (req.file) {
+            fs.unlink(req.file.path, () => {});
+        }
         res.status(500).json({ error: error.message });
     }
 };
 
 exports.remove = async (req, res) => {
     try {
-        const deleted = await Auto.destroy({ where: { id: req.params.id } });
-        if (deleted) res.json({ message: 'Eliminado correctamente' });
-        else res.status(404).json({ error: 'No encontrado' });
+        // Obtener el vehículo antes de eliminarlo para limpiar su imagen
+        const vehicle = await Auto.findByPk(req.params.id);
+
+        if (!vehicle) {
+            return res.status(404).json({ error: 'No encontrado' });
+        }
+
+        // Eliminar imagen del disco si es local
+        if (vehicle.image && vehicle.image.startsWith('/uploads/')) {
+            const imagePath = path.join(__dirname, '..', vehicle.image);
+            fs.unlink(imagePath, () => {});
+        }
+
+        await vehicle.destroy();
+        res.json({ message: 'Eliminado correctamente' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
