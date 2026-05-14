@@ -53,7 +53,7 @@ exports.login = async (req, res) => {
         });
 
         if (!usuario) {
-            return res.status(404).json({ error: 'Credenciales inválidas.' });
+            return res.status(401).json({ error: 'Credenciales inválidas.' });
         }
 
         // Verificar contraseña
