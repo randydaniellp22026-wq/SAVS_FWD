@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './PerfilUsuarios.css';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
+import api, { vehicleService, authService } from '../../services/api';
 
 import {
   Bell,
@@ -89,13 +90,9 @@ function PerfilUsuarios() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Llamar al backend para limpiar la cookie httpOnly del JWT
-          await fetch('http://localhost:5000/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include'
-          });
+          await authService.logout();
         } catch (err) {
-          console.error('Error al cerrar sesión en el servidor:', err);
+          console.error('Error al cerrar sesión:', err);
         }
         toast('Sesión cerrada', { icon: '👋' });
         localStorage.removeItem('user');
@@ -127,12 +124,12 @@ function PerfilUsuarios() {
 
         // Buscamos todas las peticiones para filtrar manualmente por email (case-insensitive) y userId
         const [contactRes, tradeInRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/requests`),
-          fetch(`http://localhost:5000/api/sale_requests?userId=${user.id}`)
+          api.get('/requests'),
+          api.get(`/sale_requests?userId=${user.id}`)
         ]);
 
-        const allContactRequests = await contactRes.json();
-        const tradeInData = await tradeInRes.json();
+        const allContactRequests = contactRes.data;
+        const tradeInData = tradeInRes.data;
 
         // Filtrar contactos por email ignorando mayúsculas/minúsculas
         const userEmail = (user.email || '').toLowerCase();
@@ -190,8 +187,8 @@ function PerfilUsuarios() {
       });
 
       try {
-        const res = await fetch('http://localhost:5000/api/vehicles');
-        const allVehiclesFromDb = await res.json();
+        const response = await vehicleService.getAll();
+        const allVehiclesFromDb = response.data || [];
         setAllVehicles(allVehiclesFromDb);
 
         const userFavoriteIds = (user.favorites || []).map(String);
@@ -281,14 +278,9 @@ function PerfilUsuarios() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`http://localhost:5000/users/${userInfo.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tracking: result.value })
-          });
+          const res = await api.patch(`/users/${userInfo.id}`, { tracking: result.value });
 
-          if (res.ok) {
-            const updatedUser = await res.json();
+          if (res.status === 200) {
             // Actualizar estado local y localStorage
             setUserInfo(prev => ({ ...prev, tracking: result.value }));
             
@@ -381,19 +373,13 @@ function PerfilUsuarios() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Operación CRUD (Update) en el servidor
-          const res = await fetch(`http://localhost:5000/users/${userInfo.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              nombre: result.value.name,
-              telefono: result.value.phone,
-              ubicacion: result.value.location,
-              direccion_precisa: result.value.preciseAddress
-            })
+          // Operación CRUD (Update) en el servidor usando API centralizada
+          await api.patch(`/users/${userInfo.id}`, {
+            nombre: result.value.name,
+            telefono: result.value.phone,
+            ubicacion: result.value.location,
+            direccion_precisa: result.value.preciseAddress
           });
-
-          if (!res.ok) throw new Error('Error al actualizar el perfil en el servidor.');
 
           // Actualizamos estado local y sesión
           const updatedUser = { ...userInfo, ...result.value };
@@ -442,13 +428,9 @@ function PerfilUsuarios() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await fetch(`http://localhost:5000/users/${userInfo.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: result.value })
-          });
+          const res = await api.patch(`/users/${userInfo.id}`, { password: result.value });
 
-          if (res.ok) {
+          if (res.status === 200) {
             Swal.fire({
               ...darkSwal,
               icon: 'success',
@@ -504,11 +486,7 @@ function PerfilUsuarios() {
 
           // Actualizar servidor para que persista en futuros inicios de sesión
           try {
-            await fetch(`http://localhost:5000/users/${userInfo.id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image: newImage })
-            });
+            await api.patch(`/users/${userInfo.id}`, { image: newImage });
           } catch (err) {
             console.error('Error guardando imagen en el backend', err);
           }
@@ -543,13 +521,7 @@ function PerfilUsuarios() {
 
     try {
       // Sincronizar con el servidor (CRUD - Update)
-      const res = await fetch(`http://localhost:5000/users/${user.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ favorites: updatedFavorites })
-      });
-
-      if (!res.ok) throw new Error('Error al sincronizar favoritos.');
+      await api.patch(`/users/${user.id}`, { favorites: updatedFavorites });
 
       // Actualizar sesión local
       user.favorites = updatedFavorites;
@@ -626,11 +598,7 @@ function PerfilUsuarios() {
             const updatedFavorites = [...(user.favorites || []), String(selectedCarDb.id)];
             
             // Sincronizar servidor
-            fetch(`http://localhost:5000/users/${user.id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ favorites: updatedFavorites })
-            }).then(() => {
+            api.patch(`/users/${user.id}`, { favorites: updatedFavorites }).then(() => {
                 // Actualizar sesión local
                 user.favorites = updatedFavorites;
                 localStorage.setItem('user', JSON.stringify(user));

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../services/api';
 import { sendRecoveryEmail } from '../../utils/security';
 import './RecuperarPassword.css';
 

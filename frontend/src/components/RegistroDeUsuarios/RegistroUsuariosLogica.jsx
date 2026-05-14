@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
-import api from '../../api/axios';
+import api from '../../services/api';
 
 const darkSwal = {
   background: '#0a0a0a',

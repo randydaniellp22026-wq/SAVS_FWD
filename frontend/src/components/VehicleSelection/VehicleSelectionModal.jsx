@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axios';
+import api from '../../services/api';
 import { Car, Truck, Zap, Flame, ChevronLeft, ChevronRight, X, Bus, ArrowLeft } from 'lucide-react';
 import './VehicleSelectionModal.css';
 
@@ -28,7 +28,11 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       api.get('/vehicles')
-        .then(res => setAllVehicles(res.data || []))
+        .then(res => {
+          // El backend envuelve los resultados en "data" (junto con pagination)
+          const vehicleArray = res.data.data || res.data || [];
+          setAllVehicles(Array.isArray(vehicleArray) ? vehicleArray : []);
+        })
         .catch(err => console.error("Error loading vehicles for selection:", err));
     }
   }, [isOpen]);

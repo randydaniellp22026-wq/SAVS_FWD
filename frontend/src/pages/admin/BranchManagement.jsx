@@ -12,7 +12,7 @@ import {
   X,
   ExternalLink
 } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../services/api';
 import AdminLoader from '../../components/admin/AdminLoader';
 import './Admin.css';
 

@@ -41,9 +41,13 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setFormData(prev => ({ ...prev, image: ev.target.result }));
-      reader.readAsDataURL(file);
+      // Generamos una URL temporal solo para la previsualización visual
+      const previewUrl = URL.createObjectURL(file);
+      setFormData(prev => ({ 
+        ...prev, 
+        image: file, // Guardamos el archivo REAL para el envío
+        preview: previewUrl // Guardamos la URL para la vista
+      }));
     }
   };
 
@@ -255,8 +259,17 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                     className="dropzone-area"
                     onClick={() => document.getElementById('main-img-input').click()}
                   >
-                    {formData.image ? (
-                      <img src={formData.image} alt="Preview" className="img-preview-main" />
+                    {formData.preview || formData.image ? (
+                      <img 
+                        src={
+                          formData.preview || 
+                          (typeof formData.image === 'string' && formData.image.startsWith('/uploads') 
+                            ? `http://localhost:5000${formData.image}` 
+                            : formData.image)
+                        } 
+                        alt="Preview" 
+                        className="img-preview-main" 
+                      />
                     ) : (
                       <div className="dropzone-placeholder">
                         <Plus size={40} />

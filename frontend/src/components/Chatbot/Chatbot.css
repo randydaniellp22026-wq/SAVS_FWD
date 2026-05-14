@@ -307,6 +307,44 @@
   color: #000;
 }
 
+/* Inline Markdown Links */
+.inline-chatbot-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.inline-chatbot-link:hover {
+  color: #60a5fa;
+  text-decoration-style: solid;
+}
+
+/* Internal Link Button (Blue) */
+.internal-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #3b82f6;
+  color: #fff !important;
+  padding: 8px 16px;
+  border-radius: 12px;
+  margin-top: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.internal-link-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
 /* WhatsApp Link */
 .whatsapp-call-btn {
   display: inline-flex;

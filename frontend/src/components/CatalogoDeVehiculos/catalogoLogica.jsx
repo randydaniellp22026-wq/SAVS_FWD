@@ -1,119 +1,110 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import api from '../../api/axios';
+import { vehicleService } from '../../services/api';
 
-export const useCatalogoLogica = (initialVehicles) => {
+/**
+ * Hook personalizado para manejar la lógica del catálogo conectada al Backend.
+ * Implementa Tarea 2 (Integración) y Tarea 3 (Filtros dinámicos).
+ */
+export const useCatalogoLogica = () => {
   const location = useLocation();
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 12,
+    totalPages: 1
+  });
+
   const [expandedSection, setExpandedSection] = useState('technical');
   const [activeFilters, setActiveFilters] = useState({
-    transmission: [], fuelType: [], drivetrain: [], consumption: '', displacement: '',
-    make: '', model: '', bodyType: [], doors: '', seats: '', color: '',
-    minPrice: '', maxPrice: '', sellerType: [], financing: false,
-    vehicleStatus: [], location: '', conditionRating: [], accidentHistory: false, singleOwner: false
+    transmission: '', 
+    fuel: '', 
+    marca: '', 
+    modelo: '', 
+    type: '',
+    minPrice: '', 
+    maxPrice: '',
+    minYear: '',
+    maxYear: '',
+    color: '',
+    search: new URLSearchParams(location.search).get('search') || ''
   });
 
-  const [vehicles, setVehicles] = useState(initialVehicles || []);
-  const [loading, setLoading] = useState(!initialVehicles);
-
-  const queryParams = new URLSearchParams(location.search);
-  const searchQueryParam = queryParams.get('search') || '';
-
-  useEffect(() => {
-    if (!initialVehicles) {
+  // Función para cargar vehículos desde la API (Servidor)
+  const fetchVehicles = useCallback(async () => {
+    try {
       setLoading(true);
-      api.get('/vehicles')
-        .then(res => {
-          // Extraemos la lista de la propiedad 'data' para soportar paginación
-          const vehicleList = Array.isArray(res.data) ? res.data : (res.data.data || []);
-          setVehicles(vehicleList);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Error fetching vehicles:", err);
-          setLoading(false);
-        });
+      
+      // Mapeamos los filtros activos a los parámetros que espera el Backend de Randy
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: activeFilters.search,
+        type: activeFilters.type,
+        fuel: activeFilters.fuel,
+        transmission: activeFilters.transmission,
+        minPrice: activeFilters.minPrice,
+        maxPrice: activeFilters.maxPrice,
+        minYear: activeFilters.minYear,
+        maxYear: activeFilters.maxYear,
+        color: activeFilters.color
+      };
+
+      // Tarea 2: Llamada real al servicio centralizado
+      const response = await vehicleService.getAll(params);
+      
+      setVehicles(response.data || []);
+      setPagination(prev => ({
+        ...prev,
+        total: response.pagination?.total || 0,
+        totalPages: response.pagination?.totalPages || 1
+      }));
+    } catch (error) {
+      console.error("Error al cargar vehículos:", error);
+    } finally {
+      setLoading(false);
     }
-  }, [initialVehicles]);
+  }, [pagination.page, pagination.limit, activeFilters]);
 
-  const filteredVehicles = useMemo(() => {
-    const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
-    return safeVehicles.filter(car => {
-      if (searchQueryParam) {
-        const query = searchQueryParam.toLowerCase();
-        const matchesName = (car.name || car.modelo || '').toLowerCase().includes(query);
-        const matchesType = (car.type || '').toLowerCase().includes(query);
-        const matchesMake = (car.make || car.marca || '').toLowerCase().includes(query);
-        if (!matchesName && !matchesType && !matchesMake) return false;
-      }
+  // Efecto para recargar cuando cambian los filtros o la página
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
 
-      if (activeFilters.transmission.length > 0 && !activeFilters.transmission.includes(car.transmission)) return false;
-      if (activeFilters.fuelType.length > 0 && !activeFilters.fuelType.includes(car.fuel)) return false;
-      
-      if (activeFilters.drivetrain.length > 0) {
-        const matchesDrivetrain = activeFilters.drivetrain.some(d => {
-          const driveLower = (car.drive || '').toLowerCase();
-          const filterLower = d.toLowerCase();
-          if (filterLower === '4x4' && (driveLower.includes('4wd') || driveLower.includes('4x4'))) return true;
-          return driveLower.includes(filterLower);
-        });
-        if (!matchesDrivetrain) return false;
-      }
-
-      const carPrice = car.price || car.precio;
-      if (activeFilters.minPrice && carPrice < parseInt(activeFilters.minPrice)) return false;
-      if (activeFilters.maxPrice && carPrice > parseInt(activeFilters.maxPrice)) return false;
-      
-      const carFullName = (car.name || `${car.marca} ${car.modelo}` || '').toLowerCase();
-      if (activeFilters.make && !carFullName.includes(activeFilters.make.toLowerCase())) return false;
-      if (activeFilters.model && !carFullName.includes(activeFilters.model.toLowerCase())) return false;
-      
-      if (activeFilters.bodyType.length > 0) {
-        const normalizeStr = (str) => (str || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-        const carTypeNormalized = normalizeStr(car.type);
-        const matchesBodyType = activeFilters.bodyType.some(b => normalizeStr(b) === carTypeNormalized);
-        if (!matchesBodyType) return false;
-      }
-      
-      if (activeFilters.financing && car.financing === false) return false;
-      if (activeFilters.accidentHistory && car.accidentFree === false) return false;
-      if (activeFilters.singleOwner && car.singleOwner === false) return false;
-      
-      return true;
-    });
-  }, [activeFilters, vehicles, searchQueryParam]);
-
+  // Manejadores de eventos
   const toggleSection = (section) => setExpandedSection(expandedSection === section ? null : section);
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setActiveFilters(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  const handleFilterChange = (name, value) => {
+    setActiveFilters(prev => ({ ...prev, [name]: value }));
+    setPagination(prev => ({ ...prev, page: 1 })); // Resetear a página 1 al filtrar
   };
 
-  const toggleMultiSelect = (category, value) => {
-    setActiveFilters(prev => {
-      const updatedList = prev[category].includes(value)
-        ? prev[category].filter(item => item !== value)
-        : [...prev[category], value];
-      return { ...prev, [category]: updatedList };
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetFilters = () => {
+    setActiveFilters({
+      transmission: '', fuel: '', marca: '', modelo: '', type: '',
+      minPrice: '', maxPrice: '', minYear: '', maxYear: '', color: '',
+      search: ''
     });
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
-
-  const resetFilters = () => setActiveFilters({
-    transmission: [], fuelType: [], drivetrain: [], consumption: '', displacement: '',
-    make: '', model: '', bodyType: [], doors: '', seats: '', color: '',
-    minPrice: '', maxPrice: '', sellerType: [], financing: false,
-    vehicleStatus: [], location: '', conditionRating: [], accidentHistory: false, singleOwner: false
-  });
 
   return {
     expandedSection,
     activeFilters,
     loading,
-    filteredVehicles,
+    vehicles, // Ahora vienen del servidor
+    pagination,
     toggleSection,
-    handleInputChange,
-    toggleMultiSelect,
+    handleFilterChange,
+    handlePageChange,
     resetFilters,
-    searchQueryParam
+    searchQueryParam: activeFilters.search
   };
 };

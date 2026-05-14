@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../services/api';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import './IntercambioDeAutos.css';
 
