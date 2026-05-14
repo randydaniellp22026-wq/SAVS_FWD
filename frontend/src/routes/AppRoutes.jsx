@@ -13,7 +13,7 @@ import IntercambioDeAutos from '../components/IntercambioDeAutos/IntercambioDeAu
 import Reseñas from '../components/TechnicalGlossary/ApartadoDeReseñas/Reseñas';
 import RecuperarPassword from '../pages/RecuperarPassword/RecuperarPassword';
 
-import AdminRoute from './AdminRoute';
+import ProtectedRoute from '../components/security/ProtectedRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import ReviewRequests from '../pages/admin/ReviewRequests';
 import CreateVehicle from '../pages/admin/CreateVehicle';
@@ -34,19 +34,27 @@ const AppRoutes = () => {
       <Route path="/contact" element={<RedireccionContactos />} />
       <Route path="/modelAuto" element={<RedireccionModeloAuto />} />
       <Route path="/simulate-credit" element={<CreditSimulator />} />
-      <Route path="/perfil" element={<PerfilUsuarios />} />
-      <Route path="/vender-auto" element={<IntercambioDeAutos />} />
+      <Route path="/perfil" element={
+        <ProtectedRoute allowedRoles={['cliente', 'admin', 'gerente']}>
+          <PerfilUsuarios />
+        </ProtectedRoute>
+      } />
+      <Route path="/vender-auto" element={
+        <ProtectedRoute allowedRoles={['cliente', 'admin', 'gerente']}>
+          <IntercambioDeAutos />
+        </ProtectedRoute>
+      } />
       <Route path="/reseñas" element={<Reseñas />} />
       <Route path="/recuperar" element={<RecuperarPassword />} />
       
       {/* Rutas Privadas de Administración (Admin y Gerente) */}
-      <Route path="/admin" element={<AdminRoute><AdminLayout><AdminDashboard /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/users" element={<AdminRoute><AdminLayout><UserManagement /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/requests" element={<AdminRoute><AdminLayout><ReviewRequests /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/branches" element={<AdminRoute><AdminLayout><BranchManagement /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/create-vehicle" element={<AdminRoute><AdminLayout><CreateVehicle /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/reviews" element={<AdminRoute><AdminLayout><Reseñas /></AdminLayout></AdminRoute>} />
-      <Route path="/admin/tracking" element={<AdminRoute><AdminLayout><TrackingManagement /></AdminLayout></AdminRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/users" element={<ProtectedRoute><AdminLayout><UserManagement /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/requests" element={<ProtectedRoute><AdminLayout><ReviewRequests /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/branches" element={<ProtectedRoute><AdminLayout><BranchManagement /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/create-vehicle" element={<ProtectedRoute><AdminLayout><CreateVehicle /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/reviews" element={<ProtectedRoute><AdminLayout><Reseñas /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/tracking" element={<ProtectedRoute><AdminLayout><TrackingManagement /></AdminLayout></ProtectedRoute>} />
     </Routes>
   );
 };

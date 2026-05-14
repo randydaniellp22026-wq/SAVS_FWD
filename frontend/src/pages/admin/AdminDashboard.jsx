@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
+import api from '../../api/axios';
+import AdminLoader from '../../components/admin/AdminLoader';
 import { 
   ShieldCheck, 
   Car, 
@@ -69,19 +71,17 @@ const AdminDashboard = () => {
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`http://localhost:5000/vehicles/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-          setVehicleList(prev => prev.filter(v => v.id !== id));
-          fetchStats(); // Update counters and charts
-          Swal.fire({
-            title: '¡Eliminado!',
-            icon: 'success',
-            background: '#141414',
-            color: '#fff',
-            timer: 1500,
-            showConfirmButton: false
-          });
-        }
+        const res = await api.delete(`/vehicles/${id}`);
+        setVehicleList(prev => prev.filter(v => v.id !== id));
+        fetchStats(); // Update counters and charts
+        Swal.fire({
+          title: '¡Eliminado!',
+          icon: 'success',
+          background: '#141414',
+          color: '#fff',
+          timer: 1500,
+          showConfirmButton: false
+        });
       } catch (error) {
         console.error("Error deleting vehicle:", error);
       }
@@ -90,29 +90,24 @@ const AdminDashboard = () => {
 
   const updateTradeInStatus = async (id, newStatus, message = '') => {
     try {
-      const res = await fetch(`http://localhost:5000/sale_requests/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          estado: newStatus,
-          respuesta_admin: message 
-        })
+      const res = await api.patch(`/sale_requests/${id}`, { 
+        estado: newStatus,
+        respuesta_admin: message 
       });
-      if (res.ok) {
-        setTradeInList(prev => prev.map(item => item.id === id ? { ...item, estado: newStatus, respuesta_admin: message } : item));
-        // Actualizar el gráfico
-        fetchStats(); 
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Sistema Actualizado',
-          text: `La solicitud ha sido marcada como ${newStatus}.`,
-          background: '#141414',
-          color: '#fff',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      }
+      
+      setTradeInList(prev => prev.map(item => item.id === id ? { ...item, estado: newStatus, respuesta_admin: message } : item));
+      // Actualizar el gráfico
+      fetchStats(); 
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Sistema Actualizado',
+        text: `La solicitud ha sido marcada como ${newStatus}.`,
+        background: '#141414',
+        color: '#fff',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -121,31 +116,40 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
       setLoading(true);
       try {
-        const endpoints = [
-          'http://localhost:5000/vehicles',
-          'http://localhost:5000/users',
-          'http://localhost:5000/requests',
-          'http://localhost:5000/reviews',
-          'http://localhost:5000/sale_requests'
-        ];
+        // Usamos la instancia 'api' que ya tiene el baseURL: http://localhost:5000/api
+        const [vRes, uRes, reqRes, revRes, sreqRes, setsRes] = await Promise.allSettled([
+          api.get('/vehicles'),
+          api.get('/users'),
+          api.get('/requests'),
+          api.get('/reviews'),
+          api.get('/sale_requests'),
+          api.get('/settings').catch(() => ({ data: {} }))
+        ]);
         
-        const [v, u, req, rev, sreq, sets] = await Promise.all(
-          [...endpoints, 'http://localhost:5000/settings'].map(url => fetch(url).then(r => r.ok ? r.json() : []))
-        );
+        // Extraemos los datos de forma segura
+        const v = vRes.status === 'fulfilled' ? vRes.value.data : [];
+        const u = uRes.status === 'fulfilled' ? uRes.value.data : [];
+        const req = reqRes.status === 'fulfilled' ? reqRes.value.data : [];
+        const rev = revRes.status === 'fulfilled' ? revRes.value.data : [];
+        const sreq = sreqRes.status === 'fulfilled' ? sreqRes.value.data : [];
+        const sets = setsRes.status === 'fulfilled' ? setsRes.value.data : {};
 
         setStats({
-          vehicles: v.length,
-          users: u.length,
-          requests: req.length,
-          reviews: rev.length,
-          tradeIn: sreq.length,
-          serverStatus: sets?.server_status || {}
+          vehicles: Array.isArray(v) ? v.length : 0,
+          users: Array.isArray(u) ? u.length : 0,
+          requests: Array.isArray(req) ? req.length : 0,
+          reviews: Array.isArray(rev) ? rev.length : 0,
+          tradeIn: Array.isArray(sreq) ? sreq.length : 0,
+          serverStatus: sets?.server_status || { is_online: true, status_text: 'SISTEMA ACTIVO' }
         });
 
-        // Procesar datos para gráficas
+        // Procesar datos para gráficas (con protecciones contra datos nulos/vacíos)
+        const safeV = Array.isArray(v) ? v : [];
+        const safeReq = Array.isArray(req) ? req : [];
+        const safeSreq = Array.isArray(sreq) ? sreq : [];
         
         // 1. Combustible
-        const fuelMap = v.reduce((acc, curr) => {
+        const fuelMap = safeV.reduce((acc, curr) => {
           const type = curr.fuel || 'No especificado';
           acc[type] = (acc[type] || 0) + 1;
           return acc;
@@ -153,7 +157,7 @@ const AdminDashboard = () => {
         const fuelData = Object.keys(fuelMap).map(name => ({ name, value: fuelMap[name] }));
 
         // 2. Transmisión
-        const transMap = v.reduce((acc, curr) => {
+        const transMap = safeV.reduce((acc, curr) => {
           const type = curr.transmission || 'No especificado';
           acc[type] = (acc[type] || 0) + 1;
           return acc;
@@ -161,7 +165,7 @@ const AdminDashboard = () => {
         const transData = Object.keys(transMap).map(name => ({ name, value: transMap[name] }));
 
         // 3. Vehículos por Año
-        const yearMap = v.reduce((acc, curr) => {
+        const yearMap = safeV.reduce((acc, curr) => {
           const year = curr.year || 'N/D';
           acc[year] = (acc[year] || 0) + 1;
           return acc;
@@ -169,7 +173,7 @@ const AdminDashboard = () => {
         const yearData = Object.keys(yearMap).sort().map(year => ({ year, cantidad: yearMap[year] }));
 
         // 4. Solicitudes por Estado
-        const reqMap = req.reduce((acc, curr) => {
+        const reqMap = safeReq.reduce((acc, curr) => {
           const statusMap = {
              'pending': 'Pendiente',
              'accepted': 'Aprobada',
@@ -183,7 +187,7 @@ const AdminDashboard = () => {
         const reqData = Object.keys(reqMap).map(name => ({ name, value: reqMap[name] }));
 
         // 5. Trade-in por Estado
-        const tradeInMap = sreq.reduce((acc, curr) => {
+        const tradeInMap = safeSreq.reduce((acc, curr) => {
           const status = curr.estado || 'En revisión';
           acc[status] = (acc[status] || 0) + 1;
           return acc;
@@ -193,8 +197,8 @@ const AdminDashboard = () => {
         setDataSets({ fuelData, transData, yearData, reqData, tradeInData });
 
         // Guardar lista completa para gestión
-        setTradeInList(sreq.sort((a, b) => (b.id - a.id)));
-        setVehicleList(v.slice().sort((a, b) => (b.id - a.id)));
+        setTradeInList(safeSreq.sort((a, b) => (b.id - a.id)));
+        setVehicleList(safeV.slice().sort((a, b) => (b.id - a.id)));
 
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -211,6 +215,10 @@ const AdminDashboard = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  if (loading && stats.vehicles === 0) {
+    return <AdminLoader message="Sincronizando con el servidor central..." />;
+  }
 
   return (
     <div className="admin-dashboard-overview">
