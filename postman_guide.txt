@@ -1,151 +1,129 @@
 🚀 Guía de Pruebas con Postman - The Destiny Vault API
 
-Esta guía te permitirá probar todos los endpoints de tu nuevo backend en MySQL, cubriendo el CRUD completo (Create, Read, Update, Delete) incluyendo el método PATCH. Asegúrate de que el servidor esté corriendo (`npm run dev:full`).
+📦 IMPORTAR COLECCIÓN:
+  Archivo JSON importable: backend/postman/TheDestinyVault.postman_collection.json
+  En Postman: File → Import → Selecciona el archivo .json
 
 URL Base: http://localhost:5000/api
+
+💡 Tips:
+  1. Postman gestiona las cookies httpOnly automáticamente (no necesitas copiar tokens).
+  2. Primero haz Login para obtener la cookie, luego prueba las rutas protegidas.
+  3. Para subir imágenes, selecciona "form-data" en el Body y cambia el tipo del campo "image" a "File".
 
 ---
 
 ## 1. Autenticación (Auth)
-Para probar las rutas protegidas, primero debes iniciar sesión para obtener una cookie de autenticación.
 
-🔹 Login (Iniciar Sesión)
-- Método: POST
-- URL: http://localhost:5000/api/auth/login
-- Body (JSON):
+🔹 POST /api/auth/register — Registrar usuario
+Body (JSON):
+{
+  "nombre": "Test User",
+  "email": "test@ejemplo.com",
+  "password": "password123",
+  "telefono": "+506 12345678",
+  "ubicacion": "San José",
+  "direccion_precisa": "Barrio Escalante"
+}
+
+🔹 POST /api/auth/login — Iniciar sesión
+Body (JSON):
 {
   "email": "yosimarvv@gmail.com",
   "password": "yosi12345."
 }
 
-🔹 Perfil Actual (Ver mis datos)
-- Método: GET
-- URL: http://localhost:5000/api/auth/me
+🔹 POST /api/auth/logout — Cerrar sesión (limpia cookie JWT)
+
+🔹 GET /api/auth/me — Perfil del usuario autenticado (requiere cookie)
+
+🔹 POST /api/auth/check-email — Verificar si un email existe
+Body: { "email": "yosimarvv@gmail.com" }
+
+🔹 POST /api/auth/reset-password — Restablecer contraseña
+Body: { "userId": "ID_DEL_USUARIO", "newPassword": "nuevaPassword123" }
 
 ---
 
-## 2. Vehículos (Inventario) - CRUD COMPLETO
-Puedes gestionar los autos usando estos endpoints:
+## 2. Vehículos — CRUD + Upload de Imágenes (Multer)
 
-🔹 1. Crear un Auto (Create)
-- Método: POST
-- URL: http://localhost:5000/api/vehicles
-- Body (JSON):
-{
-  "brand": "Toyota",
-  "model": "Corolla",
-  "year": 2024,
-  "price": 25000,
-  "mileage": 0,
-  "color": "Blanco",
-  "status": "Disponible",
-  "image_url": "https://example.com/corolla.jpg"
-}
+🔹 GET /api/vehicles — Listar todos (público, con paginación)
+  Query params: page, limit, search, type, fuel, transmission, tag, color, minPrice, maxPrice, minYear, maxYear, sort, order
 
-🔹 2. Listar todos los autos (Read)
-- Método: GET
-- URL: http://localhost:5000/api/vehicles
+🔹 GET /api/vehicles/:id — Ver un auto específico
 
-🔹 3. Ver un auto específico (Read)
-- Método: GET
-- URL: http://localhost:5000/api/vehicles/1
+🔹 POST /api/vehicles — Crear auto (Admin) ⭐ Soporta imagen
+  Opción A - JSON: Body → raw → JSON con campo "image" como URL de texto
+  Opción B - Multer: Body → form-data:
+    name (text): "Honda CR-V"
+    price (text): "32000"
+    year (text): "2024"
+    image (file): [seleccionar archivo]
 
-🔹 4. Actualizar un auto completo (Update)
-- Método: PUT
-- URL: http://localhost:5000/api/vehicles/1
-- Body (JSON):
-{
-  "brand": "Toyota",
-  "model": "Corolla XSE",
-  "year": 2025,
-  "price": 28000,
-  "mileage": 10,
-  "color": "Rojo",
-  "status": "Vendido",
-  "image_url": "https://example.com/corolla.jpg"
-}
-
-🔹 5. Actualizar un campo específico de un auto (Patch)
-- Método: PATCH
-- URL: http://localhost:5000/api/vehicles/1
-- Body (JSON):
-{
-  "price": 26000
-}
-
-🔹 6. Eliminar un auto (Delete)
-- Método: DELETE
-- URL: http://localhost:5000/api/vehicles/1
+🔹 PUT /api/vehicles/:id — Actualizar auto completo (Admin, soporta imagen)
+🔹 PATCH /api/vehicles/:id — Actualizar campo específico (Admin, soporta imagen)
+🔹 DELETE /api/vehicles/:id — Eliminar auto (Admin, también elimina la imagen del disco)
 
 ---
 
-## 3. Usuarios (Gestión) - CRUD COMPLETO (Solo Admin)
-Requiere haber iniciado sesión como administrador.
+## 3. Usuarios — CRUD (Solo Admin, requiere login como admin)
 
-🔹 1. Crear un Usuario (Create)
-- Método: POST
-- URL: http://localhost:5000/api/users
-- Body (JSON):
-{
-  "name": "Nuevo Usuario",
-  "email": "nuevo@ejemplo.com",
-  "password": "password123",
-  "role": "user"
-}
-
-🔹 2. Listar todos los usuarios (Read)
-- Método: GET
-- URL: http://localhost:5000/api/users
-
-🔹 3. Ver un usuario específico (Read)
-- Método: GET
-- URL: http://localhost:5000/api/users/2
-
-🔹 4. Actualizar un usuario completo (Update)
-- Método: PUT
-- URL: http://localhost:5000/api/users/2
-- Body (JSON):
-{
-  "name": "Usuario Modificado",
-  "email": "modificado@ejemplo.com",
-  "role": "admin"
-}
-
-🔹 5. Actualizar estado/rol de un usuario (Patch)
-- Método: PATCH
-- URL: http://localhost:5000/api/users/2
-- Body (JSON):
-{
-  "role": "admin"
-}
-
-🔹 6. Eliminar un usuario (Delete)
-- Método: DELETE
-- URL: http://localhost:5000/api/users/2
+🔹 GET /api/users — Listar todos
+🔹 GET /api/users/:id — Ver usuario
+🔹 POST /api/users — Crear usuario
+Body: { "nombre": "Nuevo", "email": "nuevo@ej.com", "password": "pass123", "rolId": 2 }
+🔹 PUT /api/users/:id — Actualizar usuario completo
+🔹 PATCH /api/users/:id — Actualizar campo específico
+🔹 DELETE /api/users/:id — Eliminar usuario
 
 ---
 
-## 4. IA Chatbot
-Prueba cómo la IA utiliza tu base de datos de MySQL para responder.
+## 4. Reviews — CRUD
 
-🔹 Preguntar al Chatbot
-- Método: POST
-- URL: http://localhost:5000/api/chatbot
-- Body (JSON):
-{
-  "message": "¿Qué autos tienes disponibles en color blanco?"
-}
+🔹 GET /api/reviews — Listar (público)
+🔹 GET /api/reviews/:id — Ver (público)
+🔹 POST /api/reviews — Crear (requiere auth)
+🔹 PUT/PATCH /api/reviews/:id — Actualizar (Admin)
+🔹 DELETE /api/reviews/:id — Eliminar (Admin)
 
 ---
 
-## 5. Otros Endpoints Útiles
-- Sucursales (GET): http://localhost:5000/api/branches
-- Glosario (GET): http://localhost:5000/api/technical_glossary
-- Settings (GET): http://localhost:5000/api/settings
+## 5. Requests (Contacto) — CRUD
+
+🔹 GET /api/requests — Listar (Admin)
+🔹 GET /api/requests/:id — Ver (Admin)
+🔹 POST /api/requests — Crear solicitud (requiere auth)
+🔹 PATCH /api/requests/:id — Responder/actualizar (Admin)
+🔹 DELETE /api/requests/:id — Eliminar (Admin)
 
 ---
 
-💡 Tips para Postman:
-1. Headers: Postman suele manejar el Content-Type: application/json automáticamente cuando eliges "Raw" -> "JSON" en el Body.
-2. Cookies: Como tu sistema usa httpOnly cookies para el JWT, Postman las gestionará solo. No necesitas copiar y pegar tokens manualmente para los métodos de usuarios.
-3. Logs: Revisa la terminal de tu backend para ver las consultas SQL generadas.
+## 6. Sale Requests (Trade-in) — CRUD
+
+🔹 GET /api/sale_requests — Listar (Admin)
+🔹 POST /api/sale_requests — Crear (requiere auth)
+🔹 PATCH /api/sale_requests/:id — Actualizar (Admin)
+🔹 DELETE /api/sale_requests/:id — Eliminar (Admin)
+
+---
+
+## 7. Otros Endpoints
+
+🔹 GET /api/branches — Sucursales (público)
+🔹 GET /api/technical_glossary — Glosario técnico (público)
+🔹 GET /api/settings — Configuraciones (público)
+🔹 POST /api/chatbot — Chatbot IA
+Body: { "message": "¿Qué autos tienes disponibles?" }
+
+---
+
+## Códigos HTTP de Respuesta
+
+  200 — Operación exitosa
+  201 — Recurso creado exitosamente
+  400 — Datos inválidos o archivo no permitido
+  401 — No autenticado / credenciales inválidas
+  403 — Acceso denegado (se requiere rol admin)
+  404 — Recurso no encontrado
+  429 — Demasiadas peticiones (rate limit)
+  500 — Error interno del servidor

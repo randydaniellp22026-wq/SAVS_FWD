@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const path = require('path');
+const multer = require('multer');
 require('dotenv').config();
 
 const helmet = require('helmet');
@@ -34,9 +36,12 @@ app.use(cors({
     origin: ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true
 }));
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Servir archivos estáticos (imágenes subidas con Multer)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rutas
 app.use('/api/auth', require('./routes/auth'));
@@ -52,6 +57,20 @@ app.use('/api/chatbot', require('./routes/chatbot'));
 
 app.get('/', (req, res) => {
     res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
+});
+
+// --- MANEJO DE ERRORES DE MULTER ---
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ error: 'El archivo excede el tamaño máximo permitido (5 MB).' });
+        }
+        return res.status(400).json({ error: `Error de subida: ${err.message}` });
+    }
+    if (err.message && err.message.includes('Tipo de archivo no permitido')) {
+        return res.status(400).json({ error: err.message });
+    }
+    next(err);
 });
 
 // --- MANEJO DE ERRORES CENTRALIZADO ---
