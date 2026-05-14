@@ -152,23 +152,26 @@ body {
 
 .premium-input {
   width: 100%;
-  padding: 1rem 1.25rem;
-  border: 1px solid rgba(234, 179, 8, 0.2);
+  padding: 1.1rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
   font-size: 1rem;
   font-family: inherit;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.04);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  background: rgba(255, 255, 255, 0.03);
   color: #ffffff;
 }
 
-.premium-input::placeholder { color: #4b5563; }
+.premium-input::placeholder { color: #525252; }
 
 .premium-input:focus {
   outline: none;
-  border-color: #eab308;
-  background: rgba(234, 179, 8, 0.08);
-  box-shadow: 0 0 15px rgba(234, 179, 8, 0.15), 0 0 5px rgba(255, 255, 255, 0.1);
+  border-color: rgba(234, 179, 8, 0.6);
+  background: rgba(234, 179, 8, 0.05);
+  box-shadow: 
+    0 0 0 4px rgba(234, 179, 8, 0.1),
+    0 0 20px rgba(234, 179, 8, 0.15);
+  transform: translateY(-1px);
 }
 
 .login-submit-btn {

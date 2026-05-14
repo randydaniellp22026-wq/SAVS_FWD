@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-import api from '../../api/axios';
+import api from '../../services/api';
 
 const darkSwal = {
   background: '#0a0a0a',
@@ -83,12 +83,5 @@ export const useLoginLogic = () => {
     }
   };
 
-  const fillTestCredentials = () => {
-    setFormData({
-      email: 'admin@thedestinyvault.com',
-      password: 'admin'
-    });
-  };
-
-  return { formData, loading, error, handleChange, handleSubmit, fillTestCredentials };
+  return { formData, loading, error, handleChange, handleSubmit };
 };

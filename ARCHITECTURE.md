@@ -97,44 +97,6 @@ Cada controlador encapsula la lógica CRUD y validaciones específicas:
 
 ---
 
-## Capas del Frontend
-
-### Estructura de Directorios
-
-```
-src/
-├── api/           → Instancia de Axios con baseURL y credenciales
-├── assets/        → Recursos estáticos (imágenes, fuentes)
-├── components/    → Componentes reutilizables (Navbar, Chatbot, CreditSimulator...)
-├── hooks/         → Custom hooks (useNavbar, useVehicleFavorites)
-├── pages/         → Vistas principales organizadas por feature
-│   ├── homepage/
-│   ├── catalogpage/
-│   ├── VehicleDetails/
-│   ├── RecuperarPassword/
-│   └── admin/     → Panel administrativo completo
-├── routes/        → AppRoutes.jsx + AdminRoute.jsx (protección por rol)
-└── utils/         → Funciones utilitarias compartidas
-```
-
-### Flujo de Autenticación
-
-```
-1. Usuario → POST /api/v1/auth/login (email + password)
-2. Backend → bcrypt.compare() → JWT sign → res.cookie('token', jwt, { httpOnly: true })
-3. Frontend → Axios con withCredentials: true → cookie viaja automáticamente
-4. Rutas protegidas → verificarToken lee req.cookies.token → jwt.verify()
-5. Rutas admin → esAdmin verifica req.usuario.rol.nombre === 'admin'
-```
-
-### Protección de Rutas en el Frontend
-
-- **AdminRoute.jsx**: Higher-Order Component que envuelve las rutas `/admin/*`.
-- Verifica el rol del usuario actual contra `admin` o `gerente`.
-- Redirige a `/login` si no está autenticado o no tiene permisos.
-
----
-
 ## Seguridad Implementada
 
 | Medida                          | Implementación                                |
@@ -143,8 +105,11 @@ src/
 | Tokens de sesión                | JWT con expiración de 24h                     |
 | Cookies seguras                 | httpOnly, sameSite: Lax, secure en producción |
 | Protección de rutas backend     | Middleware verificarToken + esAdmin            |
-| Protección de rutas frontend    | AdminRoute.jsx con validación de rol          |
-| Validación de inputs            | Bloqueo global de caracteres no permitidos    |
+| Protección de rutas frontend    | ProtectedRoute.jsx validado contra /auth/me   |
+| Prevención Brute Force          | express-rate-limit                            |
+| Seguridad de cabeceras HTTP     | Helmet                                        |
+| Prevención ataques XSS          | xss-clean y sanitización de base de datos     |
+| Prevención contaminación params | hpp (HTTP Parameter Pollution)                |
 | CORS restringido                | Solo orígenes localhost permitidos             |
 
 ---
@@ -162,6 +127,57 @@ DB_NAME=SAVS_DB
 JWT_SECRET=<secreto_seguro>
 GROQ_API_KEY=<api_key_groq>
 ```
+
+---
+
+## 📦 Librerías y Dependencias (Backend)
+
+Para instalar el entorno completo del servidor, navega a `/backend` y ejecuta:
+```bash
+npm install
+```
+
+Si deseas explorar qué bibliotecas utilizamos y su propósito individual:
+
+### Framework & Core
+- **`express`**: Framework web rápido y minimalista.
+  > `npm install express`
+- **`dotenv`**: Carga de variables de entorno desde `.env`.
+  > `npm install dotenv`
+- **`cors`**: Middleware para habilitar solicitudes desde React.
+  > `npm install cors`
+
+### Base de Datos y ORM
+- **`mysql2`**: Driver nativo para comunicación con el motor MySQL.
+  > `npm install mysql2`
+- **`sequelize`**: ORM basado en promesas para Node.js (facilita consultas y relaciones).
+  > `npm install sequelize`
+- **`sequelize-cli`**: Herramienta de consola para migraciones y seeds.
+  > `npm install -D sequelize-cli`
+
+### Seguridad y Autenticación
+- **`bcrypt`**: Librería robusta de encriptación hash (contraseñas).
+  > `npm install bcrypt`
+- **`jsonwebtoken`**: Emisión y validación de JSON Web Tokens (JWT).
+  > `npm install jsonwebtoken`
+- **`cookie-parser`**: Parsea las cookies enviadas por el navegador para el JWT HttpOnly.
+  > `npm install cookie-parser`
+- **`helmet`**: Configura cabeceras HTTP seguras automáticamente.
+  > `npm install helmet`
+- **`express-rate-limit`**: Previene ataques DDoS limitando peticiones.
+  > `npm install express-rate-limit`
+- **`hpp` & `xss-clean`**: Limpian parámetros HTTP repetidos y purifican scripts maliciosos.
+  > `npm install hpp xss-clean`
+
+### Manejo de Archivos y Peticiones Web
+- **`multer`**: Middleware de `multipart/form-data` usado para subir imágenes de vehículos.
+  > `npm install multer`
+- **`axios`**: Peticiones internas del servidor (usado para conectarse a Groq/Pollinations IA).
+  > `npm install axios`
+
+### Testing
+- **`jest` & `supertest`**: Framework de aserciones y librería para pruebas asíncronas de rutas HTTP.
+  > `npm install -D jest supertest cross-env`
 
 ---
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Admin.css';
 import { Mail, Phone, Calendar, CheckCircle, XCircle, Clock, Send, FileText, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import api from '../../api/axios';
+import api from '../../services/api';
 import AdminLoader from '../../components/admin/AdminLoader';
 
 const darkSwal = {
