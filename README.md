@@ -17,12 +17,45 @@
 - **EmailJS**: Integración para el envío de correos electrónicos desde formularios de contacto.
 - **Motion (Framer Motion)**: Biblioteca de animaciones avanzadas para transiciones, efectos como `ShimmerText` y micro-animaciones fluidas.
 
-### Backend (Simulado)
-- **JSON Server**: API REST falsa que corre sobre un archivo `db.json`, permitiendo persistencia de datos durante el desarrollo.
+### Backend
+- **Node.js + Express v5**: Servidor HTTP con API RESTful versionada (`/api/v1`).
+- **Sequelize v6 (ORM)**: Gestión de modelos, migraciones y relaciones con MySQL.
+- **MySQL 8**: Base de datos relacional de producción.
+- **JWT + bcrypt**: Autenticación segura con tokens en cookies HttpOnly.
+- **Groq Cloud (LLaMA 3.3 70B)**: Motor de IA para el chatbot inteligente.
+
+### Testing
+- **Jest**: Framework de pruebas unitarias y de integración.
+- **Supertest**: Pruebas HTTP de integración contra la API.
 
 ---
 
 ## 📁 Estructura del Proyecto (Arquitectura Técnica)
+
+> Consulta el archivo [ARCHITECTURE.md](./ARCHITECTURE.md) para un desglose detallado de la arquitectura de capas, diagramas de flujo de datos, esquema de base de datos y convenciones del proyecto.
+
+```
+The-destiny-vault/
+├── backend/                 # Servidor Node.js/Express
+│   ├── config/              # Configuración de Sequelize (config.json)
+│   ├── controllers/         # Lógica de negocio por recurso
+│   ├── middlewares/         # Autenticación JWT y autorización por rol
+│   ├── migrations/          # Migraciones de base de datos Sequelize
+│   ├── models/              # Modelos Sequelize (Auto, Usuario, Rol, etc.)
+│   ├── routes/              # Definición de endpoints RESTful
+│   ├── seeders/             # Datos iniciales para la base de datos
+│   ├── tests/               # Pruebas de integración (Jest + Supertest)
+│   └── server.js            # Punto de entrada del backend
+├── src/                     # Frontend React
+│   ├── api/                 # Instancia de Axios configurada
+│   ├── components/          # Componentes reutilizables (15+ módulos)
+│   ├── hooks/               # Custom hooks de React
+│   ├── pages/               # Vistas principales por feature
+│   ├── routes/              # Enrutamiento y protección de rutas
+│   └── utils/               # Funciones utilitarias
+├── ARCHITECTURE.md          # Documentación de arquitectura técnica
+└── README.md                # Este archivo
+```
 
 ### 1. `src/routes`: Distribución de Navegación
 La lógica de rutas reside en `AppRoutes.jsx`. Utiliza componentes de protección como `AdminRoute.jsx` para restringir el acceso al panel administrativo basado en el rol del usuario (`admin` o `gerente`).
@@ -49,13 +82,59 @@ El sistema se divide en más de 15 categorías de componentes, incluyendo:
 
 ---
 
-## 📊 Modelo de Datos (db.json)
-El sistema gestiona cinco colecciones principales:
-- **`vehicles`**: Datos técnicos, precios, etiquetas de disponibilidad e imágenes.
-- **`users`**: Perfiles con roles, credenciales, favoritos y datos de ubicación.
-- **`requests`**: Solicitudes de contacto y cotizaciones.
-- **`reviews`**: Comentarios verificados de clientes con calificación.
-- **`settings`**: Configuración global del sitio (sedes, teléfonos, logos de marcas).
+## 🗄️ API RESTful Versionada
+
+La API utiliza el prefijo `/api/v1` (con retrocompatibilidad en `/api`).
+
+### Endpoints Principales
+
+| Recurso               | Método | Ruta                               | Descripción                     |
+|------------------------|--------|------------------------------------|---------------------------------|
+| Health Check           | GET    | `/`                                | Estado del servidor              |
+| Login                  | POST   | `/api/v1/auth/login`               | Iniciar sesión                   |
+| Register               | POST   | `/api/v1/auth/register`            | Registrar usuario                |
+| Logout                 | POST   | `/api/v1/auth/logout`              | Cerrar sesión                    |
+| Perfil                 | GET    | `/api/v1/auth/me`                  | Datos del usuario autenticado    |
+| Listar vehículos       | GET    | `/api/v1/vehicles?page=1&limit=20` | Con paginación, filtros y orden  |
+| Detalle vehículo       | GET    | `/api/v1/vehicles/:id`             | Vehículo por ID                  |
+| Crear vehículo         | POST   | `/api/v1/vehicles`                 | 🔒 Requiere autenticación       |
+| Listar usuarios        | GET    | `/api/v1/users`                    | 🔒 Solo admin                   |
+| Chatbot IA             | POST   | `/api/v1/chatbot`                  | Consulta al asistente IA         |
+
+### Paginación, Búsqueda y Filtros (Vehículos)
+
+```
+GET /api/v1/vehicles?search=toyota&type=SUV&fuel=Gasolina&minPrice=5000000&maxPrice=20000000&sort=price&order=ASC&page=1&limit=10
+```
+
+Respuesta:
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 42,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5,
+    "hasNextPage": true,
+    "hasPrevPage": false
+  }
+}
+```
+
+---
+
+## 📊 Modelo de Datos (MySQL — SAVS_DB)
+El sistema gestiona las siguientes entidades:
+- **`Autos`**: Datos técnicos, precios, etiquetas de disponibilidad e imágenes.
+- **`Usuarios`**: Perfiles con roles, credenciales, favoritos y datos de ubicación.
+- **`Rols`**: Roles del sistema (admin, gerente, cliente).
+- **`Requests`**: Solicitudes de contacto y cotizaciones.
+- **`Reviews`**: Comentarios verificados de clientes con calificación.
+- **`SaleRequests`**: Solicitudes de venta/intercambio de vehículos.
+- **`Branches`**: Sucursales de la empresa.
+- **`Settings`**: Configuración global del sitio (key-value).
+- **`TechnicalGlossaries`**: Glosario técnico automotriz.
 
 ---
 
@@ -68,6 +147,7 @@ El sistema gestiona cinco colecciones principales:
 ### 🔍 Inventario Inteligente y Dinámico
 - Vista detallada de vehículos (`VehicleDetails`) **100% dinámica**: especificaciones técnicas, rendimiento, galerías e íconos de características provenientes directamente de la base de datos (eliminación total de datos fijos/hardcodeados).
 - Filtros avanzados por tipo de vehículo (SUV, Sedán, Pick-up, etc.), marca y rango de precios.
+- **Paginación server-side** con metadatos de navegación.
 
 ### 👤 Área de Usuario y Perfil
 - Registro y login seguro adaptado al diseño de la marca.
@@ -80,7 +160,7 @@ El sistema gestiona cinco colecciones principales:
 
 ### 🤖 Asistente Virtual (Chatbot)
 - Bot conversacional integrado directamente en la interfaz.
-- Respuestas automáticas guiadas para métodos de pago, vehículos como parte de pago (trade-in) y búsqueda por marcas.
+- Potenciado por **Groq Cloud (LLaMA 3.3 70B)** con contexto del inventario real de MySQL.
 - Derivación fluida a WhatsApp de ventas con mensaje personalizado para atención humana directa.
 
 ### ⚙️ Panel Administrativo Robusto (Portal SAVS)
@@ -89,31 +169,86 @@ El sistema gestiona cinco colecciones principales:
 
 ---
 
-## 🛡️ Estabilidad y Validaciones Estrictas
+## 🛡️ Seguridad
 
-Para evitar errores humanos y asegurar la integridad de los datos en la base de datos:
-- **Validación Global de Inputs**: Todos los formularios están blindados a nivel global (DOM) interceptando eventos de tipeo y pegado (`keydown`/`paste`).
-- **Control Numérico Perfecto**: Las calculadoras financieras y los precios no permiten números negativos, letras ni símbolos matemáticos de notación (`e`, `E`, `+`).
-- **Protección de Caracteres**: Bloqueo estricto del símbolo guion (`-`) en todos los campos textuales y numéricos, permitiéndose **únicamente** en los números de teléfono.
+| Medida                        | Implementación                                  |
+|-------------------------------|--------------------------------------------------|
+| Hashing de contraseñas        | bcrypt con salt de 10 rondas                     |
+| Tokens de sesión              | JWT con expiración de 24h en cookies HttpOnly    |
+| Protección de rutas backend   | Middlewares `verificarToken` + `esAdmin`          |
+| Protección de rutas frontend  | Componente `AdminRoute.jsx` con validación de rol |
+| Validación de inputs          | Bloqueo global de caracteres no permitidos        |
+| CORS restringido              | Solo orígenes explícitos permitidos               |
+
+---
+
+## 🧪 Testing
+
+El proyecto incluye pruebas de integración con **Jest + Supertest** ubicadas en `backend/tests/api.test.js`:
+
+```bash
+cd backend
+npm test
+```
+
+Las pruebas validan:
+1. **Requisito Estructural**: El servidor responde correctamente en la ruta raíz.
+2. **Caso de Éxito (Login)**: POST a `/api/login` retorna status 200 y genera cookie con token JWT.
+3. **Restricción 401 (Seguridad)**: POST a `/api/autos` sin autenticación retorna 401.
 
 ---
 
 ## 🔧 Instalación y Ejecución
 
-1. **Instalar dependencias**:
-   ```bash
-   npm install
-   ```
+### Prerrequisitos
+- Node.js v18+
+- MySQL 8 con la base de datos `SAVS_DB` creada
+- Variables de entorno configuradas en `backend/.env`
 
-2. **Levantar el servidor de datos (Backend)**:
-   ```bash
-   npx json-server --watch db.json --port 5000
-   ```
+### 1. Instalar dependencias
+```bash
+npm install
+cd backend && npm install
+```
 
-3. **Ejecutar la aplicación (Frontend)**:
-   ```bash
-   npm run dev
-   ```
+### 2. Configurar base de datos
+```bash
+cd backend
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all   # (opcional) datos iniciales
+```
+
+### 3. Ejecutar todo (Frontend + Backend)
+```bash
+npm run dev:full
+```
+
+Esto levanta simultáneamente:
+- **Frontend** en `http://localhost:5173`
+- **Backend API** en `http://localhost:5000`
+
+### Comandos Individuales
+```bash
+npm run dev         # Solo frontend (Vite)
+npm run backend     # Solo backend (Node.js)
+npm run dev:full    # Ambos simultáneamente (concurrently)
+```
+
+---
+
+## 🌐 Variables de Entorno
+
+Crear el archivo `backend/.env`:
+
+```env
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=<tu_contraseña_mysql>
+DB_NAME=SAVS_DB
+JWT_SECRET=<secreto_seguro_para_jwt>
+GROQ_API_KEY=<tu_api_key_de_groq>
+```
 
 ---
 

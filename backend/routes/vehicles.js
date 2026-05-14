@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const vehicleController = require('../controllers/vehicleController');
-
 const { verificarToken, esAdmin } = require('../middlewares/authMiddleware');
 
 router.get('/', vehicleController.getAll);
