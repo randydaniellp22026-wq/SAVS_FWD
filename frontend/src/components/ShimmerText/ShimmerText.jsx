@@ -5,6 +5,7 @@ export default function ShimmerText({
   text, 
   className = "",
   as: Component = "span",
+  shimmerWidth, // Destructure to filter out
   ...props
 }) {
   return (

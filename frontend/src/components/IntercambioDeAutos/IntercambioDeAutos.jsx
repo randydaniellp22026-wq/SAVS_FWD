@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone } from 'lucide-react';
+import api from '../../api/axios';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import './IntercambioDeAutos.css';
 
@@ -12,7 +13,7 @@ const darkSwal = {
   confirmButtonColor: '#f5b400'
 };
 
-const API_URL = 'http://localhost:5000/sale_requests';
+const API_URL = '/sale_requests';
 
 const initialFormState = {
   id: null,
@@ -70,15 +71,13 @@ const IntercambioDeAutos = () => {
 
   const fetchAllUsers = async () => {
     try {
-      const response = await fetch('http://localhost:5000/users');
-      if (response.ok) {
-        const users = await response.json();
-        const map = {};
-        users.forEach(u => {
-          map[u.id] = u;
-        });
-        setUsersMap(map);
-      }
+      const response = await api.get('/users');
+      const users = response.data;
+      const map = {};
+      users.forEach(u => {
+        map[u.id] = u;
+      });
+      setUsersMap(map);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -87,11 +86,8 @@ const IntercambioDeAutos = () => {
   const fetchAllVehicles = async () => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data = await response.json();
-        setVehiculos(formatVehicles(data));
-      }
+      const response = await api.get(API_URL);
+      setVehiculos(formatVehicles(response.data));
     } catch (error) {
       console.error("Error fetching all vehicles:", error);
     } finally {
@@ -111,11 +107,8 @@ const IntercambioDeAutos = () => {
   const fetchUserVehicles = async (uid) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}?userId=${uid}`);
-      if (response.ok) {
-        const data = await response.json();
-        setVehiculos(formatVehicles(data));
-      }
+      const response = await api.get(`${API_URL}?userId=${uid}`);
+      setVehiculos(formatVehicles(response.data));
     } catch (error) {
       console.error("Error fetching user vehicles:", error);
     } finally {
@@ -228,50 +221,34 @@ const IntercambioDeAutos = () => {
     setLoading(true);
     try {
       if (isEditing) {
-        const response = await fetch(`${API_URL}/${cleanData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cleanData)
+        const response = await api.put(`${API_URL}/${cleanData.id}`, cleanData);
+        setVehiculos(vehiculos.map(v => v.id === response.data.id ? response.data : v));
+        Swal.fire({
+          icon: 'success',
+          title: '¡Actualizado!',
+          text: 'Tu solicitud ha sido modificada con éxito.',
+          background: '#141414',
+          color: '#fff',
+          confirmButtonColor: '#f5b400'
         });
-        
-        if (response.ok) {
-          const updated = await response.json();
-          setVehiculos(vehiculos.map(v => v.id === updated.id ? updated : v));
-          Swal.fire({
-            icon: 'success',
-            title: '¡Actualizado!',
-            text: 'Tu solicitud ha sido modificada con éxito.',
-            background: '#141414',
-            color: '#fff',
-            confirmButtonColor: '#f5b400'
-          });
-          setIsEditing(false);
-        }
+        setIsEditing(false);
       } else {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...cleanData, id: String(Date.now()) })
-        });
+        const response = await api.post(API_URL, { ...cleanData, id: String(Date.now()) });
+        setVehiculos([response.data, ...vehiculos]);
         
-        if (response.ok) {
-          const newRequest = await response.json();
-          setVehiculos([newRequest, ...vehiculos]);
-          
-          toast.success('Solicitud enviada correctamente', {
-            duration: 4000,
-            icon: '📋',
-          });
+        toast.success('Solicitud enviada correctamente', {
+          duration: 4000,
+          icon: '📋',
+        });
 
-          Swal.fire({
-            icon: 'success',
-            title: '¡Recibido!',
-            text: 'Tu solicitud de intercambio ha sido registrada correctamente.',
-            background: '#141414',
-            color: '#fff',
-            confirmButtonColor: '#f5b400'
-          });
-        }
+        Swal.fire({
+          icon: 'success',
+          title: '¡Recibido!',
+          text: 'Tu solicitud de intercambio ha sido registrada correctamente.',
+          background: '#141414',
+          color: '#fff',
+          confirmButtonColor: '#f5b400'
+        });
       }
       setFormData(initialFormState);
       if(document.getElementById('imagen-upload')) {
@@ -314,23 +291,16 @@ const IntercambioDeAutos = () => {
     const updatedVehiculo = { ...vehiculo, estado: nuevoEstado };
     
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedVehiculo)
+      const response = await api.put(`${API_URL}/${id}`, updatedVehiculo);
+      setVehiculos(vehiculos.map(v => v.id === id ? updatedVehiculo : v));
+      Swal.fire({
+        ...darkSwal,
+        icon: 'success',
+        title: 'Estado actualizado',
+        text: `La solicitud ha sido marcada como ${nuevoEstado}.`,
+        timer: 1500,
+        showConfirmButton: false
       });
-
-      if (response.ok) {
-        setVehiculos(vehiculos.map(v => v.id === id ? updatedVehiculo : v));
-        Swal.fire({
-          ...darkSwal,
-          icon: 'success',
-          title: 'Estado actualizado',
-          text: `La solicitud ha sido marcada como ${nuevoEstado}.`,
-          timer: 1500,
-          showConfirmButton: false
-        });
-      }
     } catch (error) {
       Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado.' });
     }
@@ -350,17 +320,15 @@ const IntercambioDeAutos = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setVehiculos(vehiculos.filter(v => v.id !== id));
-        Swal.fire({
-          ...darkSwal,
-          icon: 'success',
-          title: 'Eliminado',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      }
+      await api.delete(`${API_URL}/${id}`);
+      setVehiculos(vehiculos.filter(v => v.id !== id));
+      Swal.fire({
+        ...darkSwal,
+        icon: 'success',
+        title: 'Eliminado',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (error) {
       Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo eliminar.' });
     }
@@ -368,21 +336,15 @@ const IntercambioDeAutos = () => {
 
   const handleAction = async (vehiculo, nuevoEstado) => {
     try {
-      const response = await fetch(`${API_URL}/${vehiculo.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado })
+      await api.patch(`${API_URL}/${vehiculo.id}`, { estado: nuevoEstado });
+      setVehiculos(vehiculos.map(v => v.id === vehiculo.id ? { ...v, estado: nuevoEstado } : v));
+      Swal.fire({
+        ...darkSwal,
+        icon: 'success',
+        title: `Vehículo ${nuevoEstado}`,
+        timer: 1500,
+        showConfirmButton: false
       });
-      if (response.ok) {
-        setVehiculos(vehiculos.map(v => v.id === vehiculo.id ? { ...v, estado: nuevoEstado } : v));
-        Swal.fire({
-          ...darkSwal,
-          icon: 'success',
-          title: `Vehículo ${nuevoEstado}`,
-          timer: 1500,
-          showConfirmButton: false
-        });
-      }
     } catch (error) {
       Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado.' });
     }

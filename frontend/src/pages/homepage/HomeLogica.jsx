@@ -10,10 +10,12 @@ export const useHomeLogica = () => {
       .catch(err => console.error("Error loading home vehicles:", err));
   }, []);
 
-  const motorCatalogo = vehicles.slice(0, 3);
-  const kilometrajeCatalogo = vehicles.slice(3, 6);
-  const tipoCatalogo = vehicles.slice(6, 9);
-  const anioCatalogo = vehicles.slice(9, 12);
+  const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
+
+  const motorCatalogo = safeVehicles.slice(0, 3);
+  const kilometrajeCatalogo = safeVehicles.slice(3, 6);
+  const tipoCatalogo = safeVehicles.slice(6, 9);
+  const anioCatalogo = safeVehicles.slice(9, 12);
 
   return {
     motorCatalogo,

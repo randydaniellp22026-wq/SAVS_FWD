@@ -67,7 +67,12 @@ export const useLoginLogic = () => {
           title: '¡Bienvenido!',
           text: `Sesión iniciada como ${usuario.nombre}`
         }).then(() => {
-          navigate('/');
+          // Si es admin o gerente, mandarlo directo al panel
+          if (usuario.rol === 'admin' || usuario.rol === 'gerente') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         });
       }
     } catch (err) {

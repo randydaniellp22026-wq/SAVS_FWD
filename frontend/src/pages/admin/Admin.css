@@ -93,6 +93,16 @@
   font-weight: 700;
 }
 
+/* Global Select & Option visibility fixes for Dark Mode */
+select, option {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+select:focus {
+  outline: 1px solid #eab308;
+}
+
 .stat-value-container {
   display: flex;
   align-items: baseline;

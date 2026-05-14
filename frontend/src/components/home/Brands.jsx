@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
 import './Brands.css';
 
 const Brands = () => {
   const [brands, setBrands] = React.useState([]);
 
   React.useEffect(() => {
-    fetch('http://localhost:5000/settings')
-      .then(res => res.json())
-      .then(data => setBrands(data.brands || []))
+    api.get('/settings')
+      .then(res => setBrands(res.data.brands || []))
       .catch(err => console.error("Error fetching brands:", err));
   }, []);
 
