@@ -1,10 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-require('dotenv').config();
-
-// Importar modelos (index.js de Sequelize CLI carga todo automáticamente)
+const app = require('./app');
 const { sequelize } = require('./models');
+<<<<<<< HEAD
+require('dotenv').config();
+=======
 
 const app = express();
 
@@ -29,6 +27,7 @@ app.use('/api/settings', require('./routes/settings'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/chatbot', require('./routes/chatbot'));
 
+>>>>>>> b3fe321d888e391231cb03a2d611180c1dcefa0a
 
 // Base de Datos
 sequelize.authenticate()
@@ -38,10 +37,6 @@ sequelize.authenticate()
     .catch(err => {
         console.error('❌ Error al conectar con la base de datos:', err);
     });
-
-app.get('/', (req, res) => {
-    res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
-});
 
 const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'test') {
