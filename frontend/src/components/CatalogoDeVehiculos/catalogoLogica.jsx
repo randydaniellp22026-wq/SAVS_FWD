@@ -23,7 +23,9 @@ export const useCatalogoLogica = (initialVehicles) => {
       setLoading(true);
       api.get('/vehicles')
         .then(res => {
-          setVehicles(res.data);
+          // Extraemos la lista de la propiedad 'data' para soportar paginación
+          const vehicleList = Array.isArray(res.data) ? res.data : (res.data.data || []);
+          setVehicles(vehicleList);
           setLoading(false);
         })
         .catch(err => {
@@ -34,7 +36,8 @@ export const useCatalogoLogica = (initialVehicles) => {
   }, [initialVehicles]);
 
   const filteredVehicles = useMemo(() => {
-    return vehicles.filter(car => {
+    const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
+    return safeVehicles.filter(car => {
       if (searchQueryParam) {
         const query = searchQueryParam.toLowerCase();
         const matchesName = (car.name || car.modelo || '').toLowerCase().includes(query);

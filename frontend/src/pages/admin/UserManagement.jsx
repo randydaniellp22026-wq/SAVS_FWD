@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/axios';
+import AdminLoader from '../../components/admin/AdminLoader';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -198,7 +199,7 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', padding: '3rem' }}>Cargando usuarios...</td></tr>
+              <tr><td colSpan="5"><AdminLoader message="Obteniendo lista de usuarios..." height="200px" /></td></tr>
             ) : filteredUsers.map(user => (
               <tr key={user.id}>
                 <td data-label="Usuario">

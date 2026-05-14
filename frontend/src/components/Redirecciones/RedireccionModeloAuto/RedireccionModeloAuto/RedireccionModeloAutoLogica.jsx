@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import api from '../../../../api/axios';
 
 export const useRedireccionModeloAutoLogica = () => {
   const [autos, setAutos] = useState([]);
@@ -15,10 +16,9 @@ export const useRedireccionModeloAutoLogica = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:5000/vehicles')
-      .then(res => res.json())
-      .then(data => {
-        setAutos(data);
+    api.get('/vehicles')
+      .then(res => {
+        setAutos(res.data);
         setLoading(false);
       })
       .catch(err => {
@@ -47,7 +47,7 @@ export const useRedireccionModeloAutoLogica = () => {
     });
   };
 
-  const autosFiltrados = autos.filter(auto => {
+  const autosFiltrados = (Array.isArray(autos) ? autos : []).filter(auto => {
     // Basic text match on brand/name
     const matchMarca = filtros.marca === '' || auto.name.toLowerCase().includes(filtros.marca.toLowerCase());
     const matchModelo = filtros.modelo === '' || auto.name.toLowerCase().includes(filtros.modelo.toLowerCase());

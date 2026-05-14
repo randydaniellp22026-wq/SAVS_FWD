@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
-// import { GoogleGenerativeAI } from "@google/generative-ai"; // No longer using Gemini SDK
+import api from '../../api/axios';
 import './Chatbot.css';
 
 
@@ -35,15 +35,13 @@ const Chatbot = () => {
     }, [messages, isTyping]);
 
     useEffect(() => {
-        fetch('http://localhost:5000/vehicles')
-            .then(res => res.json())
-            .then(data => setVehicles(data))
+        api.get('/vehicles')
+            .then(res => setVehicles(res.data))
             .catch(err => console.error("Error fetching vehicles:", err));
 
-        fetch('http://localhost:5000/settings')
-            .then(res => res.json())
-            .then(data => {
-                if (data.company?.whatsapp) setWhatsappNumber(data.company.whatsapp);
+        api.get('/settings')
+            .then(res => {
+                if (res.data.company?.whatsapp) setWhatsappNumber(res.data.company.whatsapp);
             })
             .catch(err => console.error("Error fetching settings:", err));
     }, []);
@@ -54,25 +52,11 @@ const Chatbot = () => {
 
         try {
             // Ahora la lógica reside en el backend para mayor seguridad y acceso a la BD real
-            // Esto cumple con el pedido de que la IA utilice el backend.
-            const url = "http://localhost:5000/api/chatbot";
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: userText
-                })
+            const response = await api.post('/chatbot', {
+                message: userText
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Error al conectar con el servidor de IA.");
-            }
-
-            const data = await response.json();
+            const data = response.data;
             const text = data.reply;
             const whatsappNum = data.whatsapp || whatsappNumber;
             
@@ -94,7 +78,7 @@ const Chatbot = () => {
             setMessages(prev => [...prev, {
                 id: Date.now(),
                 type: 'bot',
-                text: `❌ Error: ${err.message}`
+                text: `❌ Error: ${err.response?.data?.error || err.message}`
             }]);
         } finally {
             setIsTyping(false);

@@ -2,15 +2,15 @@ import React from 'react';
 import { Facebook, Mail, MapPin, Phone, Globe, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import savsLogo from '../../img/imagecopy4.png';
+import api from '../../api/axios';
 import './Footer.css';
 
 const Footer = () => {
   const [settings, setSettings] = React.useState(null);
 
   React.useEffect(() => {
-    fetch('http://localhost:5000/settings')
-      .then(res => res.json())
-      .then(data => setSettings(data))
+    api.get('/settings')
+      .then(res => setSettings(res.data))
       .catch(err => console.error("Error fetching footer settings:", err));
   }, []);
 

@@ -3,6 +3,7 @@ import './Admin.css';
 import { Mail, Phone, Calendar, CheckCircle, XCircle, Clock, Send, FileText, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../api/axios';
+import AdminLoader from '../../components/admin/AdminLoader';
 
 const darkSwal = {
   background: '#141414',
@@ -195,9 +196,12 @@ const ReviewRequests = () => {
 
       <div className="requests-wall">
         {loading ? (
-          <div className="admin-placeholder"><p>Cargando datos...</p></div>
+          <AdminLoader message="Obteniendo solicitudes de contacto..." />
         ) : filteredRequests.length === 0 ? (
-          <div className="admin-placeholder"><p>No hay solicitudes en esta categoría.</p></div>
+          <div className="admin-placeholder">
+            <Clock size={48} className="placeholder-icon" />
+            <p>No hay solicitudes en esta categoría.</p>
+          </div>
         ) : (
           filteredRequests.map(req => (
             <div key={req.id} className="request-card">

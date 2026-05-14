@@ -1,32 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import api from '../../api/axios';
 import { 
-  ArrowLeft, 
   CarFront, 
-  Tag, 
-  Settings, 
-  Fuel, 
-  Palette, 
-  FileText, 
-  Image as ImageIcon, 
-  Search,
-  Trash2,
-  Edit,
-  Plus,
-  RefreshCcw,
-  CheckCircle,
-  XCircle
+  LayoutGrid, 
+  Plus, 
+  RefreshCcw, 
+  ArrowLeft,
+  ChevronRight
 } from 'lucide-react';
-import './Admin.css';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const darkSwal = {
-  background: '#141414',
-  color: '#fff',
-  confirmButtonColor: '#eab308',
-  cancelButtonColor: '#333'
-};
+// Componentes Modulares
+import VehicleList from '../../components/admin/Inventory/VehicleList';
+import VehicleForm from '../../components/admin/Inventory/VehicleForm';
+import AdminLoader from '../../components/admin/AdminLoader';
+
+import './Admin.css';
 
 const initialFormState = {
   id: '',
@@ -53,377 +44,285 @@ const initialFormState = {
 
 const CreateVehicle = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [formData, setFormData] = useState(initialFormState);
+  const [view, setView] = useState('list'); // 'list' or 'form'
   const [vehiculos, setVehiculos] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [currentVehicle, setCurrentVehicle] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [detailImagesDraft, setDetailImagesDraft] = useState([]);
-
-  const filteredVehicles = vehiculos.filter(v => 
-    (v.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (v.tag || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   useEffect(() => {
     fetchVehicles();
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const editId = params.get('edit');
-    if (editId && vehiculos.length > 0) {
-      const v = vehiculos.find(car => String(car.id) === String(editId));
-      if (v) handleEdit(v);
-    }
-  }, [location.search, vehiculos]);
-
   const fetchVehicles = async () => {
     setLoading(true);
     try {
       const response = await api.get('/vehicles');
-      setVehiculos(response.data.slice().reverse());
+      // Extraemos la lista de la propiedad 'data' del objeto de respuesta
+      const vehicleList = Array.isArray(response.data) ? response.data : (response.data.data || []);
+      setVehiculos(vehicleList.slice().reverse());
     } catch (error) {
-      console.error("Error fetching admin vehicles:", error);
+      console.error("Error fetching vehicles:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de conexión',
+        text: 'No se pudieron cargar los vehículos desde el servidor.',
+        background: '#1a1a1a',
+        color: '#fff'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'price' || name === 'year') {
-      const cleanValue = value.replace(/[^0-9]/g, '');
-      setFormData({ ...formData, [name]: cleanValue });
-      return;
-    }
-    setFormData({ ...formData, [name]: value });
+  const handleAddNew = () => {
+    setCurrentVehicle(initialFormState);
+    setView('form');
   };
 
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setFormData({ ...formData, image: event.target.result });
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleEdit = (vehicle) => {
+    setCurrentVehicle(vehicle);
+    setView('form');
   };
 
-  const handleDetailImagesChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-    const readers = files.map(file => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => resolve(ev.target.result);
-        reader.readAsDataURL(file);
-      });
+  const handleDelete = async (vehicle) => {
+    const result = await Swal.fire({
+      title: '¿Eliminar vehículo?',
+      text: `¿Estás seguro de borrar "${vehicle.name || vehicle.modelo}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#333',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#141414',
+      color: '#fff'
     });
-    Promise.all(readers).then(results => {
-      setDetailImagesDraft(prev => [...prev, ...results]);
-    });
-    e.target.value = '';
-  };
 
-  const removeDetailImage = (index) => {
-    setDetailImagesDraft(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const requiredFields = ['name', 'motor', 'type', 'year', 'price', 'mileage', 'summary', 'image'];
-    for (const field of requiredFields) {
-      if (!formData[field]) {
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/vehicles/${vehicle.id}`);
+        setVehiculos(prev => prev.filter(v => v.id !== vehicle.id));
         Swal.fire({
-          ...darkSwal,
-          icon: 'warning',
-          title: 'Campo incompleto',
-          text: `El campo ${field} es obligatorio.`
+          icon: 'success',
+          title: 'Eliminado',
+          background: '#141414',
+          color: '#fff',
+          timer: 1500,
+          showConfirmButton: false
         });
-        return;
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al eliminar',
+          text: 'No se pudo completar la operación en el servidor.',
+          background: '#141414',
+          color: '#fff'
+        });
       }
     }
-    const mergedDetailImages = detailImagesDraft.length > 0 ? detailImagesDraft : (formData.detailImages || []);
+  };
 
-    const priceNum = Number(formData.price);
-    const yearNum = Number(formData.year);
-
-    // Mapeando a los nombres que espera el backend pero manteniendo los originales para el frontend
-    const cleanData = { 
-      ...formData, 
-      price: priceNum, 
-      precio: priceNum,
-      year: yearNum, 
-      anio: yearNum,
-      marca: formData.name.split(' ')[0],
-      modelo: formData.name,
-      detailImages: mergedDetailImages 
-    };
-
+  const handleFormSubmit = async (data) => {
     setLoading(true);
     try {
+      const isEditing = !!data.id;
+      const cleanData = {
+        ...data,
+        price: Number(data.price),
+        year: Number(data.year),
+        marca: data.name.split(' ')[0],
+        modelo: data.name
+      };
+
       if (isEditing) {
-        const response = await api.put(`/vehicles/${cleanData.id}`, cleanData);
-        const updated = response.data;
-        setVehiculos(vehiculos.map(v => v.id === updated.id ? updated : v));
-        Swal.fire({ ...darkSwal, icon: 'success', title: '¡Actualizado!', timer: 1500, showConfirmButton: false });
-        setIsEditing(false);
-        setFormData(initialFormState);
-        setDetailImagesDraft([]);
+        const response = await api.put(`/vehicles/${data.id}`, cleanData);
+        setVehiculos(prev => prev.map(v => v.id === data.id ? response.data : v));
+        Swal.fire({ icon: 'success', title: '¡Actualizado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       } else {
         const payload = { ...cleanData, id: String(Date.now()) };
         const response = await api.post('/vehicles', payload);
-        const newCar = response.data;
-        setVehiculos([newCar, ...vehiculos]);
-        Swal.fire({ ...darkSwal, icon: 'success', title: '¡Publicado!', timer: 1500, showConfirmButton: false });
-        setFormData(initialFormState);
-        setDetailImagesDraft([]);
+        setVehiculos(prev => [response.data, ...prev]);
+        Swal.fire({ icon: 'success', title: '¡Publicado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       }
+      setView('list');
     } catch (error) {
       console.error("Error saving vehicle:", error);
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo guardar en la base de datos MySQL.' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar la información.', background: '#141414', color: '#fff' });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleEdit = (vehiculo) => {
-    setIsEditing(true);
-    setFormData({
-      ...vehiculo,
-      price: String(vehiculo.price || vehiculo.precio),
-      year: String(vehiculo.year || vehiculo.anio),
-      detailImages: vehiculo.detailImages || []
-    });
-    setDetailImagesDraft(vehiculo.detailImages || []);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const confirmDelete = (vehiculo) => {
-    Swal.fire({
-      ...darkSwal,
-      icon: 'warning',
-      title: '¿Eliminar vehículo?',
-      text: `Esta acción borrará definitivamente el ${vehiculo.name || vehiculo.modelo} del catálogo.`,
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#ef4444'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        handleDelete(vehiculo.id);
-      }
-    });
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await api.delete(`/vehicles/${id}`);
-      setVehiculos(prev => prev.filter(v => v.id !== id));
-      Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
-    } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error al eliminar de MySQL' });
     }
   };
 
   return (
-    <div className="admin-container">
-      <div className="admin-header inventory-header">
-        <div className="header-flex-container">
-          <div className="header-text">
-            <h1 className="admin-title">Gestión de Inventario SAVS</h1>
-            <p className="admin-subtitle">Administra el catálogo de vehículos: añade, edita o elimina unidades.</p>
-          </div>
-          <button 
-            onClick={() => { setIsEditing(false); setFormData(initialFormState); }}
-            className="btn-new-record"
-          >
-            <Plus size={18} /> Nuevo Registro
-          </button>
+    <div className="admin-inventory-page">
+      <div className="admin-page-header">
+        <div className="breadcrumb">
+          <span onClick={() => navigate('/admin')} className="crumb-link">Dashboard</span>
+          <ChevronRight size={14} />
+          <span className="crumb-active">Inventario</span>
         </div>
-      </div>
-
-      <div className="vender-auto-layout">
         
-          <div className="form-card-glow">
-            <h2 className="form-title">
-              {isEditing ? <Edit size={22} className="icon-edit" /> : <Plus size={22} className="icon-new" />}
-              {isEditing ? 'Editando Especificaciones' : 'Detalles del Nuevo Vehículo'}
-            </h2>
-            
-            <form className="vender-auto-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label><CarFront size={14} /> Marca y Modelo</label>
-                <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Hyundai Tucson..." />
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label><Settings size={14} /> Motor / Cilindrada</label>
-                  <input type="text" name="motor" value={formData.motor} onChange={handleInputChange} placeholder="2000cc" />
-                </div>
-                <div className="form-group">
-                  <label>Estilo</label>
-                  <input type="text" name="type" value={formData.type} onChange={handleInputChange} placeholder="SUV, Sedán..." />
-                </div>
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Año</label>
-                  <input type="text" inputMode="numeric" name="year" value={formData.year} onChange={handleInputChange} placeholder="2024" />
-                </div>
-                <div className="form-group">
-                  <label>Precio Final (CRC)</label>
-                  <input type="text" inputMode="numeric" name="price" value={formData.price} onChange={handleInputChange} placeholder="Ej: 15000000" />
-                </div>
-              </div>
-
-              <div className="form-group-row">
-                <div className="form-group">
-                  <label>Transmisión</label>
-                  <select name="transmission" value={formData.transmission} onChange={handleInputChange} className="admin-select">
-                    <option value="Automática">Automática</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Dual">Dual</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label><Fuel size={14} /> Combustible</label>
-                  <select name="fuel" value={formData.fuel} onChange={handleInputChange} className="admin-select">
-                    <option value="Diésel">Diésel</option>
-                    <option value="Gasolina">Gasolina</option>
-                    <option value="Eléctrico">Eléctrico</option>
-                    <option value="Híbrido">Híbrido</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label><FileText size={14} /> Descripción de Venta</label>
-                <textarea 
-                  name="summary" 
-                  value={formData.summary} 
-                  onChange={handleInputChange} 
-                  rows="4"
-                  className="admin-textarea"
-                />
-              </div>
-
-              <div className="form-group">
-                <label><ImageIcon size={14} /> Fotografía Principal</label>
-                <div className="image-upload-zone">
-                  <input type="file" accept="image/*" onChange={handleImageChange} className="file-input-hidden" />
-                  {formData.image ? (
-                    <img src={formData.image} alt="Upload" className="preview-main-img" />
-                  ) : (
-                    <div className="upload-placeholder">
-                      <ImageIcon size={32} className="upload-icon" />
-                      <p>Arrastra o selecciona una imagen</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="form-group gallery-section">
-                <label className="gallery-label">
-                  <ImageIcon size={14} />
-                  Galería de Detalles
-                  <span className="optional-tag">(opcional — se muestran en el carrusel de la página de detalles)</span>
-                </label>
-
-                <label
-                  htmlFor="detail-images-input"
-                  className="multi-upload-zone"
-                >
-                  <ImageIcon size={28} className="multi-upload-icon" />
-                  <span className="multi-upload-text">Seleccionar imágenes de detalle</span>
-                  <span className="multi-upload-subtext">JPG, PNG, WEBP — puedes seleccionar varias a la vez</span>
-                  <input
-                    id="detail-images-input"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleDetailImagesChange}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-
-                {detailImagesDraft.length > 0 && (
-                  <div className="preview-gallery-container">
-                    <p className="preview-count-text">
-                      {detailImagesDraft.length} imagen{detailImagesDraft.length !== 1 ? 'es' : ''} añadida{detailImagesDraft.length !== 1 ? 's' : ''} — haz clic en la ✕ para eliminar
-                    </p>
-                    <div className="preview-gallery-grid">
-                      {detailImagesDraft.map((src, idx) => (
-                        <div
-                          key={idx}
-                          className="preview-gallery-item"
-                        >
-                          <img
-                            src={src}
-                            alt={`Detalle ${idx + 1}`}
-                            className="preview-img"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeDetailImage(idx)}
-                            title="Eliminar imagen"
-                            className="remove-img-btn"
-                          >
-                            ✕
-                          </button>
-                          <div className="img-index-tag">
-                            #{idx + 1}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button type="submit" disabled={loading} className={`btn-submit ${isEditing ? 'editing' : 'publishing'}`}>
-                {loading ? 'Procesando...' : (isEditing ? <><CheckCircle size={20}/> Guardar Cambios</> : <><Plus size={20}/> Publicar Vehículo</>)}
+        <div className="header-main-row">
+          <div className="header-titles">
+            <h1>Gestión de Inventario <CarFront size={28} className="icon-gold" /></h1>
+            <p>Añade, edita y supervisa el stock de vehículos disponibles en SAVS.</p>
+          </div>
+          
+          <div className="header-actions">
+            <button onClick={fetchVehicles} className="btn-refresh" title="Sincronizar">
+              <RefreshCcw size={18} className={loading ? 'spin' : ''} />
+            </button>
+            {view === 'list' ? (
+              <button onClick={handleAddNew} className="btn-primary-admin">
+                <Plus size={18} /> Nuevo Vehículo
               </button>
-            </form>
-          </div>
-        <div className="vender-auto-list-section">
-          <div className="inventory-list-header">
-             <h2 className="list-title">Inventario Actual ({vehiculos.length})</h2>
-             <div className="search-filter-container">
-                <Search size={18} className="search-icon-fixed" />
-                <input 
-                  type="text" 
-                  placeholder="Filtrar por nombre..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="admin-search-input"
-                />
-             </div>
-          </div>
-
-          <div className="admin-scrollable-list inventory-list">
-            {filteredVehicles.map(v => (
-              <div key={v.id} className="inventory-item">
-                <img src={v.image} alt="" className="item-thumbnail" />
-                <div className="item-details">
-                  <h4 className="item-name">{v.name || v.modelo}</h4>
-                  <p className="item-price">₡{Number(v.price || v.precio).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-                  <small className="item-meta">{(v.year || v.anio)} • {v.fuel}</small>
-                </div>
-                <div className="item-actions">
-                  <button onClick={() => handleEdit(v)} className="btn-icon-sm edit"><Edit size={16}/></button>
-                  <button onClick={() => confirmDelete(v)} className="btn-icon-sm delete"><Trash2 size={16}/></button>
-                </div>
-              </div>
-            ))}
+            ) : (
+              <button onClick={() => setView('list')} className="btn-secondary-admin">
+                <ArrowLeft size={18} /> Volver a la Lista
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      <div className="admin-page-content">
+        <AnimatePresence mode="wait">
+          {loading && view === 'list' ? (
+            <AdminLoader message="Actualizando inventario..." />
+          ) : view === 'list' ? (
+            <motion.div
+              key="list"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+            >
+              <VehicleList 
+                vehicles={vehiculos} 
+                onEdit={handleEdit} 
+                onDelete={handleDelete}
+                onAddNew={handleAddNew}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="form"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+            >
+              <VehicleForm 
+                initialData={currentVehicle} 
+                onSubmit={handleFormSubmit}
+                onCancel={() => setView('list')}
+                loading={loading}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <style>{`
+        .admin-inventory-page {
+          padding: 2rem;
+          max-width: 1400px;
+          margin: 0 auto;
+          min-height: 100vh;
+        }
+
+        .admin-page-header {
+          margin-bottom: 3rem;
+        }
+
+        .breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #4b5563;
+          font-size: 0.85rem;
+          margin-bottom: 1rem;
+        }
+
+        .crumb-link { cursor: pointer; transition: color 0.2s; }
+        .crumb-link:hover { color: #eab308; }
+        .crumb-active { color: #9ca3af; }
+
+        .header-main-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 2rem;
+          flex-wrap: wrap;
+        }
+
+        .header-titles h1 {
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          margin-bottom: 0.5rem;
+          font-family: 'Outfit', sans-serif;
+        }
+
+        .header-titles p { color: #6b7280; font-size: 1.1rem; }
+
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+
+        .btn-refresh {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: #9ca3af;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-refresh:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .btn-primary-admin {
+          background: #eab308;
+          color: #000;
+          border: none;
+          padding: 0.8rem 1.8rem;
+          border-radius: 12px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 4px 15px rgba(234, 179, 8, 0.2);
+        }
+
+        .btn-primary-admin:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(234, 179, 8, 0.3); }
+
+        .btn-secondary-admin {
+          background: rgba(255, 255, 255, 0.03);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 0.8rem 1.8rem;
+          border-radius: 12px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .btn-secondary-admin:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .icon-gold { color: #eab308; }
+      `}</style>
     </div>
   );
 };
