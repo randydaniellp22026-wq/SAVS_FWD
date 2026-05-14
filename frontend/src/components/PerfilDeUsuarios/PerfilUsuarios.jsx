@@ -86,8 +86,17 @@ function PerfilUsuarios() {
       background: '#141414',
       color: '#fff',
       confirmButtonColor: '#e63946'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
+        try {
+          // Llamar al backend para limpiar la cookie httpOnly del JWT
+          await fetch('http://localhost:5000/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+        } catch (err) {
+          console.error('Error al cerrar sesión en el servidor:', err);
+        }
         toast('Sesión cerrada', { icon: '👋' });
         localStorage.removeItem('user');
         navigate('/login');

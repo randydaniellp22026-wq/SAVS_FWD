@@ -49,8 +49,17 @@ export const useNavbarLogica = () => {
     }
   };
 
-  const handleLogout = (e) => {
+  const handleLogout = async (e) => {
     if (e) e.stopPropagation(); // Evitar que el clic en logout active el navigation al perfil
+    try {
+      // Llamar al backend para limpiar la cookie httpOnly del JWT
+      await fetch('http://localhost:5000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (err) {
+      console.error('Error al cerrar sesión en el servidor:', err);
+    }
     toast('Sesión cerrada', { icon: '👋' });
     localStorage.removeItem('user');
     setUser(null);

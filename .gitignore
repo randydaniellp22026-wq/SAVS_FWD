@@ -23,8 +23,3 @@ dist-ssr
 *.sln
 *.sw?
 .env
-*.env.local
-backend/config/config.json
-backend/config/*.json
-node_modules/
-.DS_Store
