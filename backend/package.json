@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate && cross-env NODE_ENV=test jest",
     "start": "node server.js"
   },
   "keywords": [],
@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "axios": "^1.16.1",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -22,6 +23,9 @@
     "sequelize": "^6.37.8"
   },
   "devDependencies": {
-    "sequelize-cli": "^6.6.5"
+    "cross-env": "^10.1.0",
+    "jest": "^30.4.2",
+    "sequelize-cli": "^6.6.5",
+    "supertest": "^7.2.2"
   }
 }
