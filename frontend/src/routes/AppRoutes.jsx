@@ -20,6 +20,7 @@ import CreateVehicle from '../pages/admin/CreateVehicle';
 import UserManagement from '../pages/admin/UserManagement';
 import BranchManagement from '../pages/admin/BranchManagement';
 import TrackingManagement from '../pages/admin/TrackingManagement';
+import MarketingBroadcast from '../pages/admin/MarketingBroadcast';
 import AdminLayout from '../components/admin/AdminLayout';
 
 const AppRoutes = () => {
@@ -55,6 +56,7 @@ const AppRoutes = () => {
       <Route path="/admin/create-vehicle" element={<ProtectedRoute><AdminLayout><CreateVehicle /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/reviews" element={<ProtectedRoute><AdminLayout><Reseñas /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/tracking" element={<ProtectedRoute><AdminLayout><TrackingManagement /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/marketing" element={<ProtectedRoute><AdminLayout><MarketingBroadcast /></AdminLayout></ProtectedRoute>} />
     </Routes>
   );
 };

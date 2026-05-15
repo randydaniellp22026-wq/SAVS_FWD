@@ -32,3 +32,11 @@ exports.esAdmin = (req, res, next) => {
     }
     next();
 };
+
+// Middleware para verificar si el usuario es administrador o gerente
+exports.esAdminOGerente = (req, res, next) => {
+    if (!req.usuario || !req.usuario.rol || (req.usuario.rol.nombre !== 'admin' && req.usuario.rol.nombre !== 'gerente')) {
+        return res.status(403).json({ error: 'Acceso denegado. Se requiere rol administrativo.' });
+    }
+    next();
+};
