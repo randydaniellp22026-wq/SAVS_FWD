@@ -95,18 +95,21 @@ const CreditSimulator = () => {
                 <div className="input-group full">
                   <label>Vehículo del Catálogo</label>
                   <div className="input-wrapper">
-                    <select 
-                      className="simulator-select" 
-                      onChange={(e) => handleVehicleSelect(e.target.value)}
-                      value={selectedVehicle?.id || ""}
-                    >
-                      <option value="">Selecciona un vehículo...</option>
-                      {vehicles.slice().sort((a,b) => a.name.localeCompare(b.name)).map(v => (
-                        <option key={v.id} value={v.id}>
-                          {v.name} ({v.year}) - {formatCRC(v.price)}
-                        </option>
-                      ))}
-                    </select>
+                      <select 
+                        className="simulator-select" 
+                        onChange={(e) => handleVehicleSelect(e.target.value)}
+                        value={selectedVehicle?.id || ""}
+                      >
+                        <option value="">Selecciona un vehículo...</option>
+                        {vehicles
+                          .slice()
+                          .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+                          .map(v => (
+                            <option key={v.id} value={v.id}>
+                              {v.name || 'Vehículo sin nombre'} ({v.year || 'N/A'}) - {formatCRC(v.price || 0)}
+                            </option>
+                          ))}
+                      </select>
                   </div>
                 </div>
 
