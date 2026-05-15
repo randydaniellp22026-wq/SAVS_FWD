@@ -1,3 +1,8 @@
+/**
+ * Controlador de Autenticación (Auth)
+ * Administra el registro, inicio y cierre de sesión de usuarios, así como la recuperación de contraseñas.
+ * Implementa seguridad con bcrypt (hashing) y jsonwebtoken (JWT).
+ */
 const { Usuario, Rol } = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');

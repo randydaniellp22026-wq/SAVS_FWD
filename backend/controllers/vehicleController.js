@@ -1,3 +1,8 @@
+/**
+ * Controlador de Vehículos (Autos)
+ * Centraliza la lógica para gestionar el inventario de la empresa, incluyendo 
+ * subida de imágenes, paginación, filtros avanzados y búsquedas dinámicas.
+ */
 const { Auto } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');

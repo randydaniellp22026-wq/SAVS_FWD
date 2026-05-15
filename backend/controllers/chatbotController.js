@@ -1,3 +1,8 @@
+/**
+ * Controlador del Chatbot IA
+ * Administra la comunicación entre el usuario y la API de inteligencia artificial (Groq LLaMA)
+ * incluyendo el contexto del inventario actual en tiempo real.
+ */
 const axios = require('axios');
 const { Auto, Setting } = require('../models');
 
