@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
 
 // Configuración básica de Axios
 const api = axios.create({
@@ -10,6 +10,20 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Interceptor para manejo de errores global
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Si no hay respuesta, es probable que sea un error de red o el servidor esté caído
+    if (!error.response) {
+      console.error('❌ Error de Red - ¿Está el servidor corriendo?');
+      // Modificamos el mensaje para que sea más descriptivo en el frontend
+      error.message = 'Error de conexión: El servidor no responde. Asegúrate de que el backend esté encendido (npm run dev).';
+    }
+    return Promise.reject(error);
+  }
+);
 
 /**
  * Servicio de Vehículos

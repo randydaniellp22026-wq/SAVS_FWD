@@ -483,6 +483,37 @@
   letter-spacing: -0.02em;
 }
 
+/* PDF Button Styles */
+.pdf-details-btn {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.4);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  color: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pdf-details-btn:hover {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: #eab308;
+  transform: translateY(-2px);
+}
+
+.pdf-details-btn svg {
+  color: #eab308;
+}
+
 /* Paginación Premium */
 .pagination-controls {
   display: flex;

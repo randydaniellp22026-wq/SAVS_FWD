@@ -22,7 +22,17 @@ const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUserFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored || stored === 'undefined') return {};
+      return JSON.parse(stored);
+    } catch (e) {
+      return {};
+    }
+  };
+  
+  const currentUser = getUserFromStorage();
   const isGerente = currentUser.rol === 'gerente';
 
   const fetchUsers = async () => {
@@ -42,7 +52,7 @@ const UserManagement = () => {
   }, []);
 
   const handleEditUser = (user) => {
-    if (user.rol === 'gerente' && !isGerente) {
+    if (user.rol?.nombre === 'gerente' && !isGerente) {
       return Swal.fire('Acceso Denegado', 'No tienes permisos para modificar a un Gerente.', 'warning');
     }
 
@@ -89,7 +99,7 @@ const UserManagement = () => {
        return Swal.fire('Acción Prohibida', 'No puedes eliminar tu propia cuenta desde aquí.', 'error');
     }
     
-    if (user.rol === 'gerente' && currentUser.rol !== 'gerente') {
+    if (user.rol?.nombre === 'gerente' && currentUser.rol !== 'gerente') {
        return Swal.fire('Acceso Denegado', 'No tienes permisos para eliminar a un Gerente.', 'warning');
     }
 
@@ -119,7 +129,7 @@ const UserManagement = () => {
   const handleToggleAdmin = async (user) => {
     if (!isGerente) return;
     
-    const isPromoting = user.rol !== 'admin';
+    const isPromoting = user.rol?.nombre !== 'admin';
     const newRole = isPromoting ? 'admin' : 'Cliente';
     const newRolId = isPromoting ? 1 : 3;
     
@@ -225,28 +235,28 @@ const UserManagement = () => {
                   </div>
                 </td>
                 <td data-label="Rol / Rango">
-                  <span className={`role-badge ${user.rol?.toLowerCase() || (user.rolId === 1 ? 'admin' : 'cliente')}`}>
-                    {user.rol === 'admin' ? <Shield size={14} /> : user.rol === 'gerente' ? <ShieldAlert size={14} /> : <UserCheck size={14} />}
-                    {user.rol || (user.rolId === 1 ? 'admin' : 'Cliente')}
+                  <span className={`role-badge ${(user.rol?.nombre || 'cliente').toLowerCase()}`}>
+                    {user.rol?.nombre === 'admin' ? <Shield size={14} /> : user.rol?.nombre === 'gerente' ? <ShieldAlert size={14} /> : <UserCheck size={14} />}
+                    {user.rol?.nombre || 'Cliente'}
                   </span>
                 </td>
                 <td data-label="Acciones">
                   <div className="actions-cell">
-                    {(isGerente || user.rol !== 'gerente') && (
+                    {(isGerente || user.rol?.nombre !== 'gerente') && (
                       <button className="action-btn" onClick={() => handleEditUser(user)} title="Editar"><Edit3 size={18} /></button>
                     )}
                     
-                    {isGerente && user.id !== currentUser.id && user.rol !== 'gerente' && (
+                    {isGerente && user.id !== currentUser.id && user.rol?.nombre !== 'gerente' && (
                       <button 
-                        className={`action-btn ${user.rol === 'admin' ? 'demote' : 'promote-shine'}`} 
+                        className={`action-btn ${user.rol?.nombre === 'admin' ? 'demote' : 'promote-shine'}`} 
                         onClick={() => handleToggleAdmin(user)}
-                        title={user.rol === 'admin' ? "Quitar Admin" : "Promover a Administrador"}
+                        title={user.rol?.nombre === 'admin' ? "Quitar Admin" : "Promover a Administrador"}
                       >
                         <UserPlus size={18} />
                       </button>
                     )}
 
-                    {(isGerente || (user.rol !== 'gerente' && user.id !== currentUser.id)) && (
+                    {(isGerente || (user.rol?.nombre !== 'gerente' && user.id !== currentUser.id)) && (
                       <button className="action-btn delete" onClick={() => handleDeleteUser(user)} title="Eliminar"><Trash2 size={18} /></button>
                     )}
                   </div>

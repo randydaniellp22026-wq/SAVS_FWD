@@ -47,9 +47,14 @@ export const useRegistroUsuariosLogica = () => {
       return false;
     }
 
-    const regexPassword = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const regexPassword = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!regexPassword.test(password)) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Contraseña insuficiente', text: 'La contraseña debe tener al menos 8 caracteres, incluir letras y números.' });
+      Swal.fire({ 
+        ...darkSwal, 
+        icon: 'error', 
+        title: 'Seguridad insuficiente', 
+        text: 'La contraseña debe tener al menos 8 caracteres e incluir al menos una letra MAYÚSCULA y un NÚMERO.' 
+      });
       return false;
     }
 
@@ -66,29 +71,14 @@ export const useRegistroUsuariosLogica = () => {
     if (!validarFormulario()) return;
 
     try {
-      // Verificar si el correo ya existe
-      const resCheck = await api.get('/users');
-      const allUsers = resCheck.data;
-      
-      const newEmail = formData.correo.trim().toLowerCase();
-      const emailExists = allUsers.some(u => (u.email || u.correo || '').toLowerCase() === newEmail);
-
-      if (emailExists) {
-        Swal.fire({ ...darkSwal, icon: 'warning', title: 'Correo ya registrado', text: 'Este correo ya tiene una cuenta asociada. Inicia sesión para continuar.' });
-        return;
-      }
-
-      // POST new user to Backend
-      const res = await api.post('/users', {
-        id: Date.now().toString(), // Generando un ID temporal de string para compatibilidad
-        nombre: formData.nombre,
-        email: newEmail,
-        correo: newEmail,
+      // Registrar al usuario usando el endpoint de autenticación oficial
+      const res = await api.post('/auth/register', {
+        id: crypto.randomUUID(), // Usando UUID para evitar duplicidad de IDs de fecha
+        nombre: formData.nombre.trim(),
+        email: formData.correo.trim().toLowerCase(),
         telefono: formData.telefono.trim(),
         password: formData.password,
-        rolId: 3, // ID de 'Cliente' por defecto
-        ubicacion: 'Costa Rica',
-        favorites: []
+        ubicacion: 'Costa Rica'
       });
 
       Swal.fire({
@@ -105,7 +95,13 @@ export const useRegistroUsuariosLogica = () => {
 
     } catch (err) {
       console.error("Error en registro:", err);
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error de servidor', text: 'No se pudo completar el registro en la base de datos.' });
+      const errorMsg = err.response?.data?.error || 'No se pudo completar el registro en la base de datos.';
+      Swal.fire({ 
+        ...darkSwal, 
+        icon: 'error', 
+        title: 'Error de registro', 
+        text: errorMsg 
+      });
     }
   };
 

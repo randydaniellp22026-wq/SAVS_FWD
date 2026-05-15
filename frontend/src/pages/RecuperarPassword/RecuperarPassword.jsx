@@ -71,6 +71,18 @@ const RecuperarPassword = () => {
       return;
     }
 
+    // Validación de complejidad de contraseña (Tarea solicitada)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      Swal.fire({ 
+        ...darkSwal, 
+        icon: 'error', 
+        title: 'Seguridad insuficiente', 
+        text: 'La nueva contraseña debe tener al menos 8 caracteres e incluir al menos una letra MAYÚSCULA y un NÚMERO.' 
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post('/auth/reset-password', { 

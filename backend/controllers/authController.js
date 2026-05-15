@@ -9,11 +9,39 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_key_provisional';
 exports.register = async (req, res) => {
     try {
         const { id, nombre, email, password, rolId, telefono, ubicacion, direccion_precisa, correo } = req.body;
+        const targetEmail = (email || correo || '').toLowerCase().trim();
 
-        // Verificar si el usuario ya existe (por ID o por email)
-        const usuarioExistente = await Usuario.findOne({ where: { email: email || correo } });
+        if (!targetEmail || !password) {
+            return res.status(400).json({ error: 'Email y contraseña son requeridos.' });
+        }
+
+        // Validación de complejidad de contraseña (Tarea solicitada)
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({ 
+                error: 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.' 
+            });
+        }
+
+        // Verificar si el usuario ya existe
+        const usuarioExistente = await Usuario.findOne({ 
+            where: { 
+                [require('sequelize').Op.or]: [
+                    { email: targetEmail },
+                    { correo: targetEmail }
+                ]
+            } 
+        });
+
         if (usuarioExistente) {
             return res.status(400).json({ error: 'El correo ya está registrado.' });
+        }
+
+        // Obtener el ID del rol 'Cliente' dinámicamente si no se provee uno
+        let finalRolId = rolId;
+        if (!finalRolId) {
+            const roleCliente = await Rol.findOne({ where: { nombre: 'Cliente' } });
+            finalRolId = roleCliente ? roleCliente.id : 3; // Fallback al 3 (Cliente en seed)
         }
 
         // Hashear la contraseña
@@ -22,21 +50,22 @@ exports.register = async (req, res) => {
 
         // Crear el usuario
         const nuevoUsuario = await Usuario.create({
-            id: id || crypto.randomUUID(), // Generar UUID si no viene
+            id: id || crypto.randomUUID(),
             nombre,
-            email: email || correo,
-            correo: email || correo,
+            email: targetEmail,
+            correo: targetEmail,
             password: hashedPassword,
-            rolId: rolId || 2, // Por defecto rol 2 (asumiendo que 2 es cliente y 1 es admin)
+            rolId: finalRolId,
             telefono,
-            ubicacion,
+            ubicacion: ubicacion || 'Costa Rica',
             direccion_precisa,
             favorites: []
         });
 
         res.status(201).json({ message: 'Usuario registrado con éxito', usuarioId: nuevoUsuario.id });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Error en registro:', error);
+        res.status(500).json({ error: 'Error en el servidor: ' + error.message });
     }
 };
 
@@ -44,7 +73,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, correo, password } = req.body;
-        const targetEmail = email || correo;
+        const targetEmail = (email || correo || '').toLowerCase().trim();
 
         // Buscar el usuario
         const usuario = await Usuario.findOne({ 
@@ -133,6 +162,14 @@ exports.checkEmail = async (req, res) => {
 exports.resetPassword = async (req, res) => {
     try {
         const { userId, newPassword } = req.body;
+
+        // Validación de complejidad de contraseña (Tarea solicitada)
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({ 
+                error: 'La nueva contraseña debe tener al menos 8 caracteres, una mayúscula y un número.' 
+            });
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
