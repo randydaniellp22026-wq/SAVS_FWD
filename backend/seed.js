@@ -8,7 +8,7 @@ const seedData = async () => {
     try {
         console.log('Empezando migración de datos de db.json a MySQL...');
 
-        const rawData = fs.readFileSync(path.join(__dirname, '../db.json'), 'utf8');
+        const rawData = fs.readFileSync(path.join(__dirname, '../frontend/db.json'), 'utf8');
         const data = JSON.parse(rawData);
 
         // 1. Crear Roles base

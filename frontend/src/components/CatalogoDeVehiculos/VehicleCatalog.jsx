@@ -22,6 +22,7 @@ import BorderBeam from '../BorderBeam/BorderBeam';
 import { Magnetic } from '../core/Magnetic';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import { motion } from 'framer-motion';
+import VehiclePDFButton from './VehiclePDFButton';
 import './VehicleCatalog.css';
 
 // Glob para imágenes locales (fallback si no hay imagen en el servidor)
@@ -220,11 +221,14 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
                             <span className="vehicle-price">
                               ₡{Number(car.price || 0).toLocaleString()}
                             </span>
-                            <SlideTextButton 
-                              text="Detalles" 
-                              hoverText="Ver más" 
-                              onClick={() => navigate(`/details/${car.id}`, { state: { vehicle: car } })} 
-                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0', width: '120px' }}>
+                              <VehiclePDFButton vehicle={car} />
+                              <SlideTextButton 
+                                text="Detalles" 
+                                hoverText="Ver más" 
+                                onClick={() => navigate(`/details/${car.id}`, { state: { vehicle: car } })} 
+                              />
+                            </div>
                           </div>
                         </div>
                       </motion.div>

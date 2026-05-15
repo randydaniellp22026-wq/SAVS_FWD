@@ -11,20 +11,22 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 
 // --- SEGURIDAD AVANZADA ---
-app.use(helmet());
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000, // Aumentado de 100 a 1000 para evitar bloqueos en auditoría
     message: 'Demasiadas peticiones desde esta IP, por favor intente más tarde.'
 });
 app.use('/api/', limiter);
 
-// Limitador de auth (desactivado en tests para no bloquear peticiones)
+// Limitador de auth (más permisivo para pruebas)
 if (process.env.NODE_ENV !== 'test') {
     const authLimiter = rateLimit({
         windowMs: 60 * 60 * 1000,
-        max: 10,
+        max: 50, // Aumentado de 10 a 50
         message: 'Demasiados intentos de acceso, su IP ha sido bloqueada temporalmente por seguridad.'
     });
     app.use('/api/auth/login', authLimiter);
@@ -33,7 +35,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Middlewares estándar
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    origin: true, // Permitir cualquier origen en desarrollo para evitar errores de red por IP/Port mismatch
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -54,6 +56,7 @@ app.use('/api/branches', require('./routes/branches'));
 app.use('/api/technical_glossary', require('./routes/technicalGlossary'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/chatbot', require('./routes/chatbot'));
+app.use('/api/marketing', require('./routes/marketing'));
 
 app.get('/', (req, res) => {
     res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
