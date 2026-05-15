@@ -76,3 +76,12 @@ backend/uploads/*
 *.njsproj
 *.sln
 *.sw?
+
+# Build and temporary files
+dist/
+frontend/dist/
+backend/dist/
+.cache/
+.vite/
+*.tmp
+*.temp
