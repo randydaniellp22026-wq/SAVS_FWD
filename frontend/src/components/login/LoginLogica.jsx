@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-import api from '../../api/axios';
+import api from '../../services/api';
 
 const darkSwal = {
   background: '#0a0a0a',
@@ -67,7 +67,12 @@ export const useLoginLogic = () => {
           title: '¡Bienvenido!',
           text: `Sesión iniciada como ${usuario.nombre}`
         }).then(() => {
-          navigate('/');
+          // Si es admin o gerente, mandarlo directo al panel
+          if (usuario.rol === 'admin' || usuario.rol === 'gerente') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         });
       }
     } catch (err) {
@@ -78,12 +83,5 @@ export const useLoginLogic = () => {
     }
   };
 
-  const fillTestCredentials = () => {
-    setFormData({
-      email: 'admin@thedestinyvault.com',
-      password: 'admin'
-    });
-  };
-
-  return { formData, loading, error, handleChange, handleSubmit, fillTestCredentials };
+  return { formData, loading, error, handleChange, handleSubmit };
 };

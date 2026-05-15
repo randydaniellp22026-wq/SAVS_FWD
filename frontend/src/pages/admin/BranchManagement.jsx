@@ -12,6 +12,8 @@ import {
   X,
   ExternalLink
 } from 'lucide-react';
+import api from '../../services/api';
+import AdminLoader from '../../components/admin/AdminLoader';
 import './Admin.css';
 
 const darkSwal = {
@@ -42,11 +44,8 @@ const BranchManagement = () => {
   const fetchBranches = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/branches');
-      if (response.ok) {
-        const data = await response.json();
-        setBranches(data);
-      }
+      const response = await api.get('/branches');
+      setBranches(response.data);
     } catch (error) {
       console.error("Error fetching branches:", error);
     } finally {
@@ -92,28 +91,22 @@ const BranchManagement = () => {
 
     try {
       const url = isEditing 
-        ? `http://localhost:5000/branches/${currentBranch.id}` 
-        : 'http://localhost:5000/branches';
+        ? `/branches/${currentBranch.id}` 
+        : '/branches';
       
-      const method = isEditing ? 'PUT' : 'POST';
+      const res = isEditing 
+        ? await api.put(url, currentBranch)
+        : await api.post(url, currentBranch);
 
-      const response = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentBranch)
+      Swal.fire({
+        ...darkSwal,
+        icon: 'success',
+        title: isEditing ? 'Sede Actualizada' : 'Sede Creada',
+        timer: 1500,
+        showConfirmButton: false
       });
-
-      if (response.ok) {
-        Swal.fire({
-          ...darkSwal,
-          icon: 'success',
-          title: isEditing ? 'Sede Actualizada' : 'Sede Creada',
-          timer: 1500,
-          showConfirmButton: false
-        });
-        fetchBranches();
-        closeModal();
-      }
+      fetchBranches();
+      closeModal();
     } catch (error) {
       Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo guardar la sede.' });
     }
@@ -132,13 +125,9 @@ const BranchManagement = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:5000/branches/${id}`, {
-          method: 'DELETE'
-        });
-        if (response.ok) {
-          Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
-          fetchBranches();
-        }
+        await api.delete(`/branches/${id}`);
+        Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
+        fetchBranches();
       } catch (error) {
         Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo eliminar la sede.' });
       }
@@ -160,7 +149,7 @@ const BranchManagement = () => {
 
       <div className="admin-card branches-mgmt-card">
         {isLoading ? (
-          <div className="loading-req">Cargando sedes...</div>
+          <AdminLoader message="Localizando sedes..." />
         ) : branches.length === 0 ? (
           <div className="empty-state">No hay sedes registradas.</div>
         ) : (

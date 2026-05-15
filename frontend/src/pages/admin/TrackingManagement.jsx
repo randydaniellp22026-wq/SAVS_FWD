@@ -16,8 +16,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
+import api from '../../services/api';
+import AdminLoader from '../../components/admin/AdminLoader';
 
-const API_URL = 'http://localhost:5000/users';
+const API_URL = '/users';
 
 const STAGES = [
   { step: 1, label: 'Compra Realizada',    icon: Check,   color: '#10b981', statusText: 'Compra procesada correctamente' },
@@ -46,8 +48,8 @@ const TrackingManagement = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res  = await fetch(API_URL);
-      const data = await res.json();
+      const res  = await api.get(API_URL);
+      const data = res.data;
       // Solo clientes que tengan tracking definido
       setUsers(data.filter(u => u.rol === 'Cliente' || u.tracking));
     } catch (e) {
@@ -122,25 +124,19 @@ const TrackingManagement = () => {
     }).then(async (result) => {
       if (!result.isConfirmed) return;
       try {
-        const res = await fetch(`${API_URL}/${user.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tracking: result.value })
+        await api.patch(`${API_URL}/${user.id}`, { tracking: result.value });
+        Swal.fire({
+          icon: 'success',
+          title: '¡Actualizado!',
+          text: `El tracking de ${user.nombre} fue guardado correctamente.`,
+          confirmButtonColor: '#eab308',
+          background: '#141414',
+          color: '#fff',
+          timer: 2000,
+          showConfirmButton: false
         });
-        if (res.ok) {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Actualizado!',
-            text: `El tracking de ${user.nombre} fue guardado correctamente.`,
-            confirmButtonColor: '#eab308',
-            background: '#141414',
-            color: '#fff',
-            timer: 2000,
-            showConfirmButton: false
-          });
-          fetchUsers();
-          setExpanded(null);
-        } else throw new Error();
+        fetchUsers();
+        setExpanded(null);
       } catch {
         Swal.fire('Error', 'No se pudo guardar en el servidor.', 'error');
       }
@@ -239,10 +235,7 @@ const TrackingManagement = () => {
 
       {/* ── Lista de clientes ── */}
       {loading ? (
-        <div className="tracking-placeholder loading">
-          <Ship size={40} />
-          <p>Cargando clientes...</p>
-        </div>
+        <AdminLoader message="Obteniendo estados de importación..." />
       ) : filtered.length === 0 ? (
         <div className="tracking-placeholder empty">
           <AlertCircle size={40} />

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import api from '../../../../services/api';
 
 const darkSwal = {
   background: '#0a0a0a',
@@ -137,16 +138,8 @@ export const useRedireccionContactosLogica = () => {
 
     setLoading(true);
 
-    fetch('http://localhost:5000/requests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestPayload)
-    })
+    api.post('/requests', requestPayload)
       .then(res => {
-        if (!res.ok) throw new Error('Error al guardar solicitud');
-        return res.json();
-      })
-      .then(data => {
         Swal.fire({
           ...darkSwal,
           icon: 'success',

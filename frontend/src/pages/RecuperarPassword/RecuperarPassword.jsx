@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
+import api from '../../services/api';
 import { sendRecoveryEmail } from '../../utils/security';
 import './RecuperarPassword.css';
 
@@ -10,8 +11,6 @@ const darkSwal = {
   color: '#fff',
   confirmButtonColor: '#eab308'
 };
-
-const API_URL = 'http://localhost:5000/api/auth';
 
 const RecuperarPassword = () => {
   const [step, setStep] = useState(1); // 1: Email, 2: Code, 3: New Password
@@ -29,19 +28,10 @@ const RecuperarPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Llamamos a un endpoint específico que no requiere token
-      const resp = await fetch(`${API_URL}/check-email`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      });
+      // Usamos el endpoint configurado en la API centralizada
+      const resp = await api.post('/auth/check-email', { email: email.trim() });
       
-      if (!resp.ok) {
-        const errorData = await resp.json();
-        throw new Error(errorData.error || 'No encontramos ninguna cuenta vinculada a este correo.');
-      }
-
-      const user = await resp.json();
+      const user = resp.data;
       setUserFound(user);
       const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       setGeneratedCode(tempCode);
@@ -57,7 +47,7 @@ const RecuperarPassword = () => {
       });
       setStep(2);
     } catch (err) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.message });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
     } finally {
       setLoading(false);
     }
@@ -83,28 +73,19 @@ const RecuperarPassword = () => {
 
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: userFound.id,
-          newPassword: newPassword 
-        })
+      await api.post('/auth/reset-password', { 
+        userId: userFound.id,
+        newPassword: newPassword 
       });
 
-      if (resp.ok) {
-        Swal.fire({
-          ...darkSwal,
-          icon: 'success',
-          title: 'Contraseña Actualizada',
-          text: 'Ya puedes iniciar sesión con tu nueva contraseña.'
-        }).then(() => navigate('/login'));
-      } else {
-        const errorData = await resp.json();
-        throw new Error(errorData.error || 'No se pudo actualizar la contraseña.');
-      }
+      Swal.fire({
+        ...darkSwal,
+        icon: 'success',
+        title: 'Contraseña Actualizada',
+        text: 'Ya puedes iniciar sesión con tu nueva contraseña.'
+      }).then(() => navigate('/login'));
     } catch (err) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.message });
+      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
     } finally {
       setLoading(false);
     }

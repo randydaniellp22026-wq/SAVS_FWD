@@ -2,15 +2,15 @@ import React from 'react';
 import { Facebook, Mail, MapPin, Phone, Globe, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import savsLogo from '../../img/imagecopy4.png';
+import api from '../../services/api';
 import './Footer.css';
 
 const Footer = () => {
   const [settings, setSettings] = React.useState(null);
 
   React.useEffect(() => {
-    fetch('http://localhost:5000/settings')
-      .then(res => res.json())
-      .then(data => setSettings(data))
+    api.get('/settings')
+      .then(res => setSettings(res.data))
       .catch(err => console.error("Error fetching footer settings:", err));
   }, []);
 
@@ -41,7 +41,7 @@ const Footer = () => {
             <li><Link to="/inventory">Catálogo</Link></li>
             <li><Link to="/perfil">Mi Perfil</Link></li>
             <li><Link to="/vender-auto">Auto como parte de pago</Link></li>
-            <li><Link to="/reviews">Reseñas</Link></li>
+            <li><Link to="/reseñas">Reseñas</Link></li>
             <li><Link to="/contact">Contacto</Link></li>
           </ul>
         </div>
@@ -72,7 +72,7 @@ const Footer = () => {
         <p>Copyright © {new Date().getFullYear()}. All rights reserved. Powered by Grid Studio Costa Rica.</p>
         <div className="footer-social-bottom">
           <a href="https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><Facebook size={18} /></a>
-          <a href="#" aria-label="Website"><Globe size={18} /></a>
+          <a href="#!" aria-label="Website"><Globe size={18} /></a>
         </div>
       </div>
     </footer>
