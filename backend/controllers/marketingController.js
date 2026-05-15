@@ -1,3 +1,7 @@
+/**
+ * Controlador de Marketing y Difusión
+ * Se encarga de la integración con Resend API para enviar correos electrónicos (ej. boletines o pruebas).
+ */
 const { Resend } = require('resend');
 const { Usuario } = require('../models');
 

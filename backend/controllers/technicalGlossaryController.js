@@ -1,5 +1,13 @@
+/**
+ * Controlador del Glosario Técnico
+ * Maneja los términos y definiciones técnicas relacionadas a vehículos que ayudan a los usuarios.
+ */
 const { TechnicalGlossary } = require('../models');
 
+/**
+ * Obtiene todos los términos técnicos registrados.
+ * Utilizado para mostrar un diccionario o listado de ayuda a los clientes.
+ */
 exports.getAll = async (req, res) => {
     try {
         const data = await TechnicalGlossary.findAll();
@@ -9,6 +17,9 @@ exports.getAll = async (req, res) => {
     }
 };
 
+/**
+ * Obtiene un término técnico específico por su ID.
+ */
 exports.getById = async (req, res) => {
     try {
         const data = await TechnicalGlossary.findByPk(req.params.id);
@@ -19,6 +30,10 @@ exports.getById = async (req, res) => {
     }
 };
 
+/**
+ * Crea un nuevo término en el glosario.
+ * Usado por los administradores para enriquecer la base de conocimientos.
+ */
 exports.create = async (req, res) => {
     try {
         const data = await TechnicalGlossary.create(req.body);
@@ -28,6 +43,9 @@ exports.create = async (req, res) => {
     }
 };
 
+/**
+ * Actualiza la definición o el nombre de un término técnico existente.
+ */
 exports.update = async (req, res) => {
     try {
         const [updated] = await TechnicalGlossary.update(req.body, { where: { id: req.params.id } });
@@ -42,6 +60,9 @@ exports.update = async (req, res) => {
     }
 };
 
+/**
+ * Elimina un término del glosario.
+ */
 exports.remove = async (req, res) => {
     try {
         const deleted = await TechnicalGlossary.destroy({ where: { id: req.params.id } });
