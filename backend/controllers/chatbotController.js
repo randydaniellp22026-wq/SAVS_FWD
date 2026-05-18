@@ -1,3 +1,8 @@
+/**
+ * Controlador del Chatbot IA
+ * Administra la comunicación entre el usuario y la API de inteligencia artificial (Groq LLaMA)
+ * incluyendo el contexto del inventario actual en tiempo real.
+ */
 const axios = require('axios');
 const { Auto, Setting } = require('../models');
 
@@ -27,13 +32,13 @@ exports.chat = async (req, res) => {
         const systemPrompt = `Eres el asistente experto de IMPORTADORA SAVS, Costa Rica. 
         
         REGLAS CRÍTICAS:
-        1. Solo responde preguntas relacionadas con IMPORTADORA SAVS (venta de autos, inventario, financiamiento, trámites, etc.).
-        2. Si el usuario pregunta algo fuera de contexto (chistes, temas personales, política, etc.), declina amablemente indicando que eres un asistente especializado en la importadora.
-        3. Si el usuario pregunta por un auto del inventario, DEBES dar el link usando este formato: [Ver detalles del auto](/inventory/details/ID).
-        4. Si no sabes la respuesta, el usuario pide hablar con un humano, o se llega a una conclusión/acuerdo de interés, DEBES invitar al usuario a contactar por WhatsApp.
-        5. Responde siempre de forma amable y profesional.
+        1. Solo responde preguntas relacionadas con IMPORTADORA SAVS (venta de autos, inventario, importación desde Corea, financiamiento).
+        2. PROHIBIDO hacer listas de autos. Si el usuario pregunta qué autos hay o pide el catálogo, responde con un breve mensaje general. Al final de tu respuesta, debes incluir EXACTAMENTE AMBAS etiquetas: [CATALOGO] y [WHATSAPP].
+        3. Si preguntan por un auto específico y SÍ ESTÁ en el inventario, menciónalo brevemente e incluye ambas etiquetas: [CATALOGO] y [WHATSAPP].
+        4. Si preguntan por un auto que NO ESTÁ, di que PODEMOS IMPORTARLO desde Corea o EE.UU e incluye la etiqueta [WHATSAPP].
+        5. Si el usuario pide hablar con un humano o cierra la venta, incluye la etiqueta [WHATSAPP].
         
-        INVENTARIO DISPONIBLE (Directo desde MySQL):
+        INVENTARIO DISPONIBLE (Contexto interno para ti):
         ${inventoryContext}
         
         WhatsApp de la empresa: ${whatsappNumber}`;
@@ -45,7 +50,7 @@ exports.chat = async (req, res) => {
                 { role: "system", content: systemPrompt },
                 { role: "user", content: message }
             ],
-            temperature: 0.7,
+            temperature: 0.3, // Reducido para mayor obediencia a las reglas
             max_tokens: 1024
         }, {
             headers: {
@@ -54,11 +59,33 @@ exports.chat = async (req, res) => {
             }
         });
 
-        const reply = response.data.choices[0].message.content;
+        let reply = response.data.choices[0].message.content;
+        
+        let showWhatsapp = false;
+        let showCatalog = false;
+
+        if (reply.includes('[WHATSAPP]') || reply.toLowerCase().includes('whatsapp') || reply.toLowerCase().includes('asesor')) {
+            showWhatsapp = true;
+            reply = reply.replace(/\[WHATSAPP\]/gi, '').trim();
+        }
+        
+        // Fallback robusto para mostrar el botón azul
+        if (
+            reply.includes('[CATALOGO]') || 
+            reply.toLowerCase().includes('catálogo') || 
+            reply.toLowerCase().includes('catalogo') || 
+            reply.toLowerCase().includes('inventario') ||
+            reply.toLowerCase().includes('selección actual')
+        ) {
+            showCatalog = true;
+            reply = reply.replace(/\[CATALOGO\]/gi, '').trim();
+        }
 
         res.json({
             reply,
-            whatsapp: whatsappNumber
+            whatsapp: whatsappNumber,
+            showWhatsapp,
+            showCatalog
         });
 
     } catch (error) {

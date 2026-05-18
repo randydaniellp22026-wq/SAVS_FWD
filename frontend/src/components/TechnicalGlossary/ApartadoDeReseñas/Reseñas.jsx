@@ -15,7 +15,7 @@ const darkSwal = {
     }
 };
 
-const API_URL = 'http://localhost:5000/reviews';
+import api from '../../../services/api';
 
 const Reseñas = () => {
     const [reviews, setReviews] = useState([]);
@@ -52,11 +52,8 @@ const Reseñas = () => {
     const fetchReviews = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(API_URL);
-            if (response.ok) {
-                const data = await response.json();
-                setReviews(data.reverse());
-            }
+            const response = await api.get('/reviews');
+            setReviews(response.data.reverse());
         } catch (error) {
             console.error("Error fetching reviews:", error);
         } finally {
@@ -116,17 +113,15 @@ const Reseñas = () => {
         };
 
         try {
-            const method = isEditing ? 'PUT' : 'POST';
-            const url = isEditing ? `${API_URL}/${editingId}` : API_URL;
+            let response;
+            if (isEditing) {
+                response = await api.put(`/reviews/${editingId}`, reviewData);
+            } else {
+                response = await api.post('/reviews', reviewData);
+            }
 
-            const response = await fetch(url, {
-                method: method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(reviewData)
-            });
-
-            if (response.ok) {
-                const savedReview = await response.json();
+            if (response.status === 200 || response.status === 201) {
+                const savedReview = response.data;
                 if (isEditing) {
                     setReviews(reviews.map(r => r.id === editingId ? savedReview : r));
                 } else {
@@ -168,8 +163,8 @@ const Reseñas = () => {
         if (!result.isConfirmed) return;
 
         try {
-            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            if (response.ok) {
+            const response = await api.delete(`/reviews/${id}`);
+            if (response.status === 200) {
                 setReviews(reviews.filter(review => review.id !== id));
                 Swal.fire({
                     ...darkSwal,

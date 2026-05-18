@@ -6,7 +6,10 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test npx sequelize-cli db:migrate && cross-env NODE_ENV=test jest",
     "test:watch": "jest --watch",
-    "start": "node server.js"
+    "start": "nodemon server.js",
+    "db:init": "npx sequelize-cli db:migrate",
+    "db:seed": "node seed.js",
+    "db:migrate-json": "node migrate_json_to_mysql.js"
   },
   "jest": {
     "testEnvironment": "node",
@@ -31,12 +34,14 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "mysql2": "^3.22.3",
+    "resend": "^6.12.3",
     "sequelize": "^6.37.8",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "jest": "^30.4.2",
+    "nodemon": "^3.1.14",
     "sequelize-cli": "^6.6.5",
     "supertest": "^7.2.2"
   }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import api from '../../api/axios';
+import api from '../../services/api';
 import AdminLoader from '../../components/admin/AdminLoader';
 import { 
   ShieldCheck, 
@@ -36,7 +36,17 @@ import './Admin.css';
 const COLORS = ['#eab308', '#3b82f6', '#10b981', '#ef4444', '#a855f7', '#6366f1'];
 
 const AdminDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUserFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored || stored === 'undefined') return {};
+      return JSON.parse(stored);
+    } catch (e) {
+      return {};
+    }
+  };
+  
+  const user = getUserFromStorage();
   const [stats, setStats] = useState({
     vehicles: 0,
     users: 0,
@@ -127,7 +137,10 @@ const AdminDashboard = () => {
         ]);
         
         // Extraemos los datos de forma segura
-        const v = vRes.status === 'fulfilled' ? vRes.value.data : [];
+        // Nota: Los vehículos vienen paginados { data: [...], pagination: {...} }
+        const vRaw = vRes.status === 'fulfilled' ? vRes.value.data : [];
+        const v = Array.isArray(vRaw) ? vRaw : (vRaw.data || []);
+        
         const u = uRes.status === 'fulfilled' ? uRes.value.data : [];
         const req = reqRes.status === 'fulfilled' ? reqRes.value.data : [];
         const rev = revRes.status === 'fulfilled' ? revRes.value.data : [];
@@ -135,7 +148,7 @@ const AdminDashboard = () => {
         const sets = setsRes.status === 'fulfilled' ? setsRes.value.data : {};
 
         setStats({
-          vehicles: Array.isArray(v) ? v.length : 0,
+          vehicles: vRaw.pagination?.total || (Array.isArray(v) ? v.length : 0),
           users: Array.isArray(u) ? u.length : 0,
           requests: Array.isArray(req) ? req.length : 0,
           reviews: Array.isArray(rev) ? rev.length : 0,
@@ -166,7 +179,7 @@ const AdminDashboard = () => {
 
         // 3. Vehículos por Año
         const yearMap = safeV.reduce((acc, curr) => {
-          const year = curr.year || 'N/D';
+          const year = curr.year || curr.anio || 'N/D';
           acc[year] = (acc[year] || 0) + 1;
           return acc;
         }, {});

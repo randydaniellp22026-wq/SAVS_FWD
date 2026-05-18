@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../services/api';
 import './Chatbot.css';
 
 
@@ -60,18 +60,19 @@ const Chatbot = () => {
             const text = data.reply;
             const whatsappNum = data.whatsapp || whatsappNumber;
             
-            const showWhatsapp = text.toLowerCase().includes('whatsapp') || 
-                                text.toLowerCase().includes('asesor') || 
-                                text.toLowerCase().includes('contactar') ||
-                                text.toLowerCase().includes('conclusión') ||
-                                text.toLowerCase().includes('gracias') ||
-                                text.toLowerCase().includes('terminar');
+            // Usamos las flags generadas por el backend con [WHATSAPP] o por fallback de texto
+            const showWhatsapp = data.showWhatsapp || 
+                                text.toLowerCase().includes('whatsapp') || 
+                                text.toLowerCase().includes('asesor');
+                                
+            const showCatalog = data.showCatalog;
 
             setMessages(prev => [...prev, { 
                 id: Date.now(), 
                 type: 'bot', 
                 text: text,
-                whatsapp: showWhatsapp ? `https://wa.me/${whatsappNum.replace(/\D/g, '')}` : null
+                whatsapp: showWhatsapp ? `https://wa.me/${whatsappNum.replace(/\D/g, '')}` : null,
+                internalLink: showCatalog ? { url: '/inventory', label: 'Explorar Catálogo Completo' } : null
             }]);
         } catch (err) {
             console.error("AI Error:", err);
@@ -135,8 +136,38 @@ const Chatbot = () => {
                             {msg.type === 'bot' && <div className="avatar-small"><Bot size={14} color="#eab308" /></div>}
                             <div className="message-content">
                                 <div className="text-wrapper">
-                                    {msg.text.split('\n').map((line, i) => <p key={i}>{line}</p>)}
+                                    {msg.text.split('\n').map((line, i) => {
+                                        // Simple markdown link parser [texto](url)
+                                        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+                                        if (!linkRegex.test(line)) return <p key={i}>{line}</p>;
+                                        
+                                        linkRegex.lastIndex = 0; // reset
+                                        const parts = [];
+                                        let lastIndex = 0;
+                                        let match;
+                                        
+                                        while ((match = linkRegex.exec(line)) !== null) {
+                                            if (match.index > lastIndex) parts.push(line.substring(lastIndex, match.index));
+                                            parts.push(
+                                                <a key={`link-${i}-${match.index}`} href={match[2]} className="inline-chatbot-link">
+                                                    {match[1]}
+                                                </a>
+                                            );
+                                            lastIndex = linkRegex.lastIndex;
+                                        }
+                                        if (lastIndex < line.length) parts.push(line.substring(lastIndex));
+                                        
+                                        return <p key={i}>{parts}</p>;
+                                    })}
                                 </div>
+                                {msg.internalLink && (
+                                    <button 
+                                        className="internal-link-btn" 
+                                        onClick={() => window.location.href = msg.internalLink.url}
+                                    >
+                                        <ExternalLink size={14} /> {msg.internalLink.label}
+                                    </button>
+                                )}
                                 {msg.whatsapp && (
                                     <a href={msg.whatsapp} target="_blank" rel="noreferrer" className="whatsapp-call-btn">
                                         <ExternalLink size={14} /> Contactar Asesor

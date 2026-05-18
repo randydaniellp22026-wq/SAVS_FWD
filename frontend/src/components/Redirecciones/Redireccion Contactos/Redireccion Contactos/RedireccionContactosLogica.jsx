@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import api from '../../../../api/axios';
+import api from '../../../../services/api';
 
 const darkSwal = {
   background: '#0a0a0a',

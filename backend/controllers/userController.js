@@ -1,6 +1,15 @@
+/**
+ * Controlador de Usuarios (Users)
+ * Maneja las operaciones CRUD del panel de administración para la gestión de usuarios, clientes y empleados.
+ */
 const { Usuario, Rol } = require('../models');
 const bcrypt = require('bcrypt');
 
+/**
+ * Obtiene todos los usuarios registrados en el sistema.
+ * Excluye las contraseñas por seguridad.
+ * Utilizado por los administradores para listar clientes y personal.
+ */
 exports.getAll = async (req, res) => {
     try {
         const data = await Usuario.findAll({ 
@@ -13,6 +22,10 @@ exports.getAll = async (req, res) => {
     }
 };
 
+/**
+ * Obtiene un usuario específico por su ID.
+ * Excluye la contraseña del resultado.
+ */
 exports.getById = async (req, res) => {
     try {
         const data = await Usuario.findByPk(req.params.id, { 
@@ -26,6 +39,10 @@ exports.getById = async (req, res) => {
     }
 };
 
+/**
+ * Crea un nuevo usuario de forma manual (generalmente por un administrador).
+ * Si se incluye contraseña, esta es encriptada antes de guardar.
+ */
 exports.create = async (req, res) => {
     try {
         const userData = { ...req.body };
@@ -42,6 +59,10 @@ exports.create = async (req, res) => {
     }
 };
 
+/**
+ * Actualiza la información de un usuario existente.
+ * Si la actualización incluye una nueva contraseña, esta es encriptada.
+ */
 exports.update = async (req, res) => {
     try {
         const userData = { ...req.body };
@@ -63,6 +84,9 @@ exports.update = async (req, res) => {
     }
 };
 
+/**
+ * Elimina un usuario de forma definitiva de la base de datos.
+ */
 exports.remove = async (req, res) => {
     try {
         const deleted = await Usuario.destroy({ where: { id: req.params.id } });

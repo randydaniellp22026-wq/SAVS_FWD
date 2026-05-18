@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/axios';
+import api from '../../services/api';
 
 export const useCreditSimulatorLogica = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -29,7 +29,9 @@ export const useCreditSimulatorLogica = () => {
     setLoading(true);
     api.get('/vehicles')
       .then(res => {
-        setVehicles(res.data || []);
+        // Soporta tanto la respuesta antigua (array) como la nueva (paginada: { data: [] })
+        const vehiclesData = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setVehicles(vehiclesData);
         setLoading(false);
       })
       .catch(err => {
@@ -40,12 +42,13 @@ export const useCreditSimulatorLogica = () => {
 
   // Update logistics automatically when vehicle changes
   useEffect(() => {
-    if (selectedVehicle) {
-      const name = selectedVehicle.name.toLowerCase();
+    if (selectedVehicle && selectedVehicle.name) {
+      const name = String(selectedVehicle.name).toLowerCase();
       const isBig = name.includes('4x4') || name.includes('suv') || name.includes('hilux') || name.includes('ranger') || name.includes('prado') || name.includes('porter') || name.includes('bongo');
       
       const autoShipping = isBig ? 2800 : 1800;
-      const autoInsurance = (selectedVehicle.price / 520) * 0.015;
+      const vehiclePrice = Number(selectedVehicle.price) || 0;
+      const autoInsurance = (vehiclePrice / 520) * 0.015;
 
       setShipping(autoShipping);
       setInsurance(Math.round(autoInsurance));
@@ -61,7 +64,7 @@ export const useCreditSimulatorLogica = () => {
       setSelectedVehicle(null);
       return;
     }
-    const vehicle = vehicles.find(v => v.id.toString() === idStr.toString());
+    const vehicle = vehicles.find(v => v.id && v.id.toString() === idStr.toString());
     setSelectedVehicle(vehicle || null);
   };
 

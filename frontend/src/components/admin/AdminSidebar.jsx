@@ -12,12 +12,23 @@ import {
   RefreshCw,
   Car,
   MapPin,
-  Ship
+  Ship,
+  Mail
 } from 'lucide-react';
 import './AdminSidebar.css';
 
 const AdminSidebar = ({ isOpen, closeSidebar }) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const getUserFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (!stored || stored === 'undefined') return {};
+      return JSON.parse(stored);
+    } catch (e) {
+      return {};
+    }
+  };
+  
+  const user = getUserFromStorage();
   const isManager = user.rol === 'gerente';
 
   return (
@@ -83,6 +94,12 @@ const AdminSidebar = ({ isOpen, closeSidebar }) => {
           <NavLink to="/vender-auto" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <RefreshCw size={20} />
             <span>Gestión Trade-in</span>
+            <ChevronRight size={14} className="arrow" />
+          </NavLink>
+          
+          <NavLink to="/admin/marketing" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
+            <Mail size={20} />
+            <span>Email Marketing</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
         </div>

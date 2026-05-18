@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowLeft, ChevronRight, Zap, Shield, Sparkles, Navigation } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useVehicleDetailsLogica } from './VehicleDetailsLogica';
-import api from '../../api/axios';
+import api from '../../services/api';
 import VehicleCarousel from '../../components/VehicleCarousel/VehicleCarousel';
 import ShimmerText from '../../components/ShimmerText/ShimmerText';
 import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
@@ -19,9 +19,15 @@ const VehicleDetails = () => {
   const { getMonthlyPayment } = useVehicleDetailsLogica(vehicle);
 
   React.useEffect(() => {
+    // Si no tenemos ID y no tenemos datos del vehículo desde el state, no podemos cargar
+    if (!id && !vehicle?.id) {
+      navigate('/inventory', { replace: true });
+      return;
+    }
+
     const needsUpdate = !vehicle || !(vehicle.engine_size || vehicle.motor);
     
-    if (needsUpdate && (id || vehicle?.id)) {
+    if (needsUpdate) {
       setLoading(true);
       const vehicleId = id || vehicle.id;
       
@@ -34,11 +40,14 @@ const VehicleDetails = () => {
           console.error("Error al refrescar datos del vehículo:", err);
           setLoading(false);
         });
+    } else {
+        setLoading(false);
     }
-  }, [id, vehicle?.id]);
+  }, [id, vehicle?.id, navigate]);
 
   if (loading) return <div className="loading-container"><div className="loader"></div><span>Cargando detalles técnicos...</span></div>;
-  if (!vehicle) return <div style={{marginTop: '100px', textAlign: 'center'}}>Vehículo no encontrado</div>;
+  if (!vehicle) return <div style={{marginTop: '100px', textAlign: 'center', color: '#fff'}}>Vehículo no encontrado. Redirigiendo...</div>;
+
 
   return (
     <div className="vehicle-details-page">

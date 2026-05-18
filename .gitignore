@@ -23,3 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 .env
+<<<<<<<<< Temporary merge branch 1
+*.env.local
+backend/config/config.json
+backend/config/*.json
+node_modules/
+.DS_Store
+=========
+
+# Uploaded files (Multer)
+backend/uploads/*
+!backend/uploads/.gitkeep
+>>>>>>>>> Temporary merge branch 2

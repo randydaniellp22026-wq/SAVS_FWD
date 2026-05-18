@@ -37,7 +37,7 @@ export const LoginVista = () => {
           </div>
 
           <div className="legal-notice">
-            Al continuar, aceptas nuestros <a href="#terminos">Términos de Servicio</a> y <a href="#privacidad">Acuerdos de Privacidad</a>.
+            Al continuar, aceptas nuestros <a href="#!">Términos de Servicio</a> y <a href="#!">Acuerdos de Privacidad</a>.
           </div>
         </div>
       </section>

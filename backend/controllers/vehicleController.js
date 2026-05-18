@@ -1,3 +1,8 @@
+/**
+ * Controlador de Vehículos (Autos)
+ * Centraliza la lógica para gestionar el inventario de la empresa, incluyendo 
+ * subida de imágenes, paginación, filtros avanzados y búsquedas dinámicas.
+ */
 const { Auto } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
@@ -121,7 +126,7 @@ exports.getAll = async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: 'Error interno al listar los vehículos' });
     }
 };
 
@@ -131,7 +136,7 @@ exports.getById = async (req, res) => {
         if (data) res.json(data);
         else res.status(404).json({ error: 'No encontrado' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: 'Error interno al obtener el vehículo' });
     }
 };
 
@@ -231,6 +236,6 @@ exports.remove = async (req, res) => {
         await vehicle.destroy();
         res.json({ message: 'Eliminado correctamente' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ success: false, error: 'Error interno al eliminar el vehículo' });
     }
 };

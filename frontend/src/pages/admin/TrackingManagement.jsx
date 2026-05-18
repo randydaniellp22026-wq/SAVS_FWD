@@ -16,7 +16,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import api from '../../api/axios';
+import api from '../../services/api';
 import AdminLoader from '../../components/admin/AdminLoader';
 
 const API_URL = '/users';

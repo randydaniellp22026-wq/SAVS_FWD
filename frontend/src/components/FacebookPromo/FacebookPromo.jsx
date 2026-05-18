@@ -3,6 +3,11 @@ import './FacebookPromo.css';
 import imgPromo1 from '../../img/Anuncios/Gemini_Generated_Image_49ys9i49ys9i49ys.png';
 import imgPromo2 from '../../img/Anuncios/Gemini_Generated_Image_emr4vhemr4vhemr4.png';
 import imgPromo3 from '../../img/Anuncios/Gemini_Generated_Image_wji4fewji4fewji4.png';
+import imgPromo4 from '../../img/Anuncios/Gemini_Generated_Image_3u1jhp3u1jhp3u1j.png';
+import imgPromo5 from '../../img/Anuncios/Gemini_Generated_Image_a13tgoa13tgoa13t.png';
+import imgPromo6 from '../../img/Anuncios/Gemini_Generated_Image_c0m80oc0m80oc0m8.png';
+import imgPromo7 from '../../img/Anuncios/Gemini_Generated_Image_c0m80oc0m80oc0m8 (1).png';
+import imgPromo8 from '../../img/Anuncios/Gemini_Generated_Image_tyv7hytyv7hytyv7 (1).png';
 
 const FacebookPromo = ({ 
   type = 'horizontal', 
@@ -16,7 +21,7 @@ const FacebookPromo = ({
   const [currentIdx, setCurrentIdx] = useState(0);
 
   // Setup carousel images: use 'images' array if provided, else default to the promotional images array
-  const defaultImages = [imgPromo1, imgPromo2, imgPromo3];
+  const defaultImages = [imgPromo1, imgPromo2, imgPromo3, imgPromo4, imgPromo5, imgPromo6, imgPromo7, imgPromo8];
   const carouselImages = images.length > 0 
     ? images 
     : (image ? [image] : defaultImages);

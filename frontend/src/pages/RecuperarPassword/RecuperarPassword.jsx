@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Mail, Lock, ShieldCheck, ArrowRight, ArrowLeft } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../services/api';
 import { sendRecoveryEmail } from '../../utils/security';
 import './RecuperarPassword.css';
 
@@ -68,6 +68,18 @@ const RecuperarPassword = () => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       Swal.fire({ ...darkSwal, icon: 'warning', title: 'No coinciden', text: 'Las contraseñas deben ser iguales.' });
+      return;
+    }
+
+    // Validación de complejidad de contraseña (Tarea solicitada)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      Swal.fire({ 
+        ...darkSwal, 
+        icon: 'error', 
+        title: 'Seguridad insuficiente', 
+        text: 'La nueva contraseña debe tener al menos 8 caracteres e incluir al menos una letra MAYÚSCULA y un NÚMERO.' 
+      });
       return;
     }
 
