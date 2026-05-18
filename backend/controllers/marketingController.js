@@ -1,9 +1,13 @@
 /**
  * Controlador de Marketing y Difusión
- * Se encarga de la integración con Resend API para enviar correos electrónicos (ej. boletines o pruebas).
+ * Se encarga de:
+ *  1. Envío masivo de correos (Resend API)
+ *  2. Gestión de Banners/Anuncios promocionales del sitio web
  */
 const { Resend } = require('resend');
 const { Usuario } = require('../models');
+const path = require('path');
+const fs   = require('fs');
 
 // Inicializar Resend (usaremos la API Key del .env)
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -54,5 +58,99 @@ exports.broadcastEmail = async (req, res) => {
     } catch (error) {
         console.error('Error en Broadcast:', error);
         res.status(500).json({ error: 'Error al procesar el envío masivo' });
+    }
+};
+
+// ─────────────────────────────────────────────────────────────
+// BANNERS / ANUNCIOS PROMOCIONALES
+// Archivo JSON simple como base de datos de banners
+// ─────────────────────────────────────────────────────────────
+const BANNERS_FILE = path.join(__dirname, '..', 'uploads', 'banners.json');
+
+/** Lee el archivo JSON de banners (lo crea vacío si no existe) */
+const leerBanners = () => {
+    if (!fs.existsSync(BANNERS_FILE)) {
+        fs.writeFileSync(BANNERS_FILE, JSON.stringify([]), 'utf8');
+    }
+    return JSON.parse(fs.readFileSync(BANNERS_FILE, 'utf8'));
+};
+
+/** Guarda el arreglo de banners en el archivo JSON */
+const guardarBanners = (banners) => {
+    fs.writeFileSync(BANNERS_FILE, JSON.stringify(banners, null, 2), 'utf8');
+};
+
+/**
+ * GET /api/marketing/banners
+ * Devuelve todos los banners activos (público, sin autenticación)
+ */
+exports.getBanners = (req, res) => {
+    try {
+        const banners = leerBanners();
+        res.json({ success: true, banners });
+    } catch (error) {
+        console.error('Error leyendo banners:', error);
+        res.status(500).json({ error: 'No se pudieron cargar los anuncios.' });
+    }
+};
+
+/**
+ * POST /api/marketing/banners
+ * Sube un nuevo banner con imagen, título y descripción
+ * @access Private (Admin/Gerente)
+ */
+exports.crearBanner = (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Debes seleccionar una imagen para el anuncio.' });
+        }
+
+        const { titulo, descripcion } = req.body;
+        const banners = leerBanners();
+
+        const nuevoBanner = {
+            id:          Date.now(),
+            titulo:      titulo      || 'Sin título',
+            descripcion: descripcion || '',
+            imagen:      `/uploads/${req.file.filename}`,
+            fechaSubida: new Date().toLocaleDateString('es-CR')
+        };
+
+        banners.unshift(nuevoBanner); // El más nuevo aparece primero
+        guardarBanners(banners);
+
+        res.status(201).json({ success: true, message: '¡Anuncio publicado correctamente!', banner: nuevoBanner });
+    } catch (error) {
+        console.error('Error creando banner:', error);
+        res.status(500).json({ error: 'No se pudo publicar el anuncio.' });
+    }
+};
+
+/**
+ * DELETE /api/marketing/banners/:id
+ * Elimina un banner y su imagen del servidor
+ * @access Private (Admin/Gerente)
+ */
+exports.eliminarBanner = (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const banners = leerBanners();
+        const idx = banners.findIndex(b => b.id === id);
+
+        if (idx === -1) {
+            return res.status(404).json({ error: 'Anuncio no encontrado.' });
+        }
+
+        // Eliminar el archivo de imagen del disco
+        const imgPath = path.join(__dirname, '..', banners[idx].imagen);
+        if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+
+        banners.splice(idx, 1);
+        guardarBanners(banners);
+
+        res.json({ success: true, message: 'Anuncio eliminado correctamente.' });
+    } catch (error) {
+        console.error('Error eliminando banner:', error);
+        res.status(500).json({ error: 'No se pudo eliminar el anuncio.' });
     }
 };
