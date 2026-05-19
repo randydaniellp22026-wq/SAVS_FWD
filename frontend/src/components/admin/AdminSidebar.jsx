@@ -13,7 +13,8 @@ import {
   Car,
   MapPin,
   Ship,
-  Mail
+  Mail,
+  Sparkles
 } from 'lucide-react';
 import './AdminSidebar.css';
 
@@ -82,6 +83,12 @@ const AdminSidebar = ({ isOpen, closeSidebar }) => {
           <NavLink to="/admin/branches" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <MapPin size={20} />
             <span>Sedes</span>
+            <ChevronRight size={14} className="arrow" />
+          </NavLink>
+
+          <NavLink to="/admin/create-auto-ad" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
+            <Sparkles size={20} />
+            <span>Anuncio con IA</span>
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
