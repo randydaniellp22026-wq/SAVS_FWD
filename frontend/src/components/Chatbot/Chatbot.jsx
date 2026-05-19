@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, ExternalLink, RefreshCw, AlertCircle, Image as ImageIcon } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import api from '../../services/api';
 import './Chatbot.css';
-
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,9 +14,31 @@ const Chatbot = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [error, setError] = useState(null);
     const messagesEndRef = useRef(null);
+    const imageInputRef = useRef(null);        // input file oculto
+    const [pendingImage, setPendingImage] = useState(null); // imagen lista para enviar
+    const [imagePreview, setImagePreview] = useState(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // ── Manejo de imagen adjunta ────────────────────────────────────────────
+    const handleImageSelect = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > 10 * 1024 * 1024) {
+            setError('La imagen es muy grande. Máximo 10 MB.');
+            return;
+        }
+        setPendingImage(file);
+        setImagePreview(URL.createObjectURL(file));
+        setError(null);
+    };
+
+    const removePendingImage = () => {
+        setPendingImage(null);
+        setImagePreview(null);
+        if (imageInputRef.current) imageInputRef.current.value = '';
     };
 
     useEffect(() => {
@@ -51,25 +74,36 @@ const Chatbot = () => {
         setError(null);
 
         try {
-            // Ahora la lógica reside en el backend para mayor seguridad y acceso a la BD real
-            const response = await api.post('/chatbot', {
-                message: userText
-            });
+            let response;
 
-            const data = response.data;
+            if (pendingImage) {
+                const formData = new FormData();
+                formData.append('message', userText || 'Describe esta imagen');
+                formData.append('image', pendingImage);
+                // import perezoso del servicio de chat
+                const { chatService } = await import('../../services/api');
+                response = await chatService.sendWithImage(formData);
+            } else {
+                const { chatService } = await import('../../services/api');
+                response = await chatService.sendText(userText);
+            }
+
+            const data = response;
             const text = data.reply;
             const whatsappNum = data.whatsapp || whatsappNumber;
-            
-            // Usamos las flags generadas por el backend con [WHATSAPP] o por fallback de texto
-            const showWhatsapp = data.showWhatsapp || 
-                                text.toLowerCase().includes('whatsapp') || 
-                                text.toLowerCase().includes('asesor');
-                                
+
+            const showWhatsapp = data.showWhatsapp ||
+                                 text.toLowerCase().includes('whatsapp') ||
+                                 text.toLowerCase().includes('asesor');
+
             const showCatalog = data.showCatalog;
 
-            setMessages(prev => [...prev, { 
-                id: Date.now(), 
-                type: 'bot', 
+            // Si venia imagen, limpiar despues de respuesta exitosa
+            if (pendingImage) removePendingImage();
+
+            setMessages(prev => [...prev, {
+                id: Date.now(),
+                type: 'bot',
                 text: text,
                 whatsapp: showWhatsapp ? `https://wa.me/${whatsappNum.replace(/\D/g, '')}` : null,
                 internalLink: showCatalog ? { url: '/inventory', label: 'Explorar Catálogo Completo' } : null
@@ -88,14 +122,19 @@ const Chatbot = () => {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
-        if (!input.trim() || isTyping) return;
+        if (!input.trim() && !pendingImage) return;
+        if (isTyping) return;
 
-        const userMsg = { id: Date.now(), type: 'user', text: input };
+        const userText = input.trim();
+        const userMsg = {
+            id: Date.now(),
+            type: 'user',
+            text: userText || (pendingImage ? '📎 Imagen adjunta' : ''),
+            image: imagePreview || null
+        };
         setMessages(prev => [...prev, userMsg]);
-        const currentInput = input;
         setInput('');
-        
-        await generateAIResponse(currentInput, [...messages, userMsg]);
+        await generateAIResponse(userText, [...messages, userMsg]);
     };
 
     const handleOptionClick = (option) => {
@@ -130,35 +169,27 @@ const Chatbot = () => {
                     </div>
                 </div>
 
+                {/* Input de archivo oculto */}
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    onChange={handleImageSelect}
+                    style={{ display: 'none' }}
+                />
+
                 <div className="messages-container">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`message-row ${msg.type}`}>
                             {msg.type === 'bot' && <div className="avatar-small"><Bot size={14} color="#eab308" /></div>}
                             <div className="message-content">
+                                {msg.image && (
+                                    <div className="chat-msg-image">
+                                        <img src={msg.image} alt="Adjunto" />
+                                    </div>
+                                )}
                                 <div className="text-wrapper">
-                                    {msg.text.split('\n').map((line, i) => {
-                                        // Simple markdown link parser [texto](url)
-                                        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                                        if (!linkRegex.test(line)) return <p key={i}>{line}</p>;
-                                        
-                                        linkRegex.lastIndex = 0; // reset
-                                        const parts = [];
-                                        let lastIndex = 0;
-                                        let match;
-                                        
-                                        while ((match = linkRegex.exec(line)) !== null) {
-                                            if (match.index > lastIndex) parts.push(line.substring(lastIndex, match.index));
-                                            parts.push(
-                                                <a key={`link-${i}-${match.index}`} href={match[2]} className="inline-chatbot-link">
-                                                    {match[1]}
-                                                </a>
-                                            );
-                                            lastIndex = linkRegex.lastIndex;
-                                        }
-                                        if (lastIndex < line.length) parts.push(line.substring(lastIndex));
-                                        
-                                        return <p key={i}>{parts}</p>;
-                                    })}
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                                 </div>
                                 {msg.internalLink && (
                                     <button 
@@ -195,14 +226,36 @@ const Chatbot = () => {
                 </div>
 
                 <form className="chatbot-input-form" onSubmit={handleSendMessage}>
-                    <input 
-                        type="text" 
+                    {/* Miniatura de imagen pendiente */}
+                    {imagePreview && (
+                        <div className="chat-pending-image">
+                            <img src={imagePreview} alt="pendiente" />
+                            <button type="button" className="chat-pending-remove" onClick={removePendingImage}>
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )}
+
+                    <input
+                        type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={isTyping ? "Esperando respuesta..." : "Escribe tu consulta..."}
+                        placeholder={isTyping ? "Analizando imagen…" : "Escribe tu consulta o adjunta una foto…"}
                         disabled={isTyping}
                     />
-                    <button type="submit" disabled={isTyping || !input.trim()}><Send size={18} /></button>
+                    {/* Botón adjuntar imagen */}
+                    <button
+                        type="button"
+                        className="chat-attach-btn"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={isTyping}
+                        title="Adjuntar imagen"
+                    >
+                        <ImageIcon size={18} />
+                    </button>
+                    <button type="submit" disabled={isTyping || (!input.trim() && !pendingImage)}>
+                        <Send size={18} />
+                    </button>
                 </form>
             </div>
         </div>

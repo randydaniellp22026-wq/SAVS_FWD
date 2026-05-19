@@ -28,6 +28,13 @@ api.interceptors.response.use(
 /**
  * Servicio de Vehículos
  */
+
+// Nueva instancia axios sin content-type fijo (para multipart/form-data)
+const apiForm = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
 export const vehicleService = {
   // Obtener lista con filtros y paginación
   getAll: async (params = {}) => {
@@ -61,6 +68,18 @@ export const vehicleService = {
   delete: async (id) => {
     const response = await api.delete(`/vehicles/${id}`);
     return response.data;
+  },
+
+  // ── Generar anuncio automático desde imagen con IA ──────────────────────
+  // Envía una imagen a la API; la IA detecta marca, modelo, año, tipo, color, etc.
+  // y devuelve los campos detectados para autocompletar el formulario.
+  generateAutoAd: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    const response = await apiForm.post('/vehicles/auto-ad', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   }
 };
 
@@ -87,3 +106,22 @@ export const authService = {
 };
 
 export default api;
+
+/**
+ * Servicio del Chatbot
+ */
+export const chatService = {
+  // Mensaje de texto puro
+  sendText: async (message) => {
+    const response = await api.post('/chatbot', { message });
+    return response.data;
+  },
+
+  // Mensaje con imagen adjunta (multipart/form-data)
+  sendWithImage: async (formData) => {
+    const response = await apiForm.post('/chatbot', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+};
