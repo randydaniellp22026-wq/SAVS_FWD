@@ -129,4 +129,91 @@ async function analyzeVehicleImage(base64Data, mimeType) {
     return parsed;
 }
 
-module.exports = { analyzeVehicleImage };
+// Prompt para generación de banners de publicidad/marketing
+const BANNER_PROMPT = `
+Eres un copywriter experto en marketing automotriz de IMPORTADORA SAVS, Costa Rica.
+Tu tarea es analizar la fotografia de un vehiculo que te proporciona el usuario y generar un titulo comercial sumamente atractivo y una descripcion promocional persuasiva para un banner publicitario del sitio web.
+
+Reglas:
+- El titulo debe ser corto y llamativo (maximo 40 caracteres), por ejemplo: "¡Llegó el nuevo Hyundai Tucson 2022!" o "¡Oferta Especial de la Semana!".
+- La descripcion debe ser persuasiva e incentivar la compra o cotizacion (maximo 120 caracteres), mencionando caracteristicas visibles clave del carro (color, estilo, estado reluciente).
+- Devuelve la respuesta UNICAMENTE como un objeto JSON con los campos "titulo" y "descripcion".
+- No agregues explicaciones, bloques de código ni markdown. Devuelve solo el JSON valido.
+
+Estructura JSON esperada:
+{
+  "titulo": "Titulo atractivo aqui",
+  "descripcion": "Descripcion persuasiva aqui"
+}
+`;
+
+/**
+ * Analiza una imagen de banner y genera copys publicitarios con IA.
+ * @param {string} base64Data
+ * @param {string} mimeType
+ */
+async function generateBannerCopy(base64Data, mimeType) {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+        throw new Error('GROQ_API_KEY no configurada en el entorno.');
+    }
+
+    const response = await axios.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        {
+            model: 'llama-3.2-90b-vision-preview',
+            messages: [
+                {
+                    role: 'system',
+                    content: BANNER_PROMPT
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: `data:${mimeType};base64,${base64Data}`
+                            }
+                        },
+                        {
+                            type: 'text',
+                            text: 'Analiza esta imagen y genera el titulo y descripcion promocional para el anuncio en formato JSON.'
+                        }
+                    ]
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 256
+        },
+        {
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 30000
+        }
+    );
+
+    const content = response.data.choices[0].message.content.trim();
+
+    let parsed;
+    try {
+        parsed = JSON.parse(content);
+    } catch {
+        const firstBrace = content.indexOf('{');
+        const lastBrace  = content.lastIndexOf('}');
+        if (firstBrace !== -1 && lastBrace !== -1) {
+            parsed = JSON.parse(content.slice(firstBrace, lastBrace + 1));
+        } else {
+            throw new Error('La IA no devolvió un JSON válido para el banner.');
+        }
+    }
+
+    return {
+        titulo: parsed.titulo || 'Sin título',
+        descripcion: parsed.descripcion || ''
+    };
+}
+
+module.exports = { analyzeVehicleImage, generateBannerCopy };

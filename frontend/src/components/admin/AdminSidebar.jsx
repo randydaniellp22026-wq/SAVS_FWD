@@ -86,12 +86,6 @@ const AdminSidebar = ({ isOpen, closeSidebar }) => {
             <ChevronRight size={14} className="arrow" />
           </NavLink>
 
-          <NavLink to="/admin/create-auto-ad" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
-            <Sparkles size={20} />
-            <span>Anuncio con IA</span>
-            <ChevronRight size={14} className="arrow" />
-          </NavLink>
-
           <NavLink to="/admin/create-vehicle" className={({ isActive }) => isActive ? 'nav-item active' : 'nav-item'} onClick={closeSidebar}>
             <Car size={20} />
             <span>Inventario</span>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mail, AlertTriangle, CheckCircle, Loader2, ImagePlus, Trash2, Megaphone } from 'lucide-react';
+import { Send, Mail, AlertTriangle, CheckCircle, Loader2, ImagePlus, Trash2, Megaphone, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
 
@@ -21,6 +21,7 @@ const MarketingBroadcast = () => {
     const [imagenPreview, setImagenPreview] = useState(null);
     const [imagenFile, setImagenFile]     = useState(null);
     const fileInputRef = useRef();
+    const [generatingIA, setGeneratingIA] = useState(false);
 
     // ── Cargar banners al iniciar ─────────────────────────────
     useEffect(() => {
@@ -45,6 +46,47 @@ const MarketingBroadcast = () => {
         if (!file) return;
         setImagenFile(file);
         setImagenPreview(URL.createObjectURL(file));
+    };
+
+    // ── Generar Título y Descripción con IA ──────────────────
+    const handleGenerarConIA = async () => {
+        if (!imagenFile) {
+            Swal.fire({ ...darkSwal, title: 'Falta la imagen', text: 'Por favor seleccioná una imagen para que la IA la analice.', icon: 'warning' });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('imagen', imagenFile);
+
+        setGeneratingIA(true);
+        try {
+            const res = await api.post('/marketing/banners/generate-copy', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            if (res.data.success) {
+                setNuevaTitulo(res.data.titulo);
+                setNuevaDesc(res.data.descripcion);
+                Swal.fire({
+                    ...darkSwal,
+                    title: '¡Anuncio Generado!',
+                    text: 'La IA ha generado el título y descripción basados en la imagen.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (e) {
+            console.error('Error generando copy con IA:', e);
+            Swal.fire({
+                ...darkSwal,
+                title: 'Error de IA',
+                text: e.response?.data?.error || 'No se pudo generar el contenido con IA.',
+                icon: 'error'
+            });
+        } finally {
+            setGeneratingIA(false);
+        }
     };
 
     // ── Publicar nuevo banner ─────────────────────────────────
@@ -198,8 +240,21 @@ const MarketingBroadcast = () => {
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     onChange={handleImagenSeleccionada}
-                    style={{ display: 'none' }}
+                    style={{ display: 'block', margin: '1rem 0' }}
                 />
+
+                {imagenPreview && (
+                    <button
+                        type="button"
+                        className="btn-send-test"
+                        onClick={handleGenerarConIA}
+                        disabled={generatingIA}
+                        style={{ marginTop: '1rem', width: '100%', justifyContent: 'center', background: 'rgba(234, 179, 8, 0.08)' }}
+                    >
+                        {generatingIA ? <Loader2 className="spinner" size={18} /> : <Sparkles size={18} style={{ color: '#eab308' }} />}
+                        {generatingIA ? 'IA Analizando imagen...' : '✨ Generar Título y Descripción con IA'}
+                    </button>
+                )}
 
                 {/* Campos de título y descripción */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>

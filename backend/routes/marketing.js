@@ -17,5 +17,6 @@ router.get('/banners', marketingController.getBanners);
 // Privado: solo admin o gerente pueden crear o eliminar banners
 router.post('/banners', verificarToken, esAdminOGerente, upload.single('imagen'), marketingController.crearBanner);
 router.delete('/banners/:id', verificarToken, esAdminOGerente, marketingController.eliminarBanner);
+router.post('/banners/generate-copy', verificarToken, esAdminOGerente, upload.single('imagen'), marketingController.generateBannerCopyIA);
 
 module.exports = router;

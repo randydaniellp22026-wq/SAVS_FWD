@@ -12,10 +12,13 @@ import {
   Info,
   Layers,
   Palette,
-  Tag
+  Tag,
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
+import { vehicleService } from '../../../services/api';
 
 const darkSwal = {
   background: '#1a1a1a',
@@ -27,6 +30,80 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
   const [formData, setFormData] = useState(initialData);
   const [activeTab, setActiveTab] = useState('general');
   const [detailImages, setDetailImages] = useState(initialData.detailImages || []);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleAiAutofill = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Archivo no válido',
+        text: 'Solo se aceptan imágenes (JPG, PNG, WebP, GIF).'
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Archivo muy grande',
+        text: 'El tamaño máximo es 5 MB.'
+      });
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const result = await vehicleService.generateAutoAd(file);
+      if (result.success && result.data?.detectedFields) {
+        const fields = result.data.detectedFields;
+        const previewUrl = URL.createObjectURL(file);
+
+        setFormData(prev => ({
+          ...prev,
+          name: fields.name || prev.name || '',
+          motor: fields.motor || fields.engine_size || prev.motor || '',
+          type: fields.type || prev.type || 'SUV',
+          year: fields.year || fields.anio || prev.year || new Date().getFullYear(),
+          mileage: fields.mileage || prev.mileage || '',
+          price: fields.price || fields.precio || prev.price || '',
+          tag: fields.tag || prev.tag || 'Disponible',
+          transmission: fields.transmission || prev.transmission || 'Automática',
+          fuel: fields.fuel || prev.fuel || 'Gasolina',
+          color: fields.color || prev.color || '',
+          summary: fields.summary || fields.heroSubtitle || prev.summary || '',
+          doors: fields.doors ? String(fields.doors) : prev.doors || '5',
+          passengers: fields.passengers ? String(fields.passengers) : prev.passengers || '5',
+          image: file,
+          preview: previewUrl
+        }));
+
+        Swal.fire({
+          ...darkSwal,
+          icon: 'success',
+          title: '¡Autocompletado con éxito!',
+          text: 'Hemos analizado la imagen y rellenado la ficha técnica. Por favor, revísala.',
+          timer: 3000,
+          showConfirmButton: false
+        });
+      } else {
+        throw new Error(result.error || 'No se pudieron extraer datos de la imagen.');
+      }
+    } catch (err) {
+      console.error('Error en autocompletado con IA:', err);
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error al analizar',
+        text: err.response?.data?.error || err.message || 'No se pudo obtener información del vehículo.'
+      });
+    } finally {
+      setAiLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,6 +190,35 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
           <h2>{formData.id ? 'Editar Vehículo' : 'Añadir Nuevo Vehículo'}</h2>
           <p>{formData.id ? `ID: ${formData.id}` : 'Completa los campos para publicar en el catálogo'}</p>
         </div>
+        {!formData.id && (
+          <div className="header-actions-form" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto', marginRight: '1rem' }}>
+            <button 
+              type="button" 
+              className="btn-ai-autofill"
+              disabled={aiLoading}
+              onClick={() => document.getElementById('ai-autofill-input').click()}
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="spinner" size={16} />
+                  <span>Analizando con IA...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={16} />
+                  <span>Rellenar con IA</span>
+                </>
+              )}
+            </button>
+            <input 
+              id="ai-autofill-input" 
+              type="file" 
+              hidden 
+              onChange={handleAiAutofill} 
+              accept="image/*" 
+            />
+          </div>
+        )}
         <button onClick={onCancel} className="btn-close-form">
           <X size={24} />
         </button>
@@ -557,6 +663,41 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
 
         .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(234, 179, 8, 0.2); }
         .btn-save:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* Estilos del Autocompletado con IA */
+        .btn-ai-autofill {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(234, 179, 8, 0.1);
+          color: #eab308;
+          border: 1px solid rgba(234, 179, 8, 0.3);
+          padding: 0.6rem 1.2rem;
+          border-radius: 10px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .btn-ai-autofill:hover:not(:disabled) {
+          background: rgba(234, 179, 8, 0.2);
+          border-color: #eab308;
+          transform: translateY(-1px);
+        }
+
+        .btn-ai-autofill:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .spinner {
+          animation: spin-ai 1s linear infinite;
+        }
+
+        @keyframes spin-ai {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       `}</style>
     </motion.div>
   );

@@ -17,7 +17,6 @@ import ProtectedRoute from '../components/security/ProtectedRoute';
 import AdminDashboard from '../pages/admin/AdminDashboard';
 import ReviewRequests from '../pages/admin/ReviewRequests';
 import CreateVehicle from '../pages/admin/CreateVehicle';
-import CreateAutoAd from '../pages/admin/CreateAutoAd';
 import UserManagement from '../pages/admin/UserManagement';
 import BranchManagement from '../pages/admin/BranchManagement';
 import TrackingManagement from '../pages/admin/TrackingManagement';
@@ -55,7 +54,6 @@ const AppRoutes = () => {
       <Route path="/admin/requests" element={<ProtectedRoute><AdminLayout><ReviewRequests /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/branches" element={<ProtectedRoute><AdminLayout><BranchManagement /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/create-vehicle" element={<ProtectedRoute><AdminLayout><CreateVehicle /></AdminLayout></ProtectedRoute>} />
-      <Route path="/admin/create-auto-ad" element={<ProtectedRoute><AdminLayout><CreateAutoAd /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/reviews" element={<ProtectedRoute><AdminLayout><Reseñas /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/tracking" element={<ProtectedRoute><AdminLayout><TrackingManagement /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/marketing" element={<ProtectedRoute><AdminLayout><MarketingBroadcast /></AdminLayout></ProtectedRoute>} />
