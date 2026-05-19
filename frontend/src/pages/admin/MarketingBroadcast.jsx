@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mail, AlertTriangle, CheckCircle, Loader2, ImagePlus, Trash2, Megaphone } from 'lucide-react';
+import { Send, Mail, AlertTriangle, CheckCircle, Loader2, ImagePlus, Trash2, Megaphone, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
 
@@ -18,9 +18,12 @@ const MarketingBroadcast = () => {
     const [uploadingBanner, setUploadingBanner] = useState(false);
     const [nuevaTitulo, setNuevaTitulo]   = useState('');
     const [nuevaDesc, setNuevaDesc]       = useState('');
+    const [nuevaEnlace, setNuevaEnlace]   = useState('https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/');
     const [imagenPreview, setImagenPreview] = useState(null);
     const [imagenFile, setImagenFile]     = useState(null);
     const fileInputRef = useRef();
+    const [generatingIA, setGeneratingIA] = useState(false);
+    const [isDragging, setIsDragging]     = useState(false);
 
     // ── Cargar banners al iniciar ─────────────────────────────
     useEffect(() => {
@@ -45,6 +48,76 @@ const MarketingBroadcast = () => {
         if (!file) return;
         setImagenFile(file);
         setImagenPreview(URL.createObjectURL(file));
+        analizarConIA(file);
+    };
+
+    // ── Drag & Drop Event Handlers ────────────────────────────
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            Swal.fire({ 
+                ...darkSwal, 
+                title: 'Formato incorrecto', 
+                text: 'Por favor arrastrá solo archivos de imagen (JPG, PNG o WebP).', 
+                icon: 'warning' 
+            });
+            return;
+        }
+        
+        setImagenFile(file);
+        setImagenPreview(URL.createObjectURL(file));
+        analizarConIA(file);
+    };
+
+    // ── Analizar Imagen con IA (Automático) ───────────────────
+    const analizarConIA = async (file) => {
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('imagen', file);
+
+        setGeneratingIA(true);
+        try {
+            const res = await api.post('/marketing/banners/generate-copy', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
+            if (res.data.success) {
+                setNuevaTitulo(res.data.titulo);
+                setNuevaDesc(res.data.descripcion);
+                Swal.fire({
+                    ...darkSwal,
+                    title: '¡Anuncio Generado!',
+                    text: 'La IA ha analizado la imagen y generado el contenido de forma automática.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (e) {
+            console.error('Error generando copy con IA:', e);
+            Swal.fire({
+                ...darkSwal,
+                title: 'Error de IA',
+                text: e.response?.data?.error || 'No se pudo generar el contenido con IA.',
+                icon: 'error'
+            });
+        } finally {
+            setGeneratingIA(false);
+        }
     };
 
     // ── Publicar nuevo banner ─────────────────────────────────
@@ -62,6 +135,7 @@ const MarketingBroadcast = () => {
         formData.append('imagen',      imagenFile);
         formData.append('titulo',      nuevaTitulo);
         formData.append('descripcion', nuevaDesc);
+        formData.append('enlace',      nuevaEnlace);
 
         setUploadingBanner(true);
         try {
@@ -72,6 +146,7 @@ const MarketingBroadcast = () => {
             // Limpiar formulario
             setNuevaTitulo('');
             setNuevaDesc('');
+            setNuevaEnlace('https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/');
             setImagenFile(null);
             setImagenPreview(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -176,23 +251,36 @@ const MarketingBroadcast = () => {
 
                 {/* Zona de carga de imagen */}
                 <div
-                    className="banner-drop-zone"
-                    onClick={() => fileInputRef.current?.click()}
+                    className={`banner-drop-zone ${isDragging ? 'dragging' : ''} ${generatingIA ? 'loading' : ''}`}
+                    onClick={() => !generatingIA && fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
                     style={{ backgroundImage: imagenPreview ? `url(${imagenPreview})` : 'none' }}
                 >
-                    {!imagenPreview && (
+                    {generatingIA && (
+                        <div className="banner-loading-overlay">
+                            <Loader2 className="spinner" size={40} style={{ color: '#eab308', marginBottom: 12 }} />
+                            <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: '#fff' }}>✨ IA analizando y creando copy...</p>
+                            <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>Generando título y descripción automáticos</p>
+                        </div>
+                    )}
+
+                    {!generatingIA && !imagenPreview && (
                         <>
                             <ImagePlus size={40} style={{ color: '#eab308', marginBottom: 8 }} />
-                            <p style={{ color: '#94a3b8', margin: 0 }}>📷 Hacé clic aquí para elegir la imagen del anuncio</p>
+                            <p style={{ color: '#94a3b8', margin: 0 }}>📷 Arrastrá una imagen aquí o hacé clic para seleccionarla</p>
                             <p style={{ color: '#64748b', fontSize: '0.8rem', margin: '4px 0 0' }}>JPG, PNG o WebP — máximo 5 MB</p>
                         </>
                     )}
-                    {imagenPreview && (
+                    
+                    {!generatingIA && imagenPreview && (
                         <div className="banner-preview-overlay">
-                            <p>✅ Imagen seleccionada — hacé clic para cambiarla</p>
+                            <p>✅ Imagen cargada — arrastrá o hacé clic para cambiarla</p>
                         </div>
                     )}
                 </div>
+                
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -223,6 +311,17 @@ const MarketingBroadcast = () => {
                             onChange={e => setNuevaDesc(e.target.value)}
                         />
                     </div>
+                </div>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                    <label>Enlace de redirección (opcional) — Ej: /inventory, /contact, o una URL externa</label>
+                    <input
+                        type="text"
+                        className="marketing-input"
+                        placeholder='Ej: /inventory (para catálogo) o https://facebook.com/...'
+                        value={nuevaEnlace}
+                        onChange={e => setNuevaEnlace(e.target.value)}
+                    />
                 </div>
 
                 <button
@@ -268,7 +367,12 @@ const MarketingBroadcast = () => {
                                 <div className="banner-item-info">
                                     <strong>{banner.titulo}</strong>
                                     {banner.descripcion && <p>{banner.descripcion}</p>}
-                                    <span style={{ fontSize: '0.75rem', color: '#64748b' }}>📅 Subido el {banner.fechaSubida}</span>
+                                    {banner.enlace && (
+                                        <p style={{ fontSize: '0.8rem', color: '#eab308', margin: '2px 0 0' }}>
+                                            🔗 Enlace: <code>{banner.enlace}</code>
+                                        </p>
+                                    )}
+                                    <span style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px' }}>📅 Subido el {banner.fechaSubida}</span>
                                 </div>
                                 <button
                                     className="banner-delete-btn"
@@ -352,7 +456,7 @@ const MarketingBroadcast = () => {
                     transition: all 0.3s;
                     background-size: cover;
                     background-position: center;
-                    min-height: 160px;
+                    min-height: 180px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -360,14 +464,37 @@ const MarketingBroadcast = () => {
                     position: relative;
                     overflow: hidden;
                 }
-                .banner-drop-zone:hover { border-color: #eab308; background-color: rgba(234,179,8,0.05); }
+                .banner-drop-zone:hover:not(.loading) { border-color: #eab308; background-color: rgba(234,179,8,0.05); }
+                .banner-drop-zone.dragging { border-color: #eab308; background-color: rgba(234,179,8,0.12); box-shadow: 0 0 15px rgba(234, 179, 8, 0.2) inset; }
+                .banner-drop-zone.loading { cursor: default; }
+
+                .banner-loading-overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(10, 10, 10, 0.85);
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    z-index: 10;
+                    animation: fadeInOverlay 0.3s ease-out;
+                }
+                @keyframes fadeInOverlay {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
 
                 .banner-preview-overlay {
                     position: absolute; inset: 0;
-                    background: rgba(0,0,0,0.55);
+                    background: rgba(0,0,0,0.65);
                     display: flex; align-items: center; justify-content: center;
-                    color: #fff; font-weight: 600; font-size: 1rem;
+                    color: #fff; font-weight: 600; font-size: 1.05rem;
+                    transition: background 0.3s;
                 }
+                .banner-drop-zone:hover .banner-preview-overlay { background: rgba(0,0,0,0.75); }
 
                 .banners-grid {
                     display: flex;

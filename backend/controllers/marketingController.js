@@ -8,9 +8,10 @@ const { Resend } = require('resend');
 const { Usuario } = require('../models');
 const path = require('path');
 const fs   = require('fs');
+const { generateBannerCopy } = require('../services/visionService');
 
-// Inicializar Resend (usaremos la API Key del .env)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend (usaremos la API Key del .env de forma opcional)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 /**
  * Envía un correo masivo a todos los usuarios registrados
@@ -41,6 +42,9 @@ exports.broadcastEmail = async (req, res) => {
         }
 
         // 2. Enviar el correo usando Resend
+        if (!resend) {
+            return res.status(500).json({ error: 'El servicio de envío de correos (Resend) no está configurado (falta RESEND_API_KEY en .env)' });
+        }
         const data = await resend.emails.send({
             from: 'SAVS Importadora <onboarding@resend.dev>',
             to: emailList,
@@ -105,13 +109,14 @@ exports.crearBanner = (req, res) => {
             return res.status(400).json({ error: 'Debes seleccionar una imagen para el anuncio.' });
         }
 
-        const { titulo, descripcion } = req.body;
+        const { titulo, descripcion, enlace } = req.body;
         const banners = leerBanners();
 
         const nuevoBanner = {
             id:          Date.now(),
             titulo:      titulo      || 'Sin título',
             descripcion: descripcion || '',
+            enlace:      enlace      || '',
             imagen:      `/uploads/${req.file.filename}`,
             fechaSubida: new Date().toLocaleDateString('es-CR')
         };
@@ -152,5 +157,39 @@ exports.eliminarBanner = (req, res) => {
     } catch (error) {
         console.error('Error eliminando banner:', error);
         res.status(500).json({ error: 'No se pudo eliminar el anuncio.' });
+    }
+};
+
+/**
+ * POST /api/marketing/banners/generate-copy
+ * Analiza la imagen promocional y genera título y descripción sugeridos con IA.
+ * @access Private (Admin/Gerente)
+ */
+exports.generateBannerCopyIA = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Debes seleccionar una imagen para analizar.' });
+        }
+
+        const base64Data = fs.readFileSync(req.file.path, 'base64');
+        const mimeType = req.file.mimetype;
+        const originalName = req.file.originalname;
+
+        const copyText = await generateBannerCopy(base64Data, mimeType, originalName);
+
+        // Limpiar el archivo temporal
+        fs.unlink(req.file.path, () => {});
+
+        res.json({
+            success: true,
+            titulo: copyText.titulo,
+            descripcion: copyText.descripcion
+        });
+    } catch (error) {
+        console.error('Error en generateBannerCopyIA:', error);
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlink(req.file.path, () => {});
+        }
+        res.status(500).json({ error: error.message || 'No se pudo generar el texto del anuncio.' });
     }
 };
