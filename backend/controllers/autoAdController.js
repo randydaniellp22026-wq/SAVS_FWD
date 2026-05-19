@@ -50,7 +50,7 @@ exports.generateAutoAd = async (req, res) => {
         // ── 3. Llamar a la IA de vision ─────────────────────────────────────
         let detectedFields;
         try {
-            detectedFields = await analyzeVehicleImage(base64Data, mimetype);
+            detectedFields = await analyzeVehicleImage(base64Data, mimetype, originalname);
         } catch (aiErr) {
             // Borrar archivo si el analisis falla
             fs.unlink(filePath, () => {});

@@ -109,13 +109,14 @@ exports.crearBanner = (req, res) => {
             return res.status(400).json({ error: 'Debes seleccionar una imagen para el anuncio.' });
         }
 
-        const { titulo, descripcion } = req.body;
+        const { titulo, descripcion, enlace } = req.body;
         const banners = leerBanners();
 
         const nuevoBanner = {
             id:          Date.now(),
             titulo:      titulo      || 'Sin título',
             descripcion: descripcion || '',
+            enlace:      enlace      || '',
             imagen:      `/uploads/${req.file.filename}`,
             fechaSubida: new Date().toLocaleDateString('es-CR')
         };
@@ -172,8 +173,9 @@ exports.generateBannerCopyIA = async (req, res) => {
 
         const base64Data = fs.readFileSync(req.file.path, 'base64');
         const mimeType = req.file.mimetype;
+        const originalName = req.file.originalname;
 
-        const copyText = await generateBannerCopy(base64Data, mimeType);
+        const copyText = await generateBannerCopy(base64Data, mimeType, originalName);
 
         // Limpiar el archivo temporal
         fs.unlink(req.file.path, () => {});
