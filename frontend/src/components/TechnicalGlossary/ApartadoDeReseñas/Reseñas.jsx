@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Edit2, Trash2, Plus, CheckCircle } from 'lucide-react';
 import FacebookPromo from '../../FacebookPromo/FacebookPromo';
@@ -26,6 +26,8 @@ const Reseñas = () => {
     const [editingId, setEditingId] = useState(null);
     const [storedUser, setStoredUser] = useState({});
     const navigate = useNavigate();
+    const location = useLocation();
+    const isAdminPanel = location.pathname.startsWith('/admin');
 
     // Cargar usuario y datos iniciales
     useEffect(() => {
@@ -251,9 +253,11 @@ const Reseñas = () => {
                 ))}
             </div>
 
-            <div style={{ marginBottom: '2rem', marginTop: '1rem', padding: '0 2rem' }}>
-                <FacebookPromo type="banner" reverse={true} />
-            </div>
+            {!isAdminPanel && (
+                <div style={{ marginBottom: '2rem', marginTop: '1rem', padding: '0 2rem' }}>
+                    <FacebookPromo type="banner" reverse={true} />
+                </div>
+            )}
 
             <div className="reviews-grid">
                 <div className="review-card add-review-card" onClick={toggleModal}>
