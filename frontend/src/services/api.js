@@ -11,15 +11,32 @@ const api = axios.create({
   },
 });
 
-// Interceptor para manejo de errores global
+// Interceptor: token Bearer opcional + manejo 401
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Si no hay respuesta, es probable que sea un error de red o el servidor esté caído
     if (!error.response) {
-      console.error('❌ Error de Red - ¿Está el servidor corriendo?');
-      // Modificamos el mensaje para que sea más descriptivo en el frontend
-      error.message = 'Error de conexión: El servidor no responde. Asegúrate de que el backend esté encendido (npm run dev).';
+      console.error('[API] Error de red', { url: error.config?.url, message: error.message });
+      error.message = 'Error de conexión: El servidor no responde. Asegúrate de que el backend esté encendido.';
+    } else {
+      console.error('[API]', {
+        status: error.response.status,
+        url: error.config?.url,
+        data: error.response.data
+      });
+      if (error.response.status === 401 && !window.location.pathname.includes('/login')) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        window.location.href = '/login?expired=1';
+      }
     }
     return Promise.reject(error);
   }
@@ -28,6 +45,13 @@ api.interceptors.response.use(
 /**
  * Servicio de Vehículos
  */
+
+// Nueva instancia axios sin content-type fijo (para multipart/form-data)
+const apiForm = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
 export const vehicleService = {
   // Obtener lista con filtros y paginación
   getAll: async (params = {}) => {
@@ -61,6 +85,18 @@ export const vehicleService = {
   delete: async (id) => {
     const response = await api.delete(`/vehicles/${id}`);
     return response.data;
+  },
+
+  // ── Generar anuncio automático desde imagen con IA ──────────────────────
+  // Envía una imagen a la API; la IA detecta marca, modelo, año, tipo, color, etc.
+  // y devuelve los campos detectados para autocompletar el formulario.
+  generateAutoAd: async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    const response = await apiForm.post('/vehicles/auto-ad', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   }
 };
 
@@ -86,4 +122,45 @@ export const authService = {
   }
 };
 
+export const tradeInService = {
+  getMine: () => api.get('/sale_requests/mine').then((r) => r.data),
+  create: (data) => api.post('/sale_requests', data).then((r) => r.data),
+  update: (id, data) => api.put(`/sale_requests/${id}`, data).then((r) => r.data),
+};
+
+export const appointmentService = {
+  getMine: () => api.get('/appointments/mine').then((r) => r.data),
+  create: (data) => api.post('/appointments', data).then((r) => r.data),
+  cancel: (id) => api.patch(`/appointments/${id}/cancel`).then((r) => r.data),
+};
+
+export const pointsService = {
+  getMine: () => api.get('/points/mine').then((r) => r.data),
+  redeem: (cantidad, descripcion) => api.post('/points/redeem', { cantidad, descripcion }).then((r) => r.data),
+};
+
+export const marketingService = {
+  getBanners: () => api.get('/marketing/banners').then((r) => r.data),
+};
+
+export { apiForm };
 export default api;
+
+/**
+ * Servicio del Chatbot
+ */
+export const chatService = {
+  // Mensaje de texto puro
+  sendText: async (message) => {
+    const response = await api.post('/chatbot', { message });
+    return response.data;
+  },
+
+  // Mensaje con imagen adjunta (multipart/form-data)
+  sendWithImage: async (formData) => {
+    const response = await apiForm.post('/chatbot', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+};

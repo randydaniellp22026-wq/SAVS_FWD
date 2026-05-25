@@ -1,3 +1,8 @@
+/**
+ * Controlador de Autenticación (Auth)
+ * Administra el registro, inicio y cierre de sesión de usuarios, así como la recuperación de contraseñas.
+ * Implementa seguridad con bcrypt (hashing) y jsonwebtoken (JWT).
+ */
 const { Usuario, Rol } = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -59,7 +64,15 @@ exports.register = async (req, res) => {
             telefono,
             ubicacion: ubicacion || 'Costa Rica',
             direccion_precisa,
-            favorites: []
+            favorites: [],
+            puntos: 500,
+            puntos_historial: [{
+                id: '1',
+                tipo: 'ganado',
+                cantidad: 500,
+                descripcion: 'Bienvenida — registro de cuenta',
+                fecha: new Date().toISOString()
+            }]
         });
 
         res.status(201).json({ message: 'Usuario registrado con éxito', usuarioId: nuevoUsuario.id });

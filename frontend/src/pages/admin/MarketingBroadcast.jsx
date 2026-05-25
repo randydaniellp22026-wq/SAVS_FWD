@@ -1,358 +1,410 @@
-import React, { useState } from 'react';
-import { Send, Mail, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
-import api from '../../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Send, Mail, AlertTriangle, CheckCircle, Loader2, ImagePlus, 
+  Trash2, Megaphone, Users, Calendar, BarChart2, Clock 
+} from 'lucide-react';
+import { marketingService } from '../../admin/services';
+import { getStoredAdminUser } from '../../admin/utils/auth';
+import { FACEBOOK_PAGE_URL } from '../../components/FacebookPromo/FacebookPromo';
 import Swal from 'sweetalert2';
 
-const MarketingBroadcast = () => {
-    const [subject, setSubject] = useState('');
-    const [content, setContent] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [previewMode, setPreviewMode] = useState(false);
+const darkSwal = { background: '#141414', color: '#fff', confirmButtonColor: '#eab308' };
 
-    const handleSendTest = async () => {
-        if (!subject || !content) {
-            Swal.fire({ ...darkSwal, title: 'Campos incompletos', icon: 'warning' });
+// Mock data for history and metrics
+const MOCK_HISTORY = [
+  { id: 1, subject: 'Gran Venta de Verano', audience: 'Todos', status: 'Enviado', date: '2026-05-10 10:00', openRate: '45%', clickRate: '12%' },
+  { id: 2, subject: 'Nuevos SUVs disponibles', audience: 'Leads', status: 'Enviado', date: '2026-05-05 14:30', openRate: '38%', clickRate: '8%' },
+  { id: 3, subject: 'Tu próximo mantenimiento', audience: 'Clientes', status: 'Programado', date: '2026-05-25 09:00', openRate: '-', clickRate: '-' },
+];
+
+const MarketingBroadcast = () => {
+    // ── Estado Email ──────────────────────────────────────────
+    const [subject, setSubject]       = useState('');
+    const [content, setContent]       = useState('');
+    const [audience, setAudience]     = useState('todos');
+    const [scheduleDate, setScheduleDate] = useState('');
+    const [isLoading, setIsLoading]   = useState(false);
+    const [previewMode, setPreviewMode] = useState(false);
+    const [activeTab, setActiveTab]   = useState('compose'); // compose, history, banners
+
+    // ── Estado Banners ────────────────────────────────────────
+    const [banners, setBanners]           = useState([]);
+    const [loadingBanners, setLoadingBanners] = useState(true);
+    const [uploadingBanner, setUploadingBanner] = useState(false);
+    const [nuevaTitulo, setNuevaTitulo]   = useState('');
+    const [nuevaDesc, setNuevaDesc]       = useState('');
+    const [imagenPreview, setImagenPreview] = useState(null);
+    const [imagenFile, setImagenFile]     = useState(null);
+    const fileInputRef = useRef();
+    const [generatingIA, setGeneratingIA] = useState(false);
+    const [isDragging, setIsDragging]     = useState(false);
+
+    useEffect(() => {
+        if (activeTab === 'banners') {
+            cargarBanners();
+        }
+    }, [activeTab]);
+
+    const cargarBanners = async () => {
+        try {
+            setLoadingBanners(true);
+            const list = await marketingService.getBanners();
+            setBanners(list);
+        } catch (e) {
+            console.error('Error cargando banners:', e);
+        } finally {
+            setLoadingBanners(false);
+        }
+    };
+
+    const handleImagenSeleccionada = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setImagenFile(file);
+        setImagenPreview(URL.createObjectURL(file));
+        analizarConIA(file);
+    };
+
+    const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+    const handleDragLeave = () => { setIsDragging(false); };
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        setImagenFile(file);
+        setImagenPreview(URL.createObjectURL(file));
+        analizarConIA(file);
+    };
+
+    const analizarConIA = async (file) => {
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('imagen', file);
+        setGeneratingIA(true);
+        try {
+            const res = await marketingService.generateBannerCopy(formData);
+            if (res.success) {
+                setNuevaTitulo(res.titulo);
+                setNuevaDesc(res.descripcion);
+            }
+        } catch (e) {
+            console.error('Error IA:', e);
+        } finally {
+            setGeneratingIA(false);
+        }
+    };
+
+    const handlePublicarBanner = async () => {
+        if (!imagenFile || !nuevaTitulo.trim()) {
+            Swal.fire({ ...darkSwal, title: 'Datos incompletos', icon: 'warning' });
             return;
         }
+        const formData = new FormData();
+        formData.append('imagen', imagenFile);
+        formData.append('titulo', nuevaTitulo);
+        formData.append('descripcion', nuevaDesc);
+        formData.append('enlace', FACEBOOK_PAGE_URL);
 
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const myEmail = user.email || 'yosimarvv@gmail.com';
-
-        setIsLoading(true);
+        setUploadingBanner(true);
         try {
-            await api.post('/marketing/broadcast', { 
-                subject: `[TEST] ${subject}`, 
-                content, 
-                testEmail: myEmail 
-            });
-            Swal.fire({
-                title: 'Prueba Enviada',
-                text: `El correo de prueba ha sido enviado a ${myEmail}`,
-                icon: 'success',
-                background: '#141414',
-                color: '#fff'
-            });
-        } catch (error) {
-            Swal.fire({ ...darkSwal, title: 'Error de Prueba', text: error.response?.data?.error || 'Error', icon: 'error' });
+            await marketingService.createBanner(formData);
+            Swal.fire({ ...darkSwal, title: '¡Publicado!', icon: 'success' });
+            setNuevaTitulo(''); setNuevaDesc(''); setImagenFile(null); setImagenPreview(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            cargarBanners();
+        } catch (e) {
+            Swal.fire({ ...darkSwal, title: 'Error', text: 'No se pudo publicar', icon: 'error' });
         } finally {
-            setIsLoading(false);
+            setUploadingBanner(false);
+        }
+    };
+
+    const handleEliminarBanner = async (id, titulo) => {
+        const confirm = await Swal.fire({
+            ...darkSwal, title: '¿Eliminar anuncio?', text: `"${titulo}" se eliminará.`, icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#ef4444'
+        });
+        if (!confirm.isConfirmed) return;
+        try {
+            await marketingService.deleteBanner(id);
+            cargarBanners();
+        } catch (e) {
+            Swal.fire({ ...darkSwal, title: 'Error', icon: 'error' });
         }
     };
 
     const handleSendBroadcast = async () => {
         if (!subject || !content) {
-            Swal.fire({
-                title: 'Campos incompletos',
-                text: 'Por favor escribe un asunto y el contenido del mensaje.',
-                icon: 'warning',
-                background: '#141414',
-                color: '#fff',
-                confirmButtonColor: '#eab308'
-            });
+            Swal.fire({ ...darkSwal, title: 'Campos incompletos', icon: 'warning' });
             return;
         }
+        const confirmMsg = scheduleDate 
+            ? `¿Programar envío para ${scheduleDate} a la audiencia: ${audience}?`
+            : `¿Enviar ahora a la audiencia: ${audience}?`;
 
         const confirm = await Swal.fire({
-            title: '¿Confirmar envío masivo?',
-            text: 'Este correo se enviará a todos los usuarios registrados en el sistema.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, enviar ahora',
-            cancelButtonText: 'Cancelar',
-            background: '#141414',
-            color: '#fff',
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#444'
+            ...darkSwal, title: 'Confirmar Broadcast', text: confirmMsg, icon: 'question',
+            showCancelButton: true, confirmButtonColor: '#10b981'
         });
-
         if (confirm.isConfirmed) {
             setIsLoading(true);
             try {
-                const response = await api.post('/marketing/broadcast', { subject, content });
-                
-                Swal.fire({
-                    title: '¡Envío Exitoso!',
-                    text: response.data.message,
-                    icon: 'success',
-                    background: '#141414',
-                    color: '#fff',
-                    confirmButtonColor: '#eab308'
-                });
-
-                setSubject('');
-                setContent('');
+                // Mock API call to simulate sending based on audience and schedule
+                setTimeout(() => {
+                  Swal.fire({ ...darkSwal, title: '¡Éxito!', text: scheduleDate ? 'Campaña programada.' : 'Campaña enviada.', icon: 'success' });
+                  setSubject(''); setContent(''); setScheduleDate('');
+                  setIsLoading(false);
+                  setActiveTab('history');
+                }, 1500);
             } catch (error) {
-                console.error('Error enviando broadcast:', error);
-                Swal.fire({
-                    title: 'Error de Envío',
-                    text: error.response?.data?.error || 'No se pudo procesar el envío masivo.',
-                    icon: 'error',
-                    background: '#141414',
-                    color: '#fff'
-                });
-            } finally {
                 setIsLoading(false);
             }
         }
     };
 
     return (
-        <div className="admin-marketing-container">
-            <div className="admin-header">
-                <h1 className="admin-title">Email Marketing <Mail size={36} className="admin-icon-title" /></h1>
-                <p className="admin-subtitle">Comunícate directamente con todos tus clientes registrados.</p>
+        <div className="admin-marketing-container" style={{ padding: '2rem 1rem', maxWidth: '1200px', margin: '0 auto' }}>
+            
+            <header className="admin-header" style={{ marginBottom: '2rem' }}>
+                <h1 className="admin-title">Centro de <span className="highlight-gold">Marketing</span></h1>
+                <p className="admin-subtitle">Gestiona campañas de correo, banners publicitarios y analiza el rendimiento.</p>
+            </header>
+
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
+                <button 
+                  onClick={() => setActiveTab('compose')} 
+                  style={{ background: activeTab === 'compose' ? '#eab308' : 'transparent', color: activeTab === 'compose' ? '#000' : '#fff', border: '1px solid #eab308', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  <Mail size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> Redactar Email
+                </button>
+                <button 
+                  onClick={() => setActiveTab('history')} 
+                  style={{ background: activeTab === 'history' ? '#eab308' : 'transparent', color: activeTab === 'history' ? '#000' : '#fff', border: '1px solid #eab308', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  <BarChart2 size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> Historial & Métricas
+                </button>
+                <button 
+                  onClick={() => setActiveTab('banners')} 
+                  style={{ background: activeTab === 'banners' ? '#eab308' : 'transparent', color: activeTab === 'banners' ? '#000' : '#fff', border: '1px solid #eab308', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  <ImagePlus size={16} style={{ verticalAlign: 'middle', marginRight: '6px' }}/> Banners Web
+                </button>
             </div>
 
-            <div className="marketing-grid">
-                <div className="marketing-form card-base">
-                    <div className="form-header">
-                        <Mail className="form-icon" />
-                        <h3>Redactar Nuevo Mensaje</h3>
+            {/* TAB: COMPONER EMAIL */}
+            {activeTab === 'compose' && (
+                <div className="marketing-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                    <div className="marketing-form card-base" style={{ background: 'rgba(20,20,20,0.6)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', color: '#fff' }}>
+                            <Mail color="#eab308" /> Configuración de Campaña
+                        </h3>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                           <div className="form-group" style={{ marginBottom: '1rem' }}>
+                               <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Audiencia Objetivo</label>
+                               <div style={{ position: 'relative' }}>
+                                  <Users size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+                                  <select 
+                                    value={audience} 
+                                    onChange={e => setAudience(e.target.value)} 
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem 0.8rem 2.5rem', borderRadius: '8px', marginTop: '0.3rem' }}
+                                  >
+                                      <option value="todos">Todos los Suscriptores</option>
+                                      <option value="clientes">Solo Clientes (Han comprado)</option>
+                                      <option value="leads">Leads (Sin compras)</option>
+                                  </select>
+                               </div>
+                           </div>
+                           <div className="form-group" style={{ marginBottom: '1rem' }}>
+                               <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Programar Envío (Opcional)</label>
+                               <div style={{ position: 'relative' }}>
+                                  <Calendar size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+                                  <input 
+                                    type="datetime-local" 
+                                    value={scheduleDate} 
+                                    onChange={e => setScheduleDate(e.target.value)} 
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem 0.8rem 2.5rem', borderRadius: '8px', marginTop: '0.3rem', fontFamily: 'inherit' }}
+                                  />
+                               </div>
+                           </div>
+                        </div>
+
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                            <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Asunto del Correo</label>
+                            <input type="text" value={subject} onChange={e => setSubject(e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem', borderRadius: '8px', marginTop: '0.3rem' }} />
+                        </div>
+                        <div className="form-group">
+                            <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Contenido (Soporta HTML)</label>
+                            <textarea value={content} onChange={e => setContent(e.target.value)} rows={12} style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem', borderRadius: '8px', marginTop: '0.3rem', resize: 'vertical' }} />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            <button onClick={() => setPreviewMode(!previewMode)} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '0.8rem 1.5rem', borderRadius: '8px', cursor: 'pointer' }}>
+                                {previewMode ? 'Ocultar Preview' : 'Ver Preview'}
+                            </button>
+                            <button onClick={handleSendBroadcast} disabled={isLoading} style={{ flex: 1, background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                                {isLoading ? <Loader2 className="spinner" /> : (scheduleDate ? <Clock size={18}/> : <Send size={18} />)}
+                                {isLoading ? 'Procesando...' : (scheduleDate ? 'Programar Campaña' : 'Enviar Ahora')}
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="form-group">
-                        <label>Asunto del Correo</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ej: ¡Nuevos ingresos en SAVS esta semana!"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            className="marketing-input"
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label>Contenido del Mensaje (Soporta HTML)</label>
-                        <textarea 
-                            placeholder="Escribe tu mensaje aquí..."
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            className="marketing-textarea"
-                            rows={10}
-                        ></textarea>
-                    </div>
-
-                    <div className="marketing-actions">
-                        <button 
-                            className="btn-preview"
-                            onClick={() => setPreviewMode(!previewMode)}
-                        >
-                            {previewMode ? 'Editar' : 'Vista Previa'}
-                        </button>
-                        <button 
-                            className="btn-send-test"
-                            onClick={handleSendTest}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? <Loader2 className="spinner" /> : <Mail size={18} />}
-                            Enviar Prueba
-                        </button>
-                        <button 
-                            className="btn-send-broadcast"
-                            onClick={handleSendBroadcast}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? <Loader2 className="spinner" /> : <Send size={18} />}
-                            {isLoading ? 'Enviando...' : 'Enviar a Todos'}
-                        </button>
-                    </div>
-
-                    <div className="marketing-warning">
-                        <AlertTriangle size={16} />
-                        <p>Atención: Esta acción no se puede deshacer y el envío es inmediato.</p>
+                    <div className="marketing-preview card-base" style={{ background: '#fff', padding: '2rem', borderRadius: '16px', color: '#333', opacity: previewMode ? 1 : 0.5, transition: 'opacity 0.3s' }}>
+                        <h3 style={{ borderBottom: '1px solid #eee', paddingBottom: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <CheckCircle color="#10b981" /> Vista Previa del Cliente
+                        </h3>
+                        <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#666' }}><strong>De:</strong> SAVS &lt;marketing@savs.com&gt;</p>
+                        <p style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#666', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}><strong>Asunto:</strong> {subject || '(Sin asunto)'}</p>
+                        <div style={{ minHeight: '300px', lineHeight: '1.6' }}>
+                            {content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : <p style={{ color: '#999', fontStyle: 'italic', textAlign: 'center', marginTop: '3rem' }}>El contenido aparecerá aquí...</p>}
+                        </div>
                     </div>
                 </div>
+            )}
 
-                <div className={`marketing-preview card-base ${previewMode ? 'active' : ''}`}>
-                    <div className="preview-header">
-                        <CheckCircle className="preview-icon" />
-                        <h3>Vista Previa del Suscriptor</h3>
+            {/* TAB: HISTORIAL */}
+            {activeTab === 'history' && (
+                <div className="card-base" style={{ background: 'rgba(20,20,20,0.6)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px' }}>
+                            <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.85rem', textTransform: 'uppercase' }}>Tasa de Apertura Prom.</p>
+                            <h2 style={{ color: '#fff', margin: '0.5rem 0 0 0', fontSize: '2rem' }}>41.5%</h2>
+                        </div>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px' }}>
+                            <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.85rem', textTransform: 'uppercase' }}>CTR Promedio</p>
+                            <h2 style={{ color: '#eab308', margin: '0.5rem 0 0 0', fontSize: '2rem' }}>10.0%</h2>
+                        </div>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '12px' }}>
+                            <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.85rem', textTransform: 'uppercase' }}>Campañas Enviadas</p>
+                            <h2 style={{ color: '#10b981', margin: '0.5rem 0 0 0', fontSize: '2rem' }}>12</h2>
+                        </div>
                     </div>
-                    
-                    <div className="preview-envelope">
-                        <div className="preview-field">
-                            <strong>De:</strong> SAVS Importadora &lt;notificaciones@savs.com&gt;
-                        </div>
-                        <div className="preview-field">
-                            <strong>Asunto:</strong> {subject || '(Sin Asunto)'}
-                        </div>
-                        <div className="preview-content-box">
-                            {content ? (
-                                <div dangerouslySetInnerHTML={{ __html: content }}></div>
-                            ) : (
-                                <p className="empty-preview">Escribe algo en el editor para ver la vista previa...</p>
+
+                    <h3 style={{ color: '#fff', marginBottom: '1rem' }}>Historial de Campañas</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: '#9ca3af', fontSize: '0.85rem' }}>
+                                <th style={{ padding: '1rem 0' }}>Asunto</th>
+                                <th style={{ padding: '1rem 0' }}>Audiencia</th>
+                                <th style={{ padding: '1rem 0' }}>Estado</th>
+                                <th style={{ padding: '1rem 0' }}>Fecha</th>
+                                <th style={{ padding: '1rem 0' }}>Aperturas</th>
+                                <th style={{ padding: '1rem 0' }}>Clics</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {MOCK_HISTORY.map(h => (
+                                <tr key={h.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', color: '#fff' }}>
+                                    <td style={{ padding: '1rem 0', fontWeight: 'bold' }}>{h.subject}</td>
+                                    <td style={{ padding: '1rem 0', color: '#9ca3af' }}>{h.audience}</td>
+                                    <td style={{ padding: '1rem 0' }}>
+                                        <span style={{ background: h.status === 'Enviado' ? 'rgba(16,185,129,0.1)' : 'rgba(234,179,8,0.1)', color: h.status === 'Enviado' ? '#10b981' : '#eab308', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem' }}>
+                                            {h.status}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '1rem 0', color: '#9ca3af' }}>{h.date}</td>
+                                    <td style={{ padding: '1rem 0' }}>{h.openRate}</td>
+                                    <td style={{ padding: '1rem 0' }}>{h.clickRate}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* TAB: BANNERS */}
+            {activeTab === 'banners' && (
+                <div>
+                    <div className="card-base" style={{ background: 'rgba(20,20,20,0.6)', padding: '2rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', color: '#eab308' }}>
+                            <ImagePlus /> Publicar Nuevo Banner
+                        </h3>
+                        
+                        <div 
+                           onClick={() => !generatingIA && fileInputRef.current?.click()}
+                           onDragOver={handleDragOver}
+                           onDragLeave={handleDragLeave}
+                           onDrop={handleDrop}
+                           style={{
+                              border: isDragging ? '2px dashed #eab308' : '2px dashed rgba(255,255,255,0.2)',
+                              background: imagenPreview ? `url(${imagenPreview}) center/cover` : (isDragging ? 'rgba(234,179,8,0.1)' : 'rgba(0,0,0,0.2)'),
+                              borderRadius: '12px', padding: '3rem', textAlign: 'center', cursor: 'pointer',
+                              position: 'relative', minHeight: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+                           }}
+                        >
+                            {generatingIA && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
+                                    <Loader2 className="spinner" size={40} color="#eab308" />
+                                    <p style={{ color: '#fff', marginTop: '1rem', fontWeight: 'bold' }}>IA analizando imagen...</p>
+                                </div>
+                            )}
+                            {!generatingIA && !imagenPreview && (
+                                <>
+                                  <ImagePlus size={40} color="#eab308" style={{ marginBottom: '1rem' }} />
+                                  <p style={{ color: '#9ca3af', margin: 0 }}>Arrastra o haz clic para subir imagen</p>
+                                </>
+                            )}
+                            {!generatingIA && imagenPreview && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', opacity: 0, transition: 'opacity 0.3s' }} onMouseEnter={e => e.currentTarget.style.opacity=1} onMouseLeave={e => e.currentTarget.style.opacity=0}>
+                                    <p style={{ color: '#fff', fontWeight: 'bold' }}>Cambiar Imagen</p>
+                                </div>
                             )}
                         </div>
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImagenSeleccionada} style={{ display: 'none' }} />
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                            <div className="form-group">
+                                <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Título</label>
+                                <input type="text" value={nuevaTitulo} onChange={e => setNuevaTitulo(e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem', borderRadius: '8px', marginTop: '0.3rem' }} />
+                            </div>
+                            <div className="form-group">
+                                <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Descripción</label>
+                                <input type="text" value={nuevaDesc} onChange={e => setNuevaDesc(e.target.value)} style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '0.8rem 1rem', borderRadius: '8px', marginTop: '0.3rem' }} />
+                            </div>
+                        </div>
+                        <div className="form-group" style={{ marginTop: '1rem' }}>
+                            <label style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Enlace del anuncio</label>
+                            <input
+                                type="text"
+                                readOnly
+                                value={FACEBOOK_PAGE_URL}
+                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#9ca3af', padding: '0.8rem 1rem', borderRadius: '8px', marginTop: '0.3rem', cursor: 'not-allowed' }}
+                            />
+                            <p style={{ color: '#6b7280', fontSize: '0.75rem', marginTop: '0.35rem' }}>Todos los banners redirigen a la página de Facebook de SAVS.</p>
+                        </div>
+                        
+                        <button onClick={handlePublicarBanner} disabled={uploadingBanner} style={{ width: '100%', marginTop: '1.5rem', background: '#eab308', color: '#000', border: 'none', padding: '1rem', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer' }}>
+                            {uploadingBanner ? <Loader2 className="spinner" /> : <Megaphone size={18} />}
+                            {uploadingBanner ? 'Publicando...' : 'Publicar Banner'}
+                        </button>
                     </div>
-                    
-                    <div className="preview-footer">
-                        <p>© 2024 Importadora SAVS. Todos los derechos reservados.</p>
-                        <p className="unsubscribe-link">Si ya no deseas recibir estos correos, puedes cancelar tu suscripción aquí.</p>
+
+                    <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {banners.map(b => (
+                            <div key={b.id} style={{ background: 'rgba(20,20,20,0.6)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', overflow: 'hidden' }}>
+                                <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || `http://${window.location.hostname}:5000`}${b.imagen}`} alt={b.titulo} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
+                                <div style={{ padding: '1rem' }}>
+                                    <h4 style={{ color: '#fff', margin: '0 0 5px 0' }}>{b.titulo}</h4>
+                                    <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: '0 0 10px 0' }}>{b.descripcion}</p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>{b.fechaSubida}</span>
+                                        <button onClick={() => handleEliminarBanner(b.id, b.titulo)} style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', padding: '6px', borderRadius: '6px', cursor: 'pointer' }}>
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
-
+            )}
+            
             <style>{`
-                .marketing-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 2rem;
-                    margin-top: 2rem;
-                }
-
-                .form-header, .preview-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    margin-bottom: 1.5rem;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    padding-bottom: 1rem;
-                }
-
-                .form-icon { color: #eab308; }
-                .preview-icon { color: #10b981; }
-
-                .marketing-input, .marketing-textarea {
-                    width: 100%;
-                    background: rgba(0,0,0,0.2);
-                    border: 1px solid rgba(255,255,255,0.1);
-                    border-radius: 8px;
-                    padding: 0.8rem 1rem;
-                    color: #fff;
-                    font-family: inherit;
-                    margin-top: 0.5rem;
-                }
-
-                .marketing-textarea {
-                    resize: vertical;
-                    min-height: 200px;
-                }
-
-                .marketing-actions {
-                    display: flex;
-                    gap: 1rem;
-                    margin-top: 1.5rem;
-                }
-
-                .btn-send-broadcast {
-                    flex: 1;
-                    background: #10b981;
-                    color: #fff;
-                    border: none;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    font-weight: 700;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 10px;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                }
-
-                .btn-send-broadcast:hover:not(:disabled) {
-                    background: #059669;
-                    transform: translateY(-2px);
-                }
-
-                .btn-send-broadcast:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-
-                .btn-send-test {
-                    background: rgba(234, 179, 8, 0.1);
-                    color: #eab308;
-                    border: 1px solid rgba(234, 179, 8, 0.3);
-                    padding: 0 1.5rem;
-                    border-radius: 8px;
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                }
-
-                .btn-send-test:hover:not(:disabled) {
-                    background: rgba(234, 179, 8, 0.2);
-                    border-color: #eab308;
-                }
-
-                .btn-preview {
-                    background: rgba(255,255,255,0.05);
-                    color: #fff;
-                    border: 1px solid rgba(255,255,255,0.1);
-                    padding: 0 1.5rem;
-                    border-radius: 8px;
-                    cursor: pointer;
-                }
-
-                .marketing-warning {
-                    margin-top: 1.5rem;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 0.8rem;
-                    background: rgba(234, 179, 8, 0.1);
-                    border: 1px solid rgba(234, 179, 8, 0.2);
-                    border-radius: 8px;
-                    color: #eab308;
-                    font-size: 0.85rem;
-                }
-
-                .preview-envelope {
-                    background: #fff;
-                    color: #333;
-                    border-radius: 12px;
-                    padding: 2rem;
-                    min-height: 400px;
-                }
-
-                .preview-field {
-                    border-bottom: 1px solid #eee;
-                    padding: 0.5rem 0;
-                    font-size: 0.9rem;
-                    color: #666;
-                }
-
-                .preview-content-box {
-                    margin-top: 2rem;
-                    line-height: 1.6;
-                }
-
-                .empty-preview {
-                    color: #999;
-                    font-style: italic;
-                    text-align: center;
-                    margin-top: 4rem;
-                }
-
-                .preview-footer {
-                    margin-top: 2rem;
-                    text-align: center;
-                    font-size: 0.75rem;
-                    color: #6b7280;
-                }
-
-                .unsubscribe-link {
-                    margin-top: 0.5rem;
-                    text-decoration: underline;
-                    cursor: pointer;
-                }
-
-                .spinner {
-                    animation: spin 1s linear infinite;
-                }
-
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-
-                @media (max-width: 1024px) {
-                    .marketing-grid { grid-template-columns: 1fr; }
+                .spinner { animation: spin 1s linear infinite; }
+                @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @media (max-width: 768px) {
+                    .marketing-grid { grid-template-columns: 1fr !important; }
                 }
             `}</style>
         </div>

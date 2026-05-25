@@ -1,21 +1,21 @@
 {
   "development": {
     "username": "root",
-    "password": "Yosimar53.",
+    "password": "1234",
     "database": "SAVS_DB",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "test": {
     "username": "root",
-    "password": "Yosimar53.",
+    "password": "1234",
     "database": "SAVS_DB_test",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },
   "production": {
     "username": "root",
-    "password": "Yosimar53.",
+    "password": "1234",
     "database": "SAVS_DB_prod",
     "host": "127.0.0.1",
     "dialect": "mysql"

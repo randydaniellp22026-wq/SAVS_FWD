@@ -1,3 +1,8 @@
+/**
+ * Controlador de Vehículos (Autos)
+ * Centraliza la lógica para gestionar el inventario de la empresa, incluyendo 
+ * subida de imágenes, paginación, filtros avanzados y búsquedas dinámicas.
+ */
 const { Auto } = require('../models');
 const { Op } = require('sequelize');
 const path = require('path');
@@ -5,17 +10,25 @@ const fs = require('fs');
 
 /**
  * GET /api/vehicles
- * Soporta paginación, búsqueda, filtros y ordenamiento vía query params.
+ * Soporta paginación, búsqueda inteligente, filtros avanzados y ordenamiento vía query params.
  *
  * Query params disponibles:
  *   - page (int)        → Página actual (default: 1)
  *   - limit (int)       → Resultados por página (default: 20, max: 100)
- *   - search (string)   → Búsqueda por nombre, marca, modelo o motor
+ *   - search (string)   → Búsqueda inteligente en TODOS los campos: nombre, marca, modelo,
+ *                          motor, color, tipo, puertas, pasajeros, transmisión, combustible,
+ *                          tracción, dirección, cilindraje, etiqueta, resumen, kilometraje.
+ *                          Detecta años (4 dígitos) y patrones como "4 puertas", "5 pasajeros".
  *   - type (string)     → Filtro por tipo de vehículo (SUV, Sedán, etc.)
  *   - fuel (string)     → Filtro por combustible
  *   - transmission (string) → Filtro por transmisión
  *   - tag (string)      → Filtro por etiqueta (Disponible, Vendido, etc.)
  *   - color (string)    → Filtro por color
+ *   - doors (string)    → Filtro por cantidad de puertas
+ *   - drive (string)    → Filtro por tipo de tracción (FWD, RWD, AWD, 4WD, 4x4)
+ *   - passengers (string) → Filtro por capacidad de pasajeros
+ *   - steering (string) → Filtro por tipo de dirección
+ *   - engine_size (string) → Filtro por cilindraje/tamaño del motor
  *   - minPrice (number) → Precio mínimo
  *   - maxPrice (number) → Precio máximo
  *   - minYear (number)  → Año mínimo
@@ -34,6 +47,11 @@ exports.getAll = async (req, res) => {
             transmission,
             tag,
             color,
+            doors,
+            drive,
+            passengers,
+            steering,
+            engine_size,
             minPrice,
             maxPrice,
             minYear,
@@ -50,22 +68,74 @@ exports.getAll = async (req, res) => {
         // Construir condiciones WHERE dinámicas
         const where = {};
 
-        // Búsqueda por texto libre (nombre, marca, modelo, motor)
+        // ── Búsqueda inteligente por texto libre ──
+        // Busca en TODOS los campos relevantes del vehículo para máxima cobertura.
+        // También detecta años (4 dígitos) y rangos de puertas dentro del término.
         if (search) {
-            where[Op.or] = [
-                { name: { [Op.like]: `%${search}%` } },
-                { marca: { [Op.like]: `%${search}%` } },
-                { modelo: { [Op.like]: `%${search}%` } },
-                { motor: { [Op.like]: `%${search}%` } }
+            const searchTerm = search.trim();
+            const searchConditions = [
+                // Identificación del vehículo
+                { name: { [Op.like]: `%${searchTerm}%` } },
+                { marca: { [Op.like]: `%${searchTerm}%` } },
+                { modelo: { [Op.like]: `%${searchTerm}%` } },
+                // Motor y mecánica
+                { motor: { [Op.like]: `%${searchTerm}%` } },
+                { engine_size: { [Op.like]: `%${searchTerm}%` } },
+                { transmission: { [Op.like]: `%${searchTerm}%` } },
+                { drive: { [Op.like]: `%${searchTerm}%` } },
+                { steering: { [Op.like]: `%${searchTerm}%` } },
+                // Combustible y tipo
+                { fuel: { [Op.like]: `%${searchTerm}%` } },
+                { type: { [Op.like]: `%${searchTerm}%` } },
+                // Apariencia
+                { color: { [Op.like]: `%${searchTerm}%` } },
+                // Capacidad
+                { doors: { [Op.like]: `%${searchTerm}%` } },
+                { passengers: { [Op.like]: `%${searchTerm}%` } },
+                // Etiquetas y estado
+                { tag: { [Op.like]: `%${searchTerm}%` } },
+                // Descripción y contenido
+                { summary: { [Op.like]: `%${searchTerm}%` } },
+                { heroSubtitle: { [Op.like]: `%${searchTerm}%` } },
+                // Kilometraje
+                { mileage: { [Op.like]: `%${searchTerm}%` } }
             ];
+
+            // Detección inteligente de año: si el término contiene un número de 4 dígitos
+            // entre 1900-2099, también buscar por año
+            const yearMatch = searchTerm.match(/\b(19|20)\d{2}\b/);
+            if (yearMatch) {
+                const yearNum = parseInt(yearMatch[0]);
+                searchConditions.push({ year: yearNum });
+                searchConditions.push({ anio: yearNum });
+            }
+
+            // Detección de número de puertas: "2 puertas", "4 puertas", "2p", "4p"
+            const doorsMatch = searchTerm.match(/(\d)\s*(?:puertas?|p\b|doors?)/i);
+            if (doorsMatch) {
+                searchConditions.push({ doors: { [Op.like]: `%${doorsMatch[1]}%` } });
+            }
+
+            // Detección de número de pasajeros: "5 pasajeros", "7 pasajeros"
+            const passMatch = searchTerm.match(/(\d)\s*(?:pasajeros?|passengers?|asientos?|seats?)/i);
+            if (passMatch) {
+                searchConditions.push({ passengers: { [Op.like]: `%${passMatch[1]}%` } });
+            }
+
+            where[Op.or] = searchConditions;
         }
 
-        // Filtros exactos
-        if (type) where.type = type;
-        if (fuel) where.fuel = fuel;
-        if (transmission) where.transmission = transmission;
-        if (tag) where.tag = tag;
+        // ── Filtros directos (sidebar) ──
+        if (type) where.type = { [Op.like]: `%${type}%` };
+        if (fuel) where.fuel = { [Op.like]: `%${fuel}%` };
+        if (transmission) where.transmission = { [Op.like]: `%${transmission}%` };
+        if (tag) where.tag = { [Op.like]: `%${tag}%` };
         if (color) where.color = { [Op.like]: `%${color}%` };
+        if (doors) where.doors = { [Op.like]: `%${doors}%` };
+        if (drive) where.drive = { [Op.like]: `%${drive}%` };
+        if (passengers) where.passengers = { [Op.like]: `%${passengers}%` };
+        if (steering) where.steering = { [Op.like]: `%${steering}%` };
+        if (engine_size) where.engine_size = { [Op.like]: `%${engine_size}%` };
 
         // Filtros de rango de precio
         if (minPrice || maxPrice) {

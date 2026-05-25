@@ -29,6 +29,13 @@ export const useCatalogoLogica = () => {
     minYear: '',
     maxYear: '',
     color: '',
+    doors: '',
+    drive: '',
+    passengers: '',
+    steering: '',
+    engine_size: '',
+    tag: '',
+    mileage: '',
     search: new URLSearchParams(location.search).get('search') || ''
   });
 
@@ -37,7 +44,7 @@ export const useCatalogoLogica = () => {
     try {
       setLoading(true);
       
-      // Mapeamos los filtros activos a los parámetros que espera el Backend de Randy
+      // Mapeamos los filtros activos a los parámetros que espera el Backend
       const params = {
         page: pagination.page,
         limit: pagination.limit,
@@ -49,7 +56,13 @@ export const useCatalogoLogica = () => {
         maxPrice: activeFilters.maxPrice,
         minYear: activeFilters.minYear,
         maxYear: activeFilters.maxYear,
-        color: activeFilters.color
+        color: activeFilters.color,
+        doors: activeFilters.doors,
+        drive: activeFilters.drive,
+        passengers: activeFilters.passengers,
+        steering: activeFilters.steering,
+        engine_size: activeFilters.engine_size,
+        tag: activeFilters.tag
       };
 
       // Tarea 2: Llamada real al servicio centralizado
@@ -90,7 +103,8 @@ export const useCatalogoLogica = () => {
     setActiveFilters({
       transmission: '', fuel: '', marca: '', modelo: '', type: '',
       minPrice: '', maxPrice: '', minYear: '', maxYear: '', color: '',
-      search: ''
+      doors: '', drive: '', passengers: '', steering: '', engine_size: '',
+      tag: '', mileage: '', search: ''
     });
     setPagination(prev => ({ ...prev, page: 1 }));
   };
@@ -108,3 +122,4 @@ export const useCatalogoLogica = () => {
     searchQueryParam: activeFilters.search
   };
 };
+

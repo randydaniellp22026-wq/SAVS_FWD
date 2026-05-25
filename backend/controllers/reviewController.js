@@ -1,5 +1,13 @@
+/**
+ * Controlador de Reseñas (Reviews)
+ * Maneja las operaciones CRUD para los testimonios y reseñas de los clientes.
+ */
 const { Review } = require('../models');
 
+/**
+ * Obtiene todas las reseñas almacenadas en la base de datos.
+ * Normalmente usado para mostrar testimonios en la página principal o sección de reseñas.
+ */
 exports.getAll = async (req, res) => {
     try {
         const data = await Review.findAll();
@@ -9,6 +17,9 @@ exports.getAll = async (req, res) => {
     }
 };
 
+/**
+ * Obtiene una reseña específica por su ID.
+ */
 exports.getById = async (req, res) => {
     try {
         const data = await Review.findByPk(req.params.id);
@@ -19,6 +30,10 @@ exports.getById = async (req, res) => {
     }
 };
 
+/**
+ * Crea una nueva reseña en el sistema.
+ * Útil cuando un cliente envía un testimonio desde el frontend.
+ */
 exports.create = async (req, res) => {
     try {
         const data = await Review.create(req.body);
@@ -28,6 +43,10 @@ exports.create = async (req, res) => {
     }
 };
 
+/**
+ * Actualiza una reseña existente.
+ * Por ejemplo, si un administrador necesita moderar o corregir un texto.
+ */
 exports.update = async (req, res) => {
     try {
         const [updated] = await Review.update(req.body, { where: { id: req.params.id } });
@@ -42,6 +61,10 @@ exports.update = async (req, res) => {
     }
 };
 
+/**
+ * Elimina una reseña del sistema.
+ * Usado por moderadores/administradores para quitar comentarios inapropiados.
+ */
 exports.remove = async (req, res) => {
     try {
         const deleted = await Review.destroy({ where: { id: req.params.id } });
