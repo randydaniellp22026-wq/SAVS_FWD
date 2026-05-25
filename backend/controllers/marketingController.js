@@ -1,8 +1,17 @@
 const { Resend } = require('resend');
 const { Usuario } = require('../models');
 
-// Inicializar Resend (usaremos la API Key del .env)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend de forma lazy para evitar crash si no hay API Key
+let resend = null;
+function getResendClient() {
+    if (!resend) {
+        if (!process.env.RESEND_API_KEY) {
+            throw new Error('RESEND_API_KEY no está configurada en el archivo .env');
+        }
+        resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resend;
+}
 
 /**
  * Envía un correo masivo a todos los usuarios registrados
@@ -33,7 +42,7 @@ exports.broadcastEmail = async (req, res) => {
         }
 
         // 2. Enviar el correo usando Resend
-        const data = await resend.emails.send({
+        const data = await getResendClient().emails.send({
             from: 'SAVS Importadora <onboarding@resend.dev>',
             to: emailList,
             subject: subject,
