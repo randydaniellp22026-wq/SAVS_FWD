@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-require('dotenv').config(); // Cargar variables de entorno
+require('../loadEnv');
 
 const db = new Sequelize(
     process.env.DB_NAME,
