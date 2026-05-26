@@ -13,6 +13,8 @@ const os = require('os');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const requestContext = require('./middlewares/requestContext');
+const { prometheusMiddleware, metricsHandler } = require('./middlewares/prometheus');
+const Sentry = require('./instrument');
 const { sequelize } = require('./models');
 
 const app = express();
