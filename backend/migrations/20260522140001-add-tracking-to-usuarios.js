@@ -1,9 +1,15 @@
 'use strict';
 module.exports = {
   async up(qi, S) {
-    await qi.addColumn('Usuarios', 'tracking', { type: S.JSON, allowNull: true });
+    const table = await qi.describeTable('Usuarios');
+    if (!table.tracking) {
+      await qi.addColumn('Usuarios', 'tracking', { type: S.JSON, allowNull: true });
+    }
   },
   async down(qi) {
-    await qi.removeColumn('Usuarios', 'tracking');
+    const table = await qi.describeTable('Usuarios');
+    if (table.tracking) {
+      await qi.removeColumn('Usuarios', 'tracking');
+    }
   }
 };
