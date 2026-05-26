@@ -1,6 +1,6 @@
+require('./loadEnv');
 const app = require('./app');
 const { sequelize } = require('./models');
-require('dotenv').config();
 
 // ─────────────────────────────────────────────
 // Base de Datos

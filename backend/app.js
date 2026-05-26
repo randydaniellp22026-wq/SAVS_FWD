@@ -1,9 +1,9 @@
+require('./loadEnv');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const multer = require('multer');
-require('dotenv').config();
 
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');

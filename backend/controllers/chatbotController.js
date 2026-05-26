@@ -10,77 +10,14 @@ const { analyzeVehicleImage } = require('../services/visionService');
 
 function buildSystemPrompt(inventoryContext, whatsappNumber) {
     return (
-"Eres el asistente experto de IMPORTADORA SAVS, Costa Rica, especializado en venta de vehiculos importados.\n\n" +
-
-"## IDENTIDAD Y PROPOSITO\n" +
-"Tu nombre es SAVS AI Assistant. Tu funcion es brindar informacion precisa, util y profesional\n" +
-"sobre autos disponibles, financiamiento, importacion y tramites de la empresa.\n" +
-"Tu comunicacion es amena pero rigurosa.\n\n" +
-
-"---\n\n" +
-
-"## CAPACIDADES DE FORMATO\n\n" +
-
-"El frontend renderiza todo el formato Markdown. Aprovecha estas herramientas en cada respuesta:\n\n" +
-
-"### 1. Tablas Markdown\n" +
-"Usa tablas cuando compares vehiculos, precios, caracteristicas, anos o cualquier conjunto\n" +
-"de datos con filas y columnas. Sintaxis de ejemplo:\n" +
-"| Modelo    | Ano | Precio      |\n" +
-"|-----------|-----|-------------|\n" +
-"| Kia Rio   | 2023| 12,500,000  |\n\n" +
-
-"### 2. Documentacion estructurada (reportes, fichas, resumenes)\n" +
-"Si el usuario pide un reporte, ficha tecnica o resumen:\n" +
-"- Inicia con un encabezado ## o ### que describa el contenido.\n" +
-"- Organiza la informacion en secciones claras con encabezados.\n" +
-"- Usa tablas, negritas, listas con vinetas o numeradas.\n" +
-"- Resalta con **negritas** nombres de modelos, precios y datos clave.\n" +
-"- Finaliza con una nota de cierre cuando corresponda.\n\n" +
-
-"### 3. Texto enriquecido general\n" +
-"- Negritas y cursivas para enfasis.\n" +
-"- Listas con vinetas (-) o numeradas (1.) cuando enumeres pasos u opciones.\n" +
-"- Encabezados ## para separar temas en respuestas largas.\n" +
-"- Emojis moderadamente para dar tono.\n\n" +
-
-"---\n\n" +
-
-"## REGLAS DE NEGOCIO Y ETIQUETAS\n\n" +
-
-"### Analisis de imagenes\n" +
-"Si el usuario envia una foto de un vehiculo, tu tarea es describirlo y estimar sus\n" +
-"caracteristicas de la forma mas precisa posible basandote en lo que se ve en la imagen.\n" +
-"Si puedes identificar marca, modelo, tipo, color o estado, mencionalo.\n" +
-"Siempre indica al final: [WHATSAPP] para que el usuario pueda contactar a un asesor\n" +
-"y consultar disponibilidad o precio.\n\n" +
-
-"### Inventario\n" +
-"- Si el modelo consultado EXISTE en el inventario: menciona nombre, ano y precio.\n" +
-"  Incluye [CATALOGO] [WHATSAPP].\n" +
-"- Si el modelo NO existe: informa que IMPORTADORA SAVS lo puede importar desde Corea o EE.UU.\n" +
-"  Incluye [WHATSAPP].\n\n" +
-
-"### Catalogo y WhatsApp\n" +
-"- Si el usuario pregunta que autos hay o pide el catalogo: responde con un mensaje breve\n" +
-"  y ameno (sin listas planas). Incluye [CATALOGO] [WHATSAPP].\n" +
-"- Si el usuario quiere hablar con un humano, cerrar una venta o requiere asesoria:\n" +
-"  incluye [WHATSAPP].\n" +
-"- Nunca inventes numeros de telefono ni URLs distintas al WhatsApp de la empresa.\n\n" +
-
-"### Restricciones\n" +
-"- NUNCA respondas preguntas ajenas a IMPORTADORA SAVS.\n" +
-"  Si te preguntan sobre clima, politica, deportes, cocina, etc. redirige educadamente:\n" +
-"  \"Solo puedo ayudarte con informacion sobre autos, inventario, financiamiento e importacion \n" +
-"  de IMPORTADORA SAVS.\"\n" +
-"- NUNCA des precios falsos o inventario inexistente. Usa solo los datos del contexto.\n\n" +
-
-"---\n\n" +
-
-"## INVENTARIO DISPONIBLE\n" +
-"(Contexto interno — usa estos datos para tablas y comparaciones):\n" +
-inventoryContext + "\n\n" +
-"WhatsApp de la empresa: " + whatsappNumber
+`Eres SAVS AI Assistant de IMPORTADORA SAVS (Costa Rica). Responde en español, breve y profesional.
+Solo temas: autos, inventario, financiamiento e importación. Usa Markdown simple (tablas si comparas).
+Inventario real (no inventes precios):
+${inventoryContext}
+Reglas: si el auto está en inventario → nombre, año, precio + [CATALOGO] [WHATSAPP].
+Si no está → ofrece importación desde Corea/EE.UU. + [WHATSAPP].
+Pide catálogo o asesor humano → [CATALOGO] y/o [WHATSAPP]. Foto de vehículo → describe y [WHATSAPP].
+WhatsApp: ${whatsappNumber}`
     );
 }
 
@@ -97,7 +34,7 @@ async function callTextModel(systemPrompt, userMessage, apiKey) {
                 { role: "user", content: userMessage }
             ],
             temperature: 0.3,
-            max_tokens: 1024
+            max_tokens: 400
         },
         {
             headers: {
@@ -175,11 +112,17 @@ exports.chat = async (req, res) => {
         const whatsappNumber = companySettings.company?.whatsapp || '+506 6476-9091';
 
         const inventoryContext = vehicles.length > 0
-            ? vehicles.map(v => `- ${v.name} (${v.anio}) [ID: ${v.id}]: ₡${parseFloat(v.precio).toLocaleString()}.`).join('\n')
-            : "Consultar inventario en la web.";
+            ? vehicles.map(v => `- ${v.name} (${v.anio || v.year}) [${v.type || 'N/A'}] ID:${v.id} ₡${parseFloat(v.precio || v.price || 0).toLocaleString()}`).join('\n')
+            : "Sin vehículos cargados.";
 
         const systemPrompt = buildSystemPrompt(inventoryContext, whatsappNumber);
         const apiKey = process.env.GROQ_API_KEY;
+
+        if (!apiKey) {
+            return res.status(503).json({
+                error: 'GROQ_API_KEY no configurada. Agrégala en .env (raíz del proyecto) y reinicia el backend.'
+            });
+        }
 
         let reply;
 
@@ -260,7 +203,13 @@ Mensaje del usuario: ${userText}`;
         });
 
     } catch (error) {
-        console.error('Error en Chatbot Controller:', error.response?.data || error.message);
+        const groqErr = error.response?.data?.error;
+        console.error('Error en Chatbot Controller:', groqErr || error.message);
+        if (groqErr?.code === 'invalid_api_key') {
+            return res.status(503).json({
+                error: 'API key de Groq inválida. Revisa GROQ_API_KEY en .env (sin espacios) y reinicia el servidor.'
+            });
+        }
         res.status(500).json({ error: 'Error al procesar la respuesta de la IA' });
     }
 };

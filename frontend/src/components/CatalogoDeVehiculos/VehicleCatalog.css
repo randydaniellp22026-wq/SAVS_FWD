@@ -266,6 +266,67 @@
 .quick-search svg {
   color: var(--color-primary);
 }
+
+/* Select dropdown para filtros */
+.filter-select {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23eab308' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.15);
+}
+
+.filter-select option {
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 0.5rem;
+}
+
+/* Botones de color con punto indicador */
+.color-btn {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem !important;
+}
+
+.color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.color-negro { background: #1a1a1a; }
+.color-blanco { background: #f5f5f5; }
+.color-gris { background: #6b7280; }
+.color-plata { background: #c0c0c0; }
+.color-rojo { background: #ef4444; }
+.color-azul { background: #3b82f6; }
+.color-verde { background: #22c55e; }
+.color-amarillo { background: #eab308; }
+.color-naranja { background: #f97316; }
+.color-café { background: #92400e; }
+.color-beige { background: #d4a574; }
+
 .filter-section input::placeholder { color: #4b5563; }
 
 .checkbox-grid {
@@ -450,8 +511,8 @@
 
 .vehicle-specs-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.4rem;
   margin-bottom: 1.5rem;
 }
 

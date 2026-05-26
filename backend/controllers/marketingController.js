@@ -11,8 +11,17 @@ const fs   = require('fs');
 const { generateBannerCopy } = require('../services/visionService');
 const { FACEBOOK_PAGE_URL } = require('../utils/facebookUrl');
 
-// Inicializar Resend (usaremos la API Key del .env de forma opcional)
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// Inicializar Resend de forma lazy para evitar crash si no hay API Key
+let resend = null;
+function getResendClient() {
+    if (!resend) {
+        if (!process.env.RESEND_API_KEY) {
+            throw new Error('RESEND_API_KEY no está configurada en el archivo .env');
+        }
+        resend = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resend;
+}
 
 /**
  * Envía un correo masivo a todos los usuarios registrados
@@ -43,10 +52,10 @@ exports.broadcastEmail = async (req, res) => {
         }
 
         // 2. Enviar el correo usando Resend
-        if (!resend) {
+        if (!process.env.RESEND_API_KEY) {
             return res.status(500).json({ error: 'El servicio de envío de correos (Resend) no está configurado (falta RESEND_API_KEY en .env)' });
         }
-        const data = await resend.emails.send({
+        const data = await getResendClient().emails.send({
             from: 'SAVS Importadora <onboarding@resend.dev>',
             to: emailList,
             subject: subject,
