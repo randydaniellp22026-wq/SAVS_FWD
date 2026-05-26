@@ -38,7 +38,12 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', '**/*.test.{js,jsx,ts,tsx}'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '**/*.test.{js,jsx,ts,tsx}',
+      'refactor_axios.cjs',
+    ],
   },
 ];
 
