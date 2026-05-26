@@ -28,6 +28,17 @@
   color: var(--color-primary);
   font-weight: 700;
   font-size: 1.25rem;
+  cursor: pointer;
+}
+
+/* Admin nav link — accent gold color */
+.nav-link--admin {
+  color: #eab308 !important;
+}
+
+.nav-link--admin:hover,
+.nav-link--admin.active {
+  color: #fde047 !important;
 }
 
 .logo-icon {

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { vehicleService } from '../../services/api'; // Tarea 2: Usar servicio centralizado
+import { useVehiclesAdminQuery, useVehicleMutation } from '../../hooks/queries/useVehiclesQuery';
 import { 
   CarFront, 
   Plus, 
@@ -38,33 +38,11 @@ const initialFormState = {
 const CreateVehicle = () => {
   const navigate = useNavigate();
   const [view, setView] = useState('list');
-  const [vehiculos, setVehiculos] = useState([]);
+  const { data: vehiclesData, isLoading: listLoading, refetch } = useVehiclesAdminQuery();
+  const { createMutation, updateMutation, deleteMutation } = useVehicleMutation();
+  const vehiculos = vehiclesData?.data || [];
   const [currentVehicle, setCurrentVehicle] = useState(initialFormState);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
-  const fetchVehicles = async () => {
-    setLoading(true);
-    try {
-      // Tarea 2: Obtener datos reales con paginación (traemos los primeros 100 para el admin)
-      const response = await vehicleService.getAll({ limit: 100 });
-      setVehiculos(response.data || []);
-    } catch (error) {
-      console.error("Error fetching vehicles:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error de conexión',
-        text: 'No se pudieron cargar los vehículos desde el servidor.',
-        background: '#1a1a1a',
-        color: '#fff'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAddNew = () => {
     setCurrentVehicle(initialFormState);
@@ -92,8 +70,8 @@ const CreateVehicle = () => {
 
     if (result.isConfirmed) {
       try {
-        await vehicleService.delete(vehicle.id);
-        setVehiculos(prev => prev.filter(v => v.id !== vehicle.id));
+        await deleteMutation.mutateAsync(vehicle.id);
+        refetch();
         Swal.fire({
           icon: 'success',
           title: 'Eliminado',
@@ -116,51 +94,42 @@ const CreateVehicle = () => {
 
   // Tarea 2 y 4: Enviar datos reales y validar en servidor
   const handleFormSubmit = async (data) => {
-    setLoading(true);
+    setSubmitting(true);
     try {
       const isEditing = !!data.id;
-      
-      // Creamos un FormData para poder enviar la imagen real (Multer lo requiere)
       const formData = new FormData();
-      
-      // Agregamos todos los campos al FormData
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (key === 'image' && data[key] instanceof File) {
           formData.append('image', data[key]);
         } else if (key !== 'image') {
           formData.append(key, data[key]);
         }
       });
-
-      // Aseguramos marca y modelo si el nombre viene completo
       if (data.name && !data.marca) {
         const parts = data.name.split(' ');
         formData.append('marca', parts[0]);
         formData.append('modelo', parts.slice(1).join(' '));
       }
 
-      let response;
       if (isEditing) {
-        response = await vehicleService.update(data.id, formData);
+        await updateMutation.mutateAsync({ id: data.id, data: formData });
         Swal.fire({ icon: 'success', title: '¡Actualizado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       } else {
-        response = await vehicleService.create(formData);
+        await createMutation.mutateAsync(formData);
         Swal.fire({ icon: 'success', title: '¡Publicado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       }
-
-      fetchVehicles(); // Recargar lista
+      refetch();
       setView('list');
     } catch (error) {
-      console.error("Error saving vehicle:", error);
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'Error al guardar', 
-        text: error.response?.data?.error || 'Verifica los datos e intenta de nuevo.', 
-        background: '#141414', 
-        color: '#fff' 
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: error.response?.data?.error || 'Verifica los datos e intenta de nuevo.',
+        background: '#141414',
+        color: '#fff',
       });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -180,8 +149,8 @@ const CreateVehicle = () => {
           </div>
           
           <div className="header-actions">
-            <button onClick={fetchVehicles} className="btn-refresh" title="Sincronizar">
-              <RefreshCcw size={18} className={loading ? 'spin' : ''} />
+            <button onClick={() => refetch()} className="btn-refresh" title="Sincronizar">
+              <RefreshCcw size={18} className={listLoading ? 'spin' : ''} />
             </button>
             {view === 'list' ? (
               <button onClick={handleAddNew} className="btn-primary-admin">
@@ -198,7 +167,7 @@ const CreateVehicle = () => {
 
       <div className="admin-page-content">
         <AnimatePresence mode="wait">
-          {loading && view === 'list' ? (
+          {listLoading && view === 'list' ? (
             <AdminLoader message="Actualizando inventario..." />
           ) : view === 'list' ? (
             <motion.div
@@ -225,7 +194,7 @@ const CreateVehicle = () => {
                 initialData={currentVehicle} 
                 onSubmit={handleFormSubmit}
                 onCancel={() => setView('list')}
-                loading={loading}
+                loading={submitting}
               />
             </motion.div>
           )}

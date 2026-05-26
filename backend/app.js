@@ -1,8 +1,10 @@
+const Sentry = require('./instrument');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const multer = require('multer');
+const { prometheusMiddleware, metricsHandler } = require('./middlewares/prometheus');
 require('dotenv').config();
 
 const helmet = require('helmet');
@@ -41,6 +43,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+app.use(prometheusMiddleware);
 
 // Servir archivos estáticos (imágenes subidas con Multer)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -62,6 +65,8 @@ app.get('/', (req, res) => {
     res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
 });
 
+app.get('/metrics', metricsHandler);
+
 // --- MANEJO DE ERRORES DE MULTER ---
 app.use((err, req, res, next) => {
     if (err instanceof multer.MulterError) {
@@ -79,6 +84,9 @@ app.use((err, req, res, next) => {
 // --- MANEJO DE ERRORES CENTRALIZADO ---
 app.use((err, req, res, next) => {
     console.error(err.stack);
+    if (process.env.SENTRY_DSN) {
+        Sentry.captureException(err);
+    }
     const statusCode = err.statusCode || 500;
     const message = err.message || 'Error interno del servidor';
     res.status(statusCode).json({

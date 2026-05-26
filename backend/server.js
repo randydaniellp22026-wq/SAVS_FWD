@@ -1,3 +1,4 @@
+require('./instrument');
 const app = require('./app');
 const { sequelize } = require('./models');
 require('dotenv').config();

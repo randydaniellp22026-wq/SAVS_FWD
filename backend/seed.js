@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const { Rol, Usuario, Auto, Review, Request, SaleRequest, Branch, TechnicalGlossary, Setting } = require('./models');
@@ -22,12 +23,14 @@ const seedData = async () => {
         // 2. Migrar Usuarios
         if (data.users) {
             for (const u of data.users) {
-                await Usuario.findOrCreate({
+                const plainPassword = u.password || 'changeme123';
+                const hashedPassword = await bcrypt.hash(plainPassword, 10);
+                const [usuario, created] = await Usuario.findOrCreate({
                     where: { id: u.id.toString() },
                     defaults: {
                         nombre: u.nombre,
                         email: u.email || u.correo,
-                        password: u.password,
+                        password: hashedPassword,
                         rolId: rolesMap[u.rol] || rolesMap['Cliente'],
                         favorites: u.favorites || [],
                         telefono: u.telefono,
@@ -36,6 +39,9 @@ const seedData = async () => {
                         correo: u.correo
                     }
                 });
+                if (!created && usuario.password && !String(usuario.password).startsWith('$2')) {
+                    await usuario.update({ password: hashedPassword });
+                }
             }
             console.log(`Migrados ${data.users.length} usuarios.`);
         }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   UserPlus, 
@@ -14,13 +14,14 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import api from '../../services/api';
-import AdminLoader from '../../components/admin/AdminLoader';
+import { CatalogSkeletonGrid } from '../../components/ui/Skeleton';
+import { useUsersQuery, useInvalidateUsers } from '../../hooks/queries/useUsersQuery';
 import './UserManagement.css';
 
 const UserManagement = () => {
-  const [users, setUsers] = useState([]);
+  const { data: users = [], isLoading } = useUsersQuery();
+  const invalidateUsers = useInvalidateUsers();
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   
   const getUserFromStorage = () => {
     try {
@@ -34,22 +35,6 @@ const UserManagement = () => {
   
   const currentUser = getUserFromStorage();
   const isGerente = currentUser.rol === 'gerente';
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('/users');
-      setUsers(res.data);
-    } catch (error) {
-      console.error("Error loading users:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleEditUser = (user) => {
     if (user.rol?.nombre === 'gerente' && !isGerente) {
@@ -85,7 +70,7 @@ const UserManagement = () => {
           const res = await api.put(`/users/${user.id}`, result.value);
           if (res.status === 200) {
             Swal.fire('Actualizado', 'El usuario ha sido modificado con éxito.', 'success');
-            fetchUsers();
+            invalidateUsers();
           }
         } catch (error) {
           Swal.fire('Error', 'No se pudo actualizar el usuario.', 'error');
@@ -118,7 +103,7 @@ const UserManagement = () => {
         try {
           await api.delete(`/users/${user.id}`);
           Swal.fire('Eliminado', 'El usuario ha sido removido.', 'success');
-          fetchUsers();
+          invalidateUsers();
         } catch (error) {
           Swal.fire('Error', 'Ocurrió un fallo al intentar eliminar.', 'error');
         }
@@ -162,7 +147,7 @@ const UserManagement = () => {
             background: '#141414',
             color: '#fff'
           });
-          fetchUsers();
+          invalidateUsers();
         } catch (error) {
           Swal.fire('Error', 'No se pudo procesar el cambio de rango.', 'error');
         }
@@ -208,8 +193,8 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan="5"><AdminLoader message="Obteniendo lista de usuarios..." height="200px" /></td></tr>
+            {isLoading ? (
+              <tr><td colSpan="5"><CatalogSkeletonGrid count={3} /></td></tr>
             ) : filteredUsers.map(user => (
               <tr key={user.id}>
                 <td data-label="Usuario">

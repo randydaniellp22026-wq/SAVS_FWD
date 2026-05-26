@@ -30,7 +30,7 @@ const NavbarDiseño = () => {
     <nav className="navbar">
       <div className="container navbar-container">
         {/* Logo Section */}
-        <div className="navbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+        <div className="navbar-logo" onClick={() => navigate('/')} role="button" tabIndex={0} aria-label="Ir a inicio" onKeyDown={(e) => e.key === 'Enter' && navigate('/')}>
           <div className="logo-icon-savs">
             <img src={savsLogo} alt="SAVS" className="savs-logo-img" />
           </div>
@@ -56,7 +56,7 @@ const NavbarDiseño = () => {
           <li><Link to="/contact" className={current === '/contact' ? 'active' : ''}>Contacto</Link></li>
           <li><Link to="/reseñas" className={current === '/reseñas' ? 'active' : ''}>Reseñas</Link></li>
           {(user?.rol === 'admin' || user?.rol === 'gerente') && (
-            <li><Link to="/admin" className={current.startsWith('/admin') ? 'active' : ''} style={{ color: '#eab308' }}>Gestión SAVS</Link></li>
+            <li><Link to="/admin" className={`nav-link--admin ${current.startsWith('/admin') ? 'active' : ''}`}>Gestión SAVS</Link></li>
           )}
         </ul>
 
@@ -97,14 +97,26 @@ const NavbarDiseño = () => {
           </div>
 
           {/* Hamburger Menu Toggle */}
-          <button className="hamburger-btn" onClick={toggleMenu} aria-label="Abrir Menú">
-            {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          <button
+            className="hamburger-btn"
+            onClick={toggleMenu}
+            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu-drawer"
+          >
+            {isMenuOpen ? <X size={28} aria-hidden="true" /> : <Menu size={28} aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu Drawer */}
-      <div className={`mobile-menu-drawer ${isMenuOpen ? 'open' : ''}`}>
+      <div
+        id="mobile-menu-drawer"
+        className={`mobile-menu-drawer ${isMenuOpen ? 'open' : ''}`}
+        aria-hidden={!isMenuOpen}
+        role="dialog"
+        aria-label="Menú de navegación móvil"
+      >
         <div className="mobile-menu-content">
           <ul className="mobile-links">
             <li onClick={closeMenu}><Link to="/" className={current === '/' ? 'active' : ''}>Inicio</Link></li>
@@ -124,7 +136,7 @@ const NavbarDiseño = () => {
             <li onClick={closeMenu}><Link to="/contact" className={current === '/contact' ? 'active' : ''}>Contacto</Link></li>
             <li onClick={closeMenu}><Link to="/reseñas" className={current === '/reseñas' ? 'active' : ''}>Reseñas</Link></li>
           {(user?.rol === 'admin' || user?.rol === 'gerente') && (
-            <li onClick={closeMenu}><Link to="/admin" className={current.startsWith('/admin') ? 'active' : ''} style={{ color: '#eab308' }}>Gestión SAVS</Link></li>
+            <li onClick={closeMenu}><Link to="/admin" className={`nav-link--admin ${current.startsWith('/admin') ? 'active' : ''}`}>Gestión SAVS</Link></li>
           )}
           </ul>
           

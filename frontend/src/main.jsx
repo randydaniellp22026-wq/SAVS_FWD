@@ -1,62 +1,63 @@
-import React, { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import './index.css'
-import App from './App.jsx'
+import React, { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import './index.css';
+import './styles/tokens.module.css';
+import App from './App.jsx';
+import { queryClient } from './lib/queryClient';
+import { initSentry } from './lib/sentry';
 
-// Validadores Globales de Input
+initSentry();
+
 document.addEventListener('keydown', (e) => {
   const target = e.target;
   if (!target || (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA')) return;
-  
-  const isPhone = target.type === 'tel' || 
-                  (target.name && (target.name.toLowerCase().includes('telefono') || target.name.toLowerCase().includes('phone'))) ||
-                  (target.id && (target.id.toLowerCase().includes('telefono') || target.id.toLowerCase().includes('phone'))) || 
-                  (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
 
-  // 1. Evitar "-" en todos los lados, EXCEPTO en números de teléfono.
-  if (e.key === '-') {
-    if (!isPhone) {
-      e.preventDefault();
-    }
-  }
+  const isPhone =
+    target.type === 'tel' ||
+    (target.name &&
+      (target.name.toLowerCase().includes('telefono') ||
+        target.name.toLowerCase().includes('phone'))) ||
+    (target.id &&
+      (target.id.toLowerCase().includes('telefono') ||
+        target.id.toLowerCase().includes('phone'))) ||
+    (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
 
-  // 2. En campos tipo número: evitar números negativos o notación exponencial (e, E, +, -)
-  if (target.type === 'number') {
-    if (['e', 'E', '+', '-'].includes(e.key)) {
-      e.preventDefault();
-    }
+  if (e.key === '-' && !isPhone) e.preventDefault();
+
+  if (target.type === 'number' && ['e', 'E', '+', '-'].includes(e.key)) {
+    e.preventDefault();
   }
 });
 
 document.addEventListener('paste', (e) => {
   const target = e.target;
   if (!target || (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA')) return;
-  
-  const isPhone = target.type === 'tel' || 
-                  (target.name && (target.name.toLowerCase().includes('telefono') || target.name.toLowerCase().includes('phone'))) ||
-                  (target.id && (target.id.toLowerCase().includes('telefono') || target.id.toLowerCase().includes('phone'))) || 
-                  (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
+
+  const isPhone =
+    target.type === 'tel' ||
+    (target.name &&
+      (target.name.toLowerCase().includes('telefono') ||
+        target.name.toLowerCase().includes('phone'))) ||
+    (target.id &&
+      (target.id.toLowerCase().includes('telefono') ||
+        target.id.toLowerCase().includes('phone'))) ||
+    (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
 
   const pastedData = (e.clipboardData || window.clipboardData).getData('text');
-
-  // Si no es un campo telefónico y lo pegado contiene un guion (-), bloqueamos preventivamente.
-  if (!isPhone && pastedData.includes('-')) {
+  if (!isPhone && pastedData.includes('-')) e.preventDefault();
+  if (target.type === 'number' && ['e', 'E', '+', '-'].some((c) => pastedData.includes(c))) {
     e.preventDefault();
-  }
-
-  // Si es un text/num field y lo pegado contiene caracteres matemáticos exponenciales.
-  if (target.type === 'number') {
-    if (['e', 'E', '+', '-'].some(char => pastedData.includes(char))) {
-      e.preventDefault();
-    }
   }
 });
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>,
-)
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </StrictMode>
+);
