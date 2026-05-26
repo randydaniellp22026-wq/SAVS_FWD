@@ -1,9 +1,57 @@
 const UserRepository = require('../repositories/userRepository');
 const bcrypt = require('bcrypt');
 const { formatUser } = require('../utils/formatUser');
+const { Op } = require('sequelize');
 
 class UserService {
-  async obtenerTodos() {
+  async obtenerTodos(queryParams = {}) {
+    const { limit = 20, cursor, page } = queryParams;
+
+    // Compatibilidad: si no hay paginación explícita, mantenemos el contrato legacy (array).
+    if (!cursor && !page && !queryParams.limit) {
+      const usuarios = await UserRepository.findAll();
+      return usuarios.map(formatUser);
+    }
+
+    if (cursor) {
+      const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+      const cursorMeta = await UserRepository.findCursorMeta(cursor);
+      const where = {};
+      if (cursorMeta) {
+        where[Op.and] = [
+          {
+            [Op.or]: [
+              { createdAt: { [Op.lt]: cursorMeta.createdAt } },
+              {
+                [Op.and]: [{ createdAt: cursorMeta.createdAt }, { id: { [Op.lt]: cursorMeta.id } }],
+              },
+            ],
+          },
+        ];
+      }
+
+      const rowsPlusOne = await UserRepository.findCursorPage({
+        where,
+        limit: limitNum + 1,
+        order: [
+          ['createdAt', 'DESC'],
+          ['id', 'DESC'],
+        ],
+      });
+      const hasNextPage = rowsPlusOne.length > limitNum;
+      const rows = hasNextPage ? rowsPlusOne.slice(0, limitNum) : rowsPlusOne;
+
+      return {
+        data: rows.map(formatUser),
+        pagination: {
+          limit: limitNum,
+          hasNextPage,
+          nextCursor: hasNextPage && rows[rows.length - 1] ? rows[rows.length - 1].id : null,
+        },
+      };
+    }
+
+    // Fallback: si vienen paginación legacy sin cursor, devolvemos igual contrato legacy.
     const usuarios = await UserRepository.findAll();
     return usuarios.map(formatUser);
   }

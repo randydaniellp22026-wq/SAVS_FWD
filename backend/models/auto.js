@@ -20,16 +20,32 @@ module.exports = (sequelize, DataTypes) => {
     modelo: DataTypes.STRING,
     motor: DataTypes.STRING,
     engine_size: DataTypes.STRING,
-    doors: DataTypes.STRING,
+    doors: DataTypes.INTEGER,
     drive: DataTypes.STRING,
-    passengers: DataTypes.STRING,
+    passengers: DataTypes.INTEGER,
     steering: DataTypes.STRING,
     type: DataTypes.STRING,
-    anio: DataTypes.INTEGER,
+    anio: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue('year');
+      },
+      set(value) {
+        this.setDataValue('year', value);
+      },
+    },
     year: DataTypes.INTEGER,
-    mileage: DataTypes.STRING,
+    mileage: DataTypes.INTEGER,
     price: DataTypes.DECIMAL(15, 2),
-    precio: DataTypes.DECIMAL(15, 2),
+    precio: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue('price');
+      },
+      set(value) {
+        this.setDataValue('price', value);
+      },
+    },
     stock: { type: DataTypes.INTEGER, defaultValue: 1 },
     tag: DataTypes.STRING,
     tagColor: DataTypes.STRING,

@@ -4,9 +4,9 @@
  * incluyendo el contexto del inventario actual y soporte de analisis de imagenes.
  */
 const axios = require('axios');
-const fs = require('fs');
-const { Auto, Setting } = require('../models');
+const { Setting } = require('../models');
 const { analyzeVehicleImage } = require('../services/visionService');
+const { getInventory } = require('../services/inventoryCacheService');
 
 function buildSystemPrompt(inventoryContext, whatsappNumber) {
     return (
@@ -100,8 +100,8 @@ exports.chat = async (req, res) => {
             return res.status(400).json({ error: 'El mensaje o la imagen son requeridos' });
         }
 
-        // ── Obtener contexto de la base de datos ─────────────────────────────
-        const vehicles = await Auto.findAll();
+        // ── Obtener contexto de la base de datos (con caché de 5 min) ────────
+        const vehicles = await getInventory();
         const settings = await Setting.findAll();
 
         const companySettings = settings.reduce((acc, s) => {
@@ -111,9 +111,36 @@ exports.chat = async (req, res) => {
 
         const whatsappNumber = companySettings.company?.whatsapp || '+506 6476-9091';
 
-        const inventoryContext = vehicles.length > 0
-            ? vehicles.map(v => `- ${v.name} (${v.anio || v.year}) [${v.type || 'N/A'}] ID:${v.id} ₡${parseFloat(v.precio || v.price || 0).toLocaleString()}`).join('\n')
-            : "Sin vehículos cargados.";
+        const normalize = (text) =>
+            String(text || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        const tokens = normalize(message).split(/[\s,.;:!?()[\]-]+/).filter((t) => t.length > 2);
+        const scored = vehicles
+            .map((v) => {
+                const haystack = normalize(
+                    [v.name, v.marca, v.modelo, v.type, v.fuel, v.transmission, v.color, v.summary].join(' ')
+                );
+                let score = 0;
+                for (const token of tokens) {
+                    if (haystack.includes(token)) score += 2;
+                }
+                if (tokens.length === 0) score = 1;
+                return { vehicle: v, score };
+            })
+            .filter((item) => item.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 12)
+            .map((item) => item.vehicle);
+
+        const contextVehicles = scored.length ? scored : vehicles.slice(0, 12);
+
+        const inventoryContext = contextVehicles.length > 0
+            ? contextVehicles
+                .map((v) => `- ${v.name} (${v.anio || v.year}) [${v.type || 'N/A'}] ID:${v.id} ₡${parseFloat(v.precio || v.price || 0).toLocaleString()}`)
+                .join('\n')
+            : 'Sin vehículos cargados.';
 
         const systemPrompt = buildSystemPrompt(inventoryContext, whatsappNumber);
         const apiKey = process.env.GROQ_API_KEY;
@@ -128,7 +155,7 @@ exports.chat = async (req, res) => {
 
         // ── Caso 1: Hay imagen → modelo de vision ───────────────────────────
         if (imageFile) {
-            const base64Data = fs.readFileSync(imageFile.path, 'base64');
+            const base64Data = imageFile.buffer.toString('base64');
             const userText = message || 'Describe este vehiculo en detalle.';
 
             // Paso A: analizar imagen con el modelo de vision para extraer datos estructurados
@@ -168,7 +195,6 @@ Mensaje del usuario: ${userText}`;
             }
 
             reply = await callVisionModel(systemPrompt, enrichedUserText, base64Data, imageFile.mimetype, apiKey);
-            fs.unlink(imageFile.path, () => {}); // borrar archivo temporal
         }
         // ── Caso 2: Solo texto → modelo de texto ────────────────────────────
         else {

@@ -6,11 +6,21 @@ const path = require('path');
 const multer = require('multer');
 const swaggerUi = require('swagger-ui-express');
 const { swaggerSpec } = require('./docs/swagger.js');
+const axios = require('axios');
+const fs = require('fs/promises');
+const os = require('os');
 
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const requestContext = require('./middlewares/requestContext');
+const { sequelize } = require('./models');
 
 const app = express();
+app.use(requestContext);
+app.use((req, res, next) => {
+  res.setHeader('X-Request-Id', req.id);
+  next();
+});
 
 // --- SEGURIDAD AVANZADA ---
 app.use(
@@ -51,8 +61,8 @@ app.use(cookieParser());
 // Servir archivos estáticos (imágenes subidas con Multer)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Documentación Swagger (solo en entornos de desarrollo/pruebas)
-if (process.env.NODE_ENV !== 'production') {
+// Documentación Swagger (solo en desarrollo)
+if (process.env.NODE_ENV === 'development') {
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }
 
@@ -62,6 +72,61 @@ app.use('/api/v1', (req, res, next) => {
   next();
 });
 app.use('/api/v1', require('./routes/v1'));
+
+const checkGroq = async () => {
+  if (!process.env.GROQ_API_KEY) {
+    return { ok: false, reason: 'GROQ_API_KEY no configurada' };
+  }
+  try {
+    await axios.get('https://api.groq.com/openai/v1/models', {
+      timeout: 2000,
+      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+    });
+    return { ok: true };
+  } catch (_error) {
+    return { ok: false, reason: 'Groq no disponible' };
+  }
+};
+
+const checkDisk = async () => {
+  try {
+    const stats = await fs.statfs(process.cwd());
+    const freeBytes = Number(stats.bavail) * Number(stats.bsize);
+    return { ok: freeBytes > 100 * 1024 * 1024, freeBytes };
+  } catch (_error) {
+    return { ok: false, reason: 'No se pudo verificar el disco' };
+  }
+};
+
+app.get('/liveness', (_req, res) => {
+  res.json({ status: 'alive', pid: process.pid, uptime: process.uptime() });
+});
+
+app.get('/readiness', async (_req, res) => {
+  try {
+    await sequelize.authenticate();
+    res.json({ status: 'ready' });
+  } catch (_error) {
+    res.status(503).json({ status: 'not-ready' });
+  }
+});
+
+app.get('/health', async (_req, res) => {
+  const [db, groq, disk] = await Promise.allSettled([sequelize.authenticate(), checkGroq(), checkDisk()]);
+  const dbOk = db.status === 'fulfilled';
+  const groqResult = groq.status === 'fulfilled' ? groq.value : { ok: false, reason: 'Groq check falló' };
+  const diskResult = disk.status === 'fulfilled' ? disk.value : { ok: false, reason: 'Disk check falló' };
+  const ok = dbOk && groqResult.ok && diskResult.ok;
+  res.status(ok ? 200 : 503).json({
+    status: ok ? 'ok' : 'degraded',
+    checks: {
+      mysql: dbOk ? { ok: true } : { ok: false, reason: 'MySQL no disponible' },
+      groq: groqResult,
+      disk: diskResult,
+    },
+    memory: { free: os.freemem(), total: os.totalmem() },
+  });
+});
 
 // Middleware de deprecación para alertar redirecciones a la API v1
 const deprecateRoute = (newPath) => (req, res, next) => {
@@ -111,13 +176,23 @@ app.use((err, req, res, next) => {
 
 // --- MANEJO DE ERRORES CENTRALIZADO ---
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  req.log?.error(
+    {
+      err,
+      requestId: req.id,
+      path: req.path,
+      method: req.method,
+    },
+    'Request error'
+  );
   const statusCode = err.statusCode || 500;
-  const message = err.message || 'Error interno del servidor';
+  const isServerError = statusCode >= 500;
+  const message = isServerError ? 'Error interno del servidor' : err.message || 'Solicitud inválida';
   res.status(statusCode).json({
     success: false,
     error: message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    details: err.details,
+    requestId: req.id,
   });
 });
 

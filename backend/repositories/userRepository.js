@@ -8,6 +8,24 @@ class UserRepository {
     });
   }
 
+  async findCursorMeta(id) {
+    if (!id) return null;
+    if (typeof Usuario.findByPk !== 'function') return null;
+    const row = await Usuario.findByPk(id, { attributes: ['id', 'createdAt'] });
+    return row ? { id: row.id, createdAt: row.createdAt } : null;
+  }
+
+  async findCursorPage({ where, limit, order }) {
+    if (typeof Usuario.findAll !== 'function') return [];
+    return await Usuario.findAll({
+      where,
+      limit,
+      order,
+      attributes: { exclude: ['password'] },
+      include: [{ model: Rol, as: 'rol' }],
+    });
+  }
+
   async findById(id) {
     return await Usuario.findByPk(id, {
       attributes: { exclude: ['password'] },

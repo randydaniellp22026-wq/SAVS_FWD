@@ -1,6 +1,7 @@
 const { Appointment, Branch, Auto, Cita } = require('../models');
 const { isStaff } = require('../middlewares/roleHelpers');
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 
 /* ── Legacy /api/appointments (Cita — frontend Persona 3) ── */
 exports.getMine = async (req, res) => {
@@ -54,12 +55,63 @@ exports.cancel = async (req, res) => {
 exports.list = async (req, res) => {
   const where = isStaff(req.usuario) ? {} : { usuarioId: req.usuario.id };
   if (req.query.estado) where.estado = req.query.estado;
-  const data = await Appointment.findAll({
-    where,
+
+  const hasPaginationParams = Boolean(req.query.cursor || req.query.limit || req.query.page);
+  if (!hasPaginationParams) {
+    const data = await Appointment.findAll({
+      where,
+      include: [{ model: Branch, as: 'sucursal' }, { model: Auto, as: 'vehiculo' }],
+      order: [['fecha', 'ASC']],
+    });
+    return res.json(data);
+  }
+
+  const limitNum = Math.min(100, Math.max(1, parseInt(req.query.limit || 20)));
+  const cursor = req.query.cursor;
+  let boundaryWhere = where;
+
+  if (cursor) {
+    const cursorRow = await Appointment.findByPk(cursor, { attributes: ['id', 'fecha'] });
+    if (cursorRow) {
+      boundaryWhere = {
+        ...where,
+        [Op.and]: [
+          ...(where[Op.and] || []),
+          {
+            [Op.or]: [
+              { fecha: { [Op.gt]: cursorRow.fecha } },
+              {
+                [Op.and]: [{ fecha: cursorRow.fecha }, { id: { [Op.gt]: cursorRow.id } }],
+              },
+            ],
+          },
+        ],
+      };
+    }
+  }
+
+  const rowsPlusOne = await Appointment.findAll({
+    where: boundaryWhere,
     include: [{ model: Branch, as: 'sucursal' }, { model: Auto, as: 'vehiculo' }],
-    order: [['fecha', 'ASC']]
+    limit: limitNum + 1,
+    order: [
+      ['fecha', 'ASC'],
+      ['id', 'ASC'],
+    ],
   });
-  res.json(data);
+
+  const hasNextPage = rowsPlusOne.length > limitNum;
+  const rows = hasNextPage ? rowsPlusOne.slice(0, limitNum) : rowsPlusOne;
+  const last = rows[rows.length - 1];
+
+  return res.json({
+    data: rows,
+    pagination: {
+      limit: limitNum,
+      hasNextPage,
+      nextCursor: hasNextPage && last ? last.id : null,
+    },
+  });
 };
 
 exports.createV1 = async (req, res) => {

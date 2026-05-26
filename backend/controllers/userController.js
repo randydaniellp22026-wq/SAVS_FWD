@@ -10,7 +10,7 @@ const asyncHandler = require('../utils/asyncHandler');
  * Obtiene todos los usuarios registrados en el sistema.
  */
 exports.getAll = asyncHandler(async (req, res) => {
-  const data = await UserService.obtenerTodos();
+  const data = await UserService.obtenerTodos(req.query);
   res.json(data);
 });
 

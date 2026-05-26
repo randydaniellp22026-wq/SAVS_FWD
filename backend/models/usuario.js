@@ -22,8 +22,15 @@ module.exports = (sequelize, DataTypes) => {
     telefono: DataTypes.STRING,
     ubicacion: DataTypes.STRING,
     direccion_precisa: DataTypes.STRING,
-    correo: DataTypes.STRING,
-    tracking: DataTypes.JSON,
+    correo: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        return this.getDataValue('email');
+      },
+      set(value) {
+        this.setDataValue('email', value);
+      },
+    },
     puntos: { type: DataTypes.INTEGER, defaultValue: 0 },
     puntos_historial: DataTypes.JSON
   }, {

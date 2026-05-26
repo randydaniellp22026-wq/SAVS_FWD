@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const { verificarToken, esAdmin, esAdminOGerente } = require('../middlewares/authMiddleware');
+const { validate } = require('../middlewares/validate');
+const { createUserSchema, updateUserSchema } = require('../schemas/userSchemas');
 
 /**
  * @openapi
@@ -118,7 +120,7 @@ router.get('/:id', verificarToken, userController.getById);
  *       400:
  *         description: Petición incorrecta
  */
-router.post('/', verificarToken, esAdmin, userController.create);
+router.post('/', verificarToken, esAdmin, validate(createUserSchema), userController.create);
 
 /**
  * @openapi
@@ -146,8 +148,8 @@ router.post('/', verificarToken, esAdmin, userController.create);
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/:id', verificarToken, esAdminOGerente, userController.update);
-router.patch('/:id', verificarToken, userController.update);
+router.put('/:id', verificarToken, esAdminOGerente, validate(updateUserSchema), userController.update);
+router.patch('/:id', verificarToken, validate(updateUserSchema), userController.update);
 
 /**
  * @openapi

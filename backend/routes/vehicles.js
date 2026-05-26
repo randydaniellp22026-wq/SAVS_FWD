@@ -4,6 +4,8 @@ const vehicleController = require('../controllers/vehicleController');
 const autoAdController = require('../controllers/autoAdController');
 const { verificarToken, esAdmin } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
+const { validate } = require('../middlewares/validate');
+const { createVehicleSchema, updateVehicleSchema } = require('../schemas/vehicleSchemas');
 
 /**
  * @openapi
@@ -176,7 +178,7 @@ router.post(
  *       201:
  *         description: Vehículo creado correctamente
  */
-router.post('/', verificarToken, esAdmin, upload.single('image'), vehicleController.create);
+router.post('/', verificarToken, esAdmin, upload.single('image'), validate(createVehicleSchema), vehicleController.create);
 
 /**
  * @openapi
@@ -211,8 +213,8 @@ router.post('/', verificarToken, esAdmin, upload.single('image'), vehicleControl
  *       404:
  *         description: Vehículo no encontrado
  */
-router.put('/:id', verificarToken, esAdmin, upload.single('image'), vehicleController.update);
-router.patch('/:id', verificarToken, esAdmin, upload.single('image'), vehicleController.update);
+router.put('/:id', verificarToken, esAdmin, upload.single('image'), validate(updateVehicleSchema), vehicleController.update);
+router.patch('/:id', verificarToken, esAdmin, upload.single('image'), validate(updateVehicleSchema), vehicleController.update);
 
 /**
  * @openapi

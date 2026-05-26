@@ -1,5 +1,5 @@
 const VehicleRepository = require('../repositories/vehicleRepository');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 class VehicleService {
   async listar(queryParams) {
@@ -7,6 +7,7 @@ class VehicleService {
       page = 1,
       limit = 20,
       search,
+      cursor,
       type,
       fuel,
       transmission,
@@ -36,47 +37,36 @@ class VehicleService {
     // Búsqueda inteligente por texto libre
     if (search) {
       const searchTerm = search.trim();
-      const searchConditions = [
-        { name: { [Op.like]: `%${searchTerm}%` } },
-        { marca: { [Op.like]: `%${searchTerm}%` } },
-        { modelo: { [Op.like]: `%${searchTerm}%` } },
-        { motor: { [Op.like]: `%${searchTerm}%` } },
-        { engine_size: { [Op.like]: `%${searchTerm}%` } },
-        { transmission: { [Op.like]: `%${searchTerm}%` } },
-        { drive: { [Op.like]: `%${searchTerm}%` } },
-        { steering: { [Op.like]: `%${searchTerm}%` } },
-        { fuel: { [Op.like]: `%${searchTerm}%` } },
-        { type: { [Op.like]: `%${searchTerm}%` } },
-        { color: { [Op.like]: `%${searchTerm}%` } },
-        { doors: { [Op.like]: `%${searchTerm}%` } },
-        { passengers: { [Op.like]: `%${searchTerm}%` } },
-        { tag: { [Op.like]: `%${searchTerm}%` } },
-        { summary: { [Op.like]: `%${searchTerm}%` } },
-        { heroSubtitle: { [Op.like]: `%${searchTerm}%` } },
-        { mileage: { [Op.like]: `%${searchTerm}%` } },
-      ];
+
+      // FULLTEXT para búsqueda libre.
+      // Nota: usamos exactamente los campos incluidos en el FULLTEXT index existente.
+      const fulltext = Sequelize.literal(
+        `MATCH(name, marca, modelo, summary, heroSubtitle, type, fuel) AGAINST (${Sequelize.escape(
+          searchTerm
+        )} IN BOOLEAN MODE) > 0`
+      );
+
+      where[Op.and] = where[Op.and] || [];
+      where[Op.and].push(fulltext);
 
       // Detección de año
       const yearMatch = searchTerm.match(/\b(19|20)\d{2}\b/);
       if (yearMatch) {
         const yearNum = parseInt(yearMatch[0]);
-        searchConditions.push({ year: yearNum });
-        searchConditions.push({ anio: yearNum });
+        where[Op.and].push({ year: yearNum });
       }
 
       // Detección de puertas
       const doorsMatch = searchTerm.match(/(\d)\s*(?:puertas?|p\b|doors?)/i);
       if (doorsMatch) {
-        searchConditions.push({ doors: { [Op.like]: `%${doorsMatch[1]}%` } });
+        where[Op.and].push({ doors: parseInt(doorsMatch[1]) });
       }
 
       // Detección de pasajeros
       const passMatch = searchTerm.match(/(\d)\s*(?:pasajeros?|passengers?|asientos?|seats?)/i);
       if (passMatch) {
-        searchConditions.push({ passengers: { [Op.like]: `%${passMatch[1]}%` } });
+        where[Op.and].push({ passengers: parseInt(passMatch[1]) });
       }
-
-      where[Op.or] = searchConditions;
     }
 
     // Filtros directos
@@ -103,18 +93,12 @@ class VehicleService {
       where[Op.and] = where[Op.and] || [];
       if (minYear) {
         where[Op.and].push({
-          [Op.or]: [
-            { year: { [Op.gte]: parseInt(minYear) } },
-            { anio: { [Op.gte]: parseInt(minYear) } },
-          ],
+          year: { [Op.gte]: parseInt(minYear) },
         });
       }
       if (maxYear) {
         where[Op.and].push({
-          [Op.or]: [
-            { year: { [Op.lte]: parseInt(maxYear) } },
-            { anio: { [Op.lte]: parseInt(maxYear) } },
-          ],
+          year: { [Op.lte]: parseInt(maxYear) },
         });
       }
     }
@@ -122,9 +106,7 @@ class VehicleService {
     // Ordenamiento seguro
     const allowedSortFields = [
       'price',
-      'precio',
       'year',
-      'anio',
       'name',
       'createdAt',
       'updatedAt',
@@ -133,6 +115,57 @@ class VehicleService {
     ];
     const sortField = allowedSortFields.includes(sort) ? sort : 'createdAt';
     const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    // Cursor-based pagination (S3.6)
+    // Implementado solo para orden por createdAt para mantener consistencia con el cursor = id del último elemento.
+    if (cursor && sortField === 'createdAt') {
+      const cursorMeta = await VehicleRepository.findCursorMeta(cursor);
+      if (cursorMeta) {
+        const { createdAt: cursorCreatedAt, id: cursorId } = cursorMeta;
+        where[Op.and] = where[Op.and] || [];
+
+        if (sortOrder === 'DESC') {
+          where[Op.and].push({
+            [Op.or]: [
+              { createdAt: { [Op.lt]: cursorCreatedAt } },
+              {
+                [Op.and]: [{ createdAt: cursorCreatedAt }, { id: { [Op.lt]: cursorId } }],
+              },
+            ],
+          });
+        } else {
+          where[Op.and].push({
+            [Op.or]: [
+              { createdAt: { [Op.gt]: cursorCreatedAt } },
+              {
+                [Op.and]: [{ createdAt: cursorCreatedAt }, { id: { [Op.gt]: cursorId } }],
+              },
+            ],
+          });
+        }
+      }
+
+      const rowsPlusOne = await VehicleRepository.findCursorPage({
+        where,
+        limit: limitNum + 1,
+        order: [
+          [sortField, sortOrder],
+          ['id', sortOrder],
+        ],
+      });
+
+      const hasNextPage = rowsPlusOne.length > limitNum;
+      const rows = hasNextPage ? rowsPlusOne.slice(0, limitNum) : rowsPlusOne;
+      const last = rows[rows.length - 1];
+      return {
+        data: rows,
+        pagination: {
+          limit: limitNum,
+          hasNextPage,
+          nextCursor: hasNextPage && last ? last.id : null,
+        },
+      };
+    }
 
     // Ejecutar consulta en repositorio
     const { count, rows } = await VehicleRepository.findAndCountAll({
@@ -170,10 +203,8 @@ class VehicleService {
   }
 
   async eliminar(id) {
-    const vehicle = await VehicleRepository.findById(id);
-    if (!vehicle) return null;
-    await vehicle.destroy();
-    return vehicle;
+    const deleted = await VehicleRepository.destroy(id);
+    return deleted ? { id } : null;
   }
 }
 

@@ -13,7 +13,11 @@ const fs = require('fs');
  */
 exports.getAll = asyncHandler(async (req, res) => {
   const result = await VehicleService.listar(req.query);
-  res.json(result);
+  // Backwards compatibility:
+  // - Si no se envía paginación (tests/legacy), devolvemos el array directo.
+  // - Si se envía paginación/cursor, devolvemos el objeto { data, pagination }.
+  const hasPaginationParams = Boolean(req.query.page || req.query.limit || req.query.cursor);
+  return res.json(hasPaginationParams ? result : result.data || result);
 });
 
 /**
@@ -32,18 +36,6 @@ exports.getById = asyncHandler(async (req, res) => {
  * Crea un nuevo vehículo.
  */
 exports.create = asyncHandler(async (req, res) => {
-  // Validación de campos requeridos
-  const requiredFields = ['name', 'price', 'year'];
-  const missing = requiredFields.filter((field) => !req.body[field] && req.body[field] !== 0);
-  if (missing.length > 0) {
-    if (req.file) {
-      fs.unlink(req.file.path, () => {});
-    }
-    return res.status(400).json({
-      error: `Campos requeridos faltantes: ${missing.join(', ')}`,
-    });
-  }
-
   const vehicleData = { ...req.body };
   if (req.file) {
     vehicleData.image = `/uploads/${req.file.filename}`;

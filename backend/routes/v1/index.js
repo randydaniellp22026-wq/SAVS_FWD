@@ -22,6 +22,6 @@ router.use('/settings', require('../settings'));
 router.use('/chatbot', require('../chatbot'));
 router.use('/points', require('../points'));
 
-router.get('/health', (req, res) => res.json({ status: 'ok', version: '1.0' }));
+router.get('/health', (req, res) => res.json({ status: 'ok', version: 'v1' }));
 
 module.exports = router;
