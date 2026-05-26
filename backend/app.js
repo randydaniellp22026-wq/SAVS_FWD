@@ -1,11 +1,9 @@
-const Sentry = require('./instrument');
+require('./loadEnv');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const multer = require('multer');
-const { prometheusMiddleware, metricsHandler } = require('./middlewares/prometheus');
-require('dotenv').config();
 
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -48,7 +46,10 @@ app.use(prometheusMiddleware);
 // Servir archivos estáticos (imágenes subidas con Multer)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Rutas
+// API v1 (módulos nuevos)
+app.use('/api/v1', require('./routes/v1'));
+
+// Rutas legacy /api/*
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/vehicles', require('./routes/vehicles'));
@@ -60,9 +61,11 @@ app.use('/api/technical_glossary', require('./routes/technicalGlossary'));
 app.use('/api/settings', require('./routes/settings'));
 app.use('/api/chatbot', require('./routes/chatbot'));
 app.use('/api/marketing', require('./routes/marketing'));
+app.use('/api/appointments', require('./routes/appointments'));
+app.use('/api/points', require('./routes/points'));
 
 app.get('/', (req, res) => {
-    res.json({ message: '🚗 API del Sistema de Venta de Autos en línea' });
+    res.json({ message: '🚗 API del Sistema de Venta de Autos en línea', version: 'v1' });
 });
 
 app.get('/metrics', metricsHandler);

@@ -1,14 +1,9 @@
-import React, { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import './index.css';
-import './styles/tokens.module.css';
-import App from './App.jsx';
-import { queryClient } from './lib/queryClient';
-import { initSentry } from './lib/sentry';
-
-initSentry();
+import React, { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import './index.css'
+import App from './App.jsx'
+import ErrorBoundary from './components/core/ErrorBoundary.jsx'
 
 document.addEventListener('keydown', (e) => {
   const target = e.target;
@@ -54,10 +49,10 @@ document.addEventListener('paste', (e) => {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary>
         <App />
-      </BrowserRouter>
-    </QueryClientProvider>
-  </StrictMode>
-);
+      </ErrorBoundary>
+    </BrowserRouter>
+  </StrictMode>,
+)

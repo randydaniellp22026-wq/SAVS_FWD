@@ -26,22 +26,41 @@ export const useCatalogoLogica = () => {
     minYear: '',
     maxYear: '',
     color: '',
-    search: new URLSearchParams(location.search).get('search') || '',
+    doors: '',
+    drive: '',
+    passengers: '',
+    steering: '',
+    engine_size: '',
+    tag: '',
+    mileage: '',
+    search: new URLSearchParams(location.search).get('search') || ''
   });
 
-  const queryParams = {
-    page: pagination.page,
-    limit: pagination.limit,
-    search: activeFilters.search,
-    type: activeFilters.type,
-    fuel: activeFilters.fuel,
-    transmission: activeFilters.transmission,
-    minPrice: activeFilters.minPrice,
-    maxPrice: activeFilters.maxPrice,
-    minYear: activeFilters.minYear,
-    maxYear: activeFilters.maxYear,
-    color: activeFilters.color,
-  };
+  // Función para cargar vehículos desde la API (Servidor)
+  const fetchVehicles = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      // Mapeamos los filtros activos a los parámetros que espera el Backend
+      const params = {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: activeFilters.search,
+        type: activeFilters.type,
+        fuel: activeFilters.fuel,
+        transmission: activeFilters.transmission,
+        minPrice: activeFilters.minPrice,
+        maxPrice: activeFilters.maxPrice,
+        minYear: activeFilters.minYear,
+        maxYear: activeFilters.maxYear,
+        color: activeFilters.color,
+        doors: activeFilters.doors,
+        drive: activeFilters.drive,
+        passengers: activeFilters.passengers,
+        steering: activeFilters.steering,
+        engine_size: activeFilters.engine_size,
+        tag: activeFilters.tag
+      };
 
   const { data, isLoading, isFetching } = useVehiclesCatalogQuery(queryParams);
 
@@ -68,17 +87,10 @@ export const useCatalogoLogica = () => {
 
   const resetFilters = () => {
     setActiveFilters({
-      transmission: '',
-      fuel: '',
-      marca: '',
-      modelo: '',
-      type: '',
-      minPrice: '',
-      maxPrice: '',
-      minYear: '',
-      maxYear: '',
-      color: '',
-      search: '',
+      transmission: '', fuel: '', marca: '', modelo: '', type: '',
+      minPrice: '', maxPrice: '', minYear: '', maxYear: '', color: '',
+      doors: '', drive: '', passengers: '', steering: '', engine_size: '',
+      tag: '', mileage: '', search: ''
     });
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
@@ -96,3 +108,4 @@ export const useCatalogoLogica = () => {
     searchQueryParam: activeFilters.search,
   };
 };
+

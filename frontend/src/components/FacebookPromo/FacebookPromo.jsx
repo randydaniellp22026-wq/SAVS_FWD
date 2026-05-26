@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Share2, ArrowRight } from 'lucide-react';
 import './FacebookPromo.css';
@@ -16,56 +15,19 @@ import imgPromo8 from '../../img/Anuncios/Gemini_Generated_Image_tyv7hytyv7hytyv
 
 const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || `http://${window.location.hostname}:5000`;
 
-// Banners dinámicos por defecto con textos y enlaces de redirección exclusivos y premium
+export const FACEBOOK_PAGE_URL =
+  'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/';
+
+// Textos variados; todos los clics van a la página de Facebook
 const FALLBACK_SLIDES = [
-  {
-    image: imgPromo1,
-    title: '¿Buscás tu Próximo Destino?',
-    desc: 'Llevate vehículos seleccionados e importados a precios irrepetibles en Costa Rica.',
-    enlace: 'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/'
-  },
-  {
-    image: imgPromo2,
-    title: 'Importación Directa de Confianza',
-    desc: 'Traemos el auto que soñás desde EE.UU. con historial certificado y entrega rápida garantizada.',
-    enlace: '/inventory'
-  },
-  {
-    image: imgPromo3,
-    title: 'Financiamiento a Tu Medida',
-    desc: 'Aprobación inmediata en menos de 24 horas con las tasas más competitivas del mercado.',
-    enlace: '/simulate-credit'
-  },
-  {
-    image: imgPromo4,
-    title: 'Revisión Certificada de 150 Puntos',
-    desc: 'Cada vehículo es meticulosamente verificado para asegurar un rendimiento impecable desde el primer día.',
-    enlace: '/contact'
-  },
-  {
-    image: imgPromo5,
-    title: 'Seguridad y Confort en SUVs',
-    desc: 'Explorá una gama de SUVs de lujo diseñadas para proteger y deleitar a toda tu familia.',
-    enlace: '/inventory'
-  },
-  {
-    image: imgPromo6,
-    title: 'Pick-ups de Fuerza Absoluta',
-    desc: 'Potencia sin límites lista para el trabajo pesado y terrenos extremos en todo el país.',
-    enlace: '/inventory'
-  },
-  {
-    image: imgPromo7,
-    title: 'Movilidad Eléctrica Avanzada',
-    desc: 'Unite a la revolución ecológica con vehículos híbridos y eléctricos eficientes y libres de impuestos.',
-    enlace: '/inventory'
-  },
-  {
-    image: imgPromo8,
-    title: 'Reserva Tu Asesoría Personalizada',
-    desc: 'Conversá con nuestros expertos hoy mismo y diseñá el plan de importación ideal para vos.',
-    enlace: '/contact'
-  }
+  { image: imgPromo1, title: '¿Buscás tu Próximo Destino?', desc: 'Vehículos importados a precios irrepetibles. ¡Cotizá en Facebook!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo2, title: 'Importación Directa de Confianza', desc: 'Historial certificado y entrega rápida. ¡Escribinos por FB!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo3, title: 'Financiamiento a Tu Medida', desc: 'Aprobación ágil y tasas competitivas. ¡Consultá en Facebook!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo4, title: 'Revisión Certificada', desc: '150 puntos de control en cada unidad. ¡Más info en nuestra página!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo5, title: 'SUVs de Lujo', desc: 'Seguridad y confort para tu familia. ¡Seguinos en Facebook!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo6, title: 'Pick-ups de Fuerza', desc: 'Potencia para trabajo y ruta. ¡Cotizá por mensaje en FB!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo7, title: 'Híbridos y Eléctricos', desc: 'Eficiencia y tecnología importada. ¡Visitá Facebook hoy!', enlace: FACEBOOK_PAGE_URL },
+  { image: imgPromo8, title: 'Asesoría Personalizada', desc: 'Expertos SAVS te guían paso a paso. ¡Agendá por Facebook!', enlace: FACEBOOK_PAGE_URL }
 ];
 
 const FacebookPromo = ({
@@ -77,7 +39,6 @@ const FacebookPromo = ({
   desc        = 'Llevate vehículos seleccionados a precios irrepetibles. Solo en nuestras redes.',
   reverse     = false
 }) => {
-  const navigate = useNavigate();
   const [currentIdx, setCurrentIdx]   = useState(0);
   const [slides, setSlides]           = useState([]);
   const [loaded, setLoaded]           = useState(false);
@@ -93,7 +54,7 @@ const FacebookPromo = ({
             image: `${BACKEND_URL}${b.imagen}`,
             title: b.titulo,
             desc: b.descripcion,
-            enlace: b.enlace || 'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/'
+            enlace: FACEBOOK_PAGE_URL
           }));
           setSlides(loadedSlides);
         }
@@ -113,12 +74,12 @@ const FacebookPromo = ({
         image: img,
         title: Array.isArray(title) ? title[idx] || title[0] : title,
         desc: Array.isArray(desc) ? desc[idx] || desc[0] : desc,
-        enlace: 'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/'
+        enlace: FACEBOOK_PAGE_URL
       }))
     : slides.length > 0
       ? slides
       : image
-        ? [{ image, title, desc, enlace: 'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/' }]
+        ? [{ image, title, desc, enlace: FACEBOOK_PAGE_URL }]
         : FALLBACK_SLIDES;
 
   // ── Auto-avance del carrusel ─────────────────────────────────────────────
@@ -141,14 +102,8 @@ const FacebookPromo = ({
     setCurrentIdx(prev => (prev === activeSlides.length - 1 ? 0 : prev + 1));
   };
 
-  // Redirección inteligente según el enlace configurado
-  const handleSlideClick = (enlaceUrl) => {
-    if (!enlaceUrl) return;
-    if (enlaceUrl.startsWith('http://') || enlaceUrl.startsWith('https://')) {
-      window.open(enlaceUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      navigate(enlaceUrl);
-    }
+  const handleSlideClick = () => {
+    window.open(FACEBOOK_PAGE_URL, '_blank', 'noopener,noreferrer');
   };
 
   // ── Renderiza el carrusel de imágenes y controles ────────────────────────
@@ -195,7 +150,7 @@ const FacebookPromo = ({
     return (
       <div 
         className={`card vehicle-card fb-promo-card ${className}`} 
-        onClick={() => handleSlideClick(currentSlide.enlace)}
+        onClick={handleSlideClick}
       >
         <div className="fb-promo-content">
           {renderCarousel('card')}
@@ -214,7 +169,7 @@ const FacebookPromo = ({
               </motion.div>
             </AnimatePresence>
             <button className="btn btn-primary fb-promo-btn">
-              {currentSlide.enlace?.startsWith('http') ? 'Ir a Facebook' : 'Ver Promoción'}
+              Ir a Facebook
             </button>
           </div>
         </div>
@@ -227,7 +182,7 @@ const FacebookPromo = ({
     return (
       <div 
         className={`fb-promo-vertical ${className}`} 
-        onClick={() => handleSlideClick(currentSlide.enlace)}
+        onClick={handleSlideClick}
       >
         <div className="fb-promo-img-top">{renderCarousel('vertical')}</div>
         <div className="fb-promo-text-bottom">
@@ -248,7 +203,7 @@ const FacebookPromo = ({
           </AnimatePresence>
           
           <button className="btn btn-primary fb-promo-btn" style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: '#000' }}>
-            {currentSlide.enlace?.startsWith('http') ? 'Ver en Facebook →' : 'Me interesa →'}
+            Ver en Facebook →
           </button>
         </div>
       </div>
@@ -286,14 +241,10 @@ const FacebookPromo = ({
             style={{ backgroundColor: 'transparent' }}
             onClick={(e) => {
               e.stopPropagation();
-              handleSlideClick(currentSlide.enlace);
+              handleSlideClick();
             }}
           >
-            <span>
-              {currentSlide.enlace?.startsWith('http') || !currentSlide.enlace
-                ? 'Ir a Facebook' 
-                : 'Ver Detalles'}
-            </span>
+            <span>Ir a Facebook</span>
             <ArrowRight size={16} />
           </button>
         </div>

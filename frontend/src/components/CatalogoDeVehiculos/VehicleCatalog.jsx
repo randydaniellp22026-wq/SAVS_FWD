@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Heart, 
   Gauge, 
@@ -11,7 +11,13 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  DoorOpen,
+  Palette,
+  Users,
+  Calendar,
+  Tag,
+  Cog
 } from 'lucide-react';
 import { useVehicleFavorites } from '../../hooks/useVehicleFavorites';
 import { useCatalogoLogica } from './catalogoLogica';
@@ -21,6 +27,8 @@ import SlideTextButton from '../SlideTextButton/SlideTextButton';
 import BorderBeam from '../BorderBeam/BorderBeam';
 import { Magnetic } from '../core/Magnetic';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
+import PromocionBadge from '../catalog/PromocionBadge';
+import { marketingService } from '../../services/api';
 import { motion } from 'framer-motion';
 import VehiclePDFButton from './VehiclePDFButton';
 import { CatalogSkeletonGrid } from '../ui/Skeleton';
@@ -80,6 +88,18 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
     resetFilters
   } = useCatalogoLogica();
   const navigate = useNavigate();
+  const [promosActivas, setPromosActivas] = useState(false);
+
+  useEffect(() => {
+    marketingService.getBanners()
+      .then((banners) => setPromosActivas(Array.isArray(banners) && banners.length > 0))
+      .catch(() => setPromosActivas(false));
+  }, []);
+
+  const isVehiclePromo = (car) => {
+    const tag = (car.tag || '').toLowerCase();
+    return promosActivas && (tag.includes('oferta') || tag.includes('promo') || tag.includes('descuento'));
+  };
 
   return (
     <section className={`vehicle-catalog ${showFilters ? 'with-sidebar' : 'catalog-section'}`}>
@@ -91,12 +111,12 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
           </p>
         </div>
         
-        {/* Barra de búsqueda rápida (Tarea 6) */}
+        {/* Barra de búsqueda rápida — busca en TODOS los campos */}
         <div className="quick-search card-base">
           <Search size={18} />
           <input 
             type="text" 
-            placeholder="Buscar por marca, modelo..." 
+            placeholder="Buscar por marca, modelo, color, tipo, puertas, año..." 
             value={activeFilters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
           />
@@ -152,8 +172,123 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
               </div>
               <div className="filter-group half">
                 <label>Tipo</label>
-                <input type="text" placeholder="Ej: SUV" value={activeFilters.type} onChange={(e) => handleFilterChange('type', e.target.value)} />
+                <select value={activeFilters.type} onChange={(e) => handleFilterChange('type', e.target.value)} className="filter-select">
+                  <option value="">Todos</option>
+                  <option value="Sedán">Sedán</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Pickup">Pickup</option>
+                  <option value="Hatchback">Hatchback</option>
+                  <option value="Coupé">Coupé</option>
+                  <option value="Convertible">Convertible</option>
+                  <option value="Van">Van / Minivan</option>
+                  <option value="Camioneta">Camioneta</option>
+                  <option value="Deportivo">Deportivo</option>
+                </select>
               </div>
+            </div>
+            <div className="filter-group">
+              <label>Etiqueta / Estado</label>
+              <div className="button-grid">
+                {['Disponible', 'Nuevo', 'Vendido', 'Reservado', 'Oferta'].map(t => (
+                  <Magnetic key={t}>
+                    <button 
+                      className={`toggle-btn ${activeFilters.tag === t ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('tag', activeFilters.tag === t ? '' : t)}
+                    >
+                      {t}
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection id="appearance" title="Apariencia" icon={Palette} expandedSection={expandedSection} toggleSection={toggleSection}>
+            <div className="filter-group">
+              <label>Color</label>
+              <div className="button-grid">
+                {['Negro', 'Blanco', 'Gris', 'Plata', 'Rojo', 'Azul', 'Verde', 'Amarillo', 'Naranja', 'Café', 'Beige'].map(c => (
+                  <Magnetic key={c}>
+                    <button 
+                      className={`toggle-btn color-btn ${activeFilters.color === c ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('color', activeFilters.color === c ? '' : c)}
+                    >
+                      <span className={`color-dot color-${c.toLowerCase()}`}></span>
+                      {c}
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection id="capacity" title="Capacidad" icon={DoorOpen} expandedSection={expandedSection} toggleSection={toggleSection}>
+            <div className="filter-group">
+              <label>Puertas</label>
+              <div className="button-grid">
+                {['2', '3', '4', '5'].map(d => (
+                  <Magnetic key={d}>
+                    <button 
+                      className={`toggle-btn ${activeFilters.doors === d ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('doors', activeFilters.doors === d ? '' : d)}
+                    >
+                      {d} puertas
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <label>Pasajeros</label>
+              <div className="button-grid">
+                {['2', '4', '5', '7', '8+'].map(p => (
+                  <Magnetic key={p}>
+                    <button 
+                      className={`toggle-btn ${activeFilters.passengers === p ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('passengers', activeFilters.passengers === p ? '' : p)}
+                    >
+                      {p} pasajeros
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection id="drivetrain" title="Tracción" icon={Cog} expandedSection={expandedSection} toggleSection={toggleSection}>
+            <div className="filter-group">
+              <label>Tipo de Tracción</label>
+              <div className="button-grid">
+                {['FWD', 'RWD', 'AWD', '4WD', '4x4'].map(d => (
+                  <Magnetic key={d}>
+                    <button 
+                      className={`toggle-btn ${activeFilters.drive === d ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('drive', activeFilters.drive === d ? '' : d)}
+                    >
+                      {d}
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <label>Dirección</label>
+              <div className="button-grid">
+                {['Hidráulica', 'Eléctrica', 'Electro-hidráulica'].map(s => (
+                  <Magnetic key={s}>
+                    <button 
+                      className={`toggle-btn ${activeFilters.steering === s ? 'active' : ''}`} 
+                      onClick={() => handleFilterChange('steering', activeFilters.steering === s ? '' : s)}
+                    >
+                      {s}
+                    </button>
+                  </Magnetic>
+                ))}
+              </div>
+            </div>
+            <div className="filter-group">
+              <label>Cilindraje / Motor</label>
+              <input type="text" placeholder="Ej: 2.0L, V6, Turbo" value={activeFilters.engine_size} onChange={(e) => handleFilterChange('engine_size', e.target.value)} />
             </div>
           </FilterSection>
 
@@ -163,6 +298,16 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
               <div className="filter-row">
                 <input type="number" placeholder="Mín" value={activeFilters.minPrice} onChange={(e) => handleFilterChange('minPrice', e.target.value)} />
                 <input type="number" placeholder="Máx" value={activeFilters.maxPrice} onChange={(e) => handleFilterChange('maxPrice', e.target.value)} />
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection id="year" title="Año" icon={Calendar} expandedSection={expandedSection} toggleSection={toggleSection}>
+            <div className="filter-group">
+              <label>Rango de Año</label>
+              <div className="filter-row">
+                <input type="number" placeholder="Desde" min="1990" max="2030" value={activeFilters.minYear} onChange={(e) => handleFilterChange('minYear', e.target.value)} />
+                <input type="number" placeholder="Hasta" min="1990" max="2030" value={activeFilters.maxYear} onChange={(e) => handleFilterChange('maxYear', e.target.value)} />
               </div>
             </div>
           </FilterSection>
@@ -201,6 +346,7 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
                         <BorderBeam duration={10} size={25} borderWidth={1.2} />
                         <div className="vehicle-image-container">
                           <img src={imageSrc} alt={car.name} className="vehicle-image" />
+                          <PromocionBadge tag={car.tag} promoActiva={isVehiclePromo(car)} />
                           <div className="vehicle-tag" style={{ backgroundColor: car.tag === 'Vendido' ? '#ef4444' : '#10b981' }}>
                             {car.tag || 'Disponible'}
                           </div>
@@ -213,7 +359,10 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
                           </div>
                           <div className="vehicle-specs-grid">
                             <div className="spec-item"><Gauge size={16} className="spec-icon" /><span>{car.mileage || '0'} km</span></div>
-                            <div className="spec-item"><Droplet size={16} className="spec-icon" /><span>{car.color || 'N/A'}</span></div>
+                            <div className="spec-item"><Palette size={16} className="spec-icon" /><span>{car.color || 'N/A'}</span></div>
+                            <div className="spec-item"><DoorOpen size={16} className="spec-icon" /><span>{car.doors || '—'} puertas</span></div>
+                            <div className="spec-item"><Users size={16} className="spec-icon" /><span>{car.passengers || '—'} pas.</span></div>
+                            <div className="spec-item"><Cog size={16} className="spec-icon" /><span>{car.drive || 'N/A'}</span></div>
                           </div>
                           <div className="vehicle-footer">
                             <span className="vehicle-price">

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { useVehiclesAdminQuery, useVehicleMutation } from '../../hooks/queries/useVehiclesQuery';
+import { adminVehiclesService } from '../../admin/services';
 import { 
   CarFront, 
   Plus, 
@@ -42,7 +42,31 @@ const CreateVehicle = () => {
   const { createMutation, updateMutation, deleteMutation } = useVehicleMutation();
   const vehiculos = vehiclesData?.data || [];
   const [currentVehicle, setCurrentVehicle] = useState(initialFormState);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    setLoading(true);
+    try {
+      // Tarea 2: Obtener datos reales con paginación (traemos los primeros 100 para el admin)
+      const response = await adminVehiclesService.getAll({ limit: 100 });
+      setVehiculos(response.data || []);
+    } catch (error) {
+      console.error("Error fetching vehicles:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de conexión',
+        text: 'No se pudieron cargar los vehículos desde el servidor.',
+        background: '#1a1a1a',
+        color: '#fff'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddNew = () => {
     setCurrentVehicle(initialFormState);
@@ -70,8 +94,8 @@ const CreateVehicle = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteMutation.mutateAsync(vehicle.id);
-        refetch();
+        await adminVehiclesService.delete(vehicle.id);
+        setVehiculos(prev => prev.filter(v => v.id !== vehicle.id));
         Swal.fire({
           icon: 'success',
           title: 'Eliminado',
@@ -112,10 +136,10 @@ const CreateVehicle = () => {
       }
 
       if (isEditing) {
-        await updateMutation.mutateAsync({ id: data.id, data: formData });
+        response = await adminVehiclesService.update(data.id, formData);
         Swal.fire({ icon: 'success', title: '¡Actualizado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       } else {
-        await createMutation.mutateAsync(formData);
+        response = await adminVehiclesService.create(formData);
         Swal.fire({ icon: 'success', title: '¡Publicado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       }
       refetch();

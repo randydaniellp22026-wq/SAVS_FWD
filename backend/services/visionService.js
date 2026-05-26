@@ -10,6 +10,9 @@
  */
 
 const axios = require('axios');
+const crypto = require('crypto');
+
+const randomPick = (arr) => arr[crypto.randomInt(0, arr.length)];
 
 // Listas de datos para el analizador de metadatos local (Fallback)
 const BRANDS = [
@@ -40,22 +43,29 @@ const COLORS = [
 ];
 
 const GENERIC_PROMOS = [
-    {
-        titulo: "¡Tu Próximo Seminuevo Está Aquí!",
-        descripcion: "Vehículos garantizados con el mejor respaldo y financiamiento a tu medida. ¡Vení hoy mismo a Importadora SAVS!"
-    },
-    {
-        titulo: "¡Oferta Especial de la Semana!",
-        descripcion: "Unidad seleccionada en impecables condiciones y precio de oportunidad. ¡Cotizá hoy de forma rápida!"
-    },
-    {
-        titulo: "¡Conducí tus Sueños Hoy Mismo!",
-        descripcion: "Calidad, seguridad y el mejor trato en vehículos importados. ¡Vení y llévatelo con entrega inmediata!"
-    },
-    {
-        titulo: "¡Tu Próximo Vehículo te Espera!",
-        descripcion: "Equipamiento de lujo, confort inigualable y la máxima garantía del mercado. Solo en Importadora SAVS."
-    }
+    { titulo: '🔥 ¡El que buscás, llegó!', descripcion: 'Seminuevo premium, financiamiento flexible y entrega express. ¡Cotizá en Facebook!' },
+    { titulo: '⚡ Oferta que vuela', descripcion: 'Unidad impecable, precio imbatible. ¡Escribinos por FB y agendá tu prueba!' },
+    { titulo: '✨ Tu próximo upgrade', descripcion: 'Importado, garantizado y listo para la ruta. ¡Seguinos en Facebook y llevátelo!' },
+    { titulo: '🏆 Solo en SAVS', descripcion: 'Lujo, potencia y confort. La unidad que todos quieren… ¡cotizá ya en nuestra página!' },
+    { titulo: '💎 Joya sobre ruedas', descripcion: 'Brilla en la calle, historial claro y trato directo. ¡Más info en Facebook!' },
+    { titulo: '🚗 ¿SUV o sedán?', descripcion: 'Tenemos tu match perfecto importado. ¡Entrá a Facebook y pedí tu cotización!' },
+    { titulo: '📲 Cotizá en 1 clic', descripcion: 'Respuesta rápida, asesoría real y el mejor precio. ¡Visitanos en Facebook hoy!' },
+    { titulo: '🌟 Stock limitado', descripcion: 'Unidades que no duran. ¡Seguinos en FB y asegurá la tuya antes que se vaya!' },
+    { titulo: '🔑 Llave en mano', descripcion: 'Trámite ágil, financiamiento a tu medida. ¡Consultá disponibilidad en Facebook!' },
+    { titulo: '🇨🇷 Importado para vos', descripcion: 'Calidad USA/Japón con respaldo SAVS. ¡Cotizá por Facebook sin compromiso!' },
+    { titulo: '⏰ Cierra hoy', descripcion: 'Precio especial por tiempo limitado. ¡Escribinos en FB y reservá tu unidad!' },
+    { titulo: '🛣️ Listo para rodar', descripcion: 'Detalles impecables y entrega express. ¡Mandanos mensaje en Facebook!' }
+];
+
+const COPY_STYLE_HINTS = [
+    'Tono urgente: escasez, últimas unidades, no te quedés atrás.',
+    'Tono aspiracional: estilo de vida, status, tu próximo nivel.',
+    'Tono directo: precio, financiamiento, cotización rápida.',
+    'Tono emocional: familia, seguridad, confianza en la carretera.',
+    'Tono curioso: pregunta retórica que invite a hacer clic.',
+    'Tono exclusivo: solo en SAVS, importación premium.',
+    'Tono costarricense: vos, llevátelo, cotizá, vení a verlo.',
+    'Tono aventura: ruta, potencia, terreno, libertad.'
 ];
 
 /**
@@ -184,39 +194,50 @@ function generateFallbackCopy(originalName) {
     
     // Si el nombre es genérico o consiste principalmente de IDs numéricos
     if (isGenericOrNumericName(info.cleanName) && (!info.brand || !info.model)) {
-        // Seleccionar de forma consistente una promo de alta conversión usando la longitud del nombre
-        const genericIndex = (originalName || '').length % GENERIC_PROMOS.length;
-        const promo = GENERIC_PROMOS[genericIndex];
+        const promo = randomPick(GENERIC_PROMOS);
         titulo = promo.titulo;
         descripcion = promo.descripcion;
     } else if (info.brand && info.model) {
         const yearStr = info.year ? ` ${info.year}` : '';
         const colorStr = info.color ? ` color ${info.color.toLowerCase()}` : '';
-        
+
         const titles = [
-            `¡Llegó el espectacular ${info.brand} ${info.model}${yearStr}!`,
-            `¡Exclusivo ${info.brand} ${info.model}${yearStr} disponible!`,
-            `¡Estilo y potencia: ${info.brand} ${info.model}${yearStr}!`,
-            `¡Vení por tu ${info.brand} ${info.model}${yearStr}!`
+            `🔥 ¡${info.brand} ${info.model}${yearStr} te espera!`,
+            `⚡ ${info.brand} ${info.model}${yearStr} — ¡Ya es tuyo!`,
+            `✨ El ${info.brand} ${info.model}${yearStr} que todos quieren`,
+            `🏆 ${info.brand} ${info.model}${yearStr}: potencia pura`,
+            `💎 ${info.brand} ${info.model}${yearStr} en SAVS`,
+            `🚗 ¿Buscás ${info.model}? Acá está`,
+            `📲 Cotizá tu ${info.brand} ${info.model}${yearStr}`,
+            `⏰ ${info.brand} ${info.model}${yearStr} — stock limitado`
         ];
-        const titleIndex = originalName.length % titles.length;
-        titulo = titles[titleIndex];
-        
         const descriptions = [
-            `Impecable estado${colorStr}, ideal para vos y tu familia. ¡Financiamiento disponible en Importadora SAVS!`,
-            `Un diseño imponente y moderno${colorStr}. ¡Aprovechá hoy las mejores condiciones de Costa Rica!`,
-            `Equipamiento premium y confort garantizado${colorStr}. Cotizalo hoy mismo de forma rápida y segura.`,
-            `Tu próximo vehículo de ensueño${colorStr} está aquí. Excelente rendimiento y elegancia incomparable.`
+            `Brilla en la calle${colorStr}, impecable y listo. ¡Cotizá en Facebook!`,
+            `Diseño que roba miradas${colorStr}. ¡Escribinos por FB antes que se vaya!`,
+            `Confort premium${colorStr} y entrega express. ¡Seguinos en Facebook!`,
+            `Elegancia y potencia${colorStr} al mejor precio. ¡Mandanos mensaje en FB!`,
+            `Importado con respaldo SAVS${colorStr}. ¡Pedí info en nuestra página de Facebook!`,
+            `Financiamiento flexible${colorStr}. ¡Agendá por Facebook hoy!`,
+            `Unidad verificada${colorStr}, trato directo. ¡Cotizá sin compromiso en FB!`,
+            `Tu upgrade empieza acá${colorStr}. ¡Visitá Facebook y reservá!`
         ];
-        const descIndex = originalName.length % descriptions.length;
-        descripcion = descriptions[descIndex];
+        titulo = randomPick(titles);
+        descripcion = randomPick(descriptions);
     } else {
         const nameCleaned = info.cleanName && info.cleanName.length > 3 ? info.cleanName : 'Vehículo Exclusivo';
         const formattedName = nameCleaned.charAt(0).toUpperCase() + nameCleaned.slice(1);
-        
-        titulo = `¡Gran Oportunidad: ${formattedName}!`;
-        const colorStr = info.color ? ` color ${info.color.toLowerCase()}` : '';
-        descripcion = `Excelente estado${colorStr}, rendimiento garantizado y el mejor respaldo. ¡Vení a Importadora SAVS hoy mismo!`;
+        const genericTitles = [
+            `🔥 ¡${formattedName} — oportunidad única!`,
+            `⚡ ${formattedName}: ¡no lo dejes pasar!`,
+            `✨ Descubrí ${formattedName} en SAVS`
+        ];
+        const genericDescs = [
+            'Impecable, garantizado y financiamiento flexible. ¡Cotizá en Facebook!',
+            'Importado con respaldo total. ¡Escribinos por FB y agendá tu visita!',
+            'Precio competitivo y entrega ágil. ¡Más detalles en nuestra página de Facebook!'
+        ];
+        titulo = randomPick(genericTitles);
+        descripcion = randomPick(genericDescs);
     }
     
     // Validar límites de longitud para encajar perfecto en el diseño
@@ -408,19 +429,32 @@ async function analyzeVehicleImage(base64Data, mimeType, originalName = '') {
 
 // Prompt para generación de banners de publicidad/marketing
 const BANNER_PROMPT = `
-Eres un copywriter experto en marketing automotriz de IMPORTADORA SAVS, Costa Rica.
-Tu tarea es analizar la fotografia de un vehiculo que te proporciona el usuario y generar un titulo comercial sumamente atractivo y una descripcion promocional persuasiva para un banner publicitario del sitio web.
+Eres el mejor copywriter de marketing automotriz de IMPORTADORA SAVS en Costa Rica. Escribes como un creativo de agencia: titulares que detienen el scroll y descripciones que generan deseo inmediato de comprar o cotizar.
 
-Reglas:
-- El titulo debe ser corto y llamativo (maximo 40 caracteres), por ejemplo: "¡Llegó el nuevo Hyundai Tucson 2022!" o "¡Oferta Especial de la Semana!".
-- La descripcion debe ser persuasiva e incentivar la compra o cotizacion (maximo 120 caracteres), mencionando caracteristicas visibles clave del carro (color, estilo, estado reluciente).
-- Devuelve la respuesta UNICAMENTE como un objeto JSON con los campos "titulo" y "descripcion".
-- No agregues explicaciones, bloques de código ni markdown. Devuelve solo el JSON valido.
+Analiza la fotografia del vehiculo y crea un anuncio para banner web que VENDA emocionalmente, no que solo describa.
 
-Estructura JSON esperada:
+ESTILO CREATIVO (obligatorio):
+- Usa lenguaje vibrante, cercano y costarricense (vos, vení, llevátelo, cotizá).
+- Titulo: gancho fuerte — urgencia, exclusividad, beneficio o emoción. Puede incluir emoji al inicio (🔥 ⚡ ✨ 🏆) si suma impacto.
+- Descripcion: beneficio concreto + detalle visible del auto (color, brillo, diseño, SUV/sedán, etc.) + llamado a la acción claro.
+- Evita frases genéricas o aburridas como "vehículo en buen estado" o "excelente oportunidad" sin personalidad.
+- Varía el tono: a veces urgente ("¡Últimas unidades!"), a veces aspiracional ("Tu próximo upgrade"), a veces directo ("¿Buscás potencia? Acá está").
+
+EJEMPLOS DE REFERENCIA (no copies literal, inspírate):
+- titulo: "🔥 ¡Tucson 2022 que roba miradas!"
+- descripcion: "Gris metalizado impecable, SUV premium y financiamiento flexible. ¡Cotizá hoy en SAVS antes que se vaya!"
+- titulo: "⚡ ¿Listo para el upgrade?"
+- descripcion: "Sedán reluciente, equipamiento top y entrega express. Tu próximo auto te espera en Importadora SAVS."
+
+REGLAS TÉCNICAS:
+- titulo: máximo 40 caracteres, corto y muy llamativo.
+- descripcion: máximo 120 caracteres, persuasiva con CTA (cotizá, vení, agendá, llevátelo).
+- Menciona al menos un detalle visible real de la imagen (marca, modelo, color, tipo, año si se infiere).
+- Respuesta UNICAMENTE JSON valido, sin markdown ni explicaciones.
+
 {
-  "titulo": "Titulo atractivo aqui",
-  "descripcion": "Descripcion persuasiva aqui"
+  "titulo": "...",
+  "descripcion": "..."
 }
 `;
 
@@ -458,13 +492,13 @@ async function generateBannerCopy(base64Data, mimeType, originalName = '') {
                             },
                             {
                                 type: 'text',
-                                text: 'Analiza esta imagen y genera el titulo y descripcion promocional para el anuncio en formato JSON.'
+                                text: `Crea un anuncio NUEVO y distinto (no repitas frases típicas) para Importadora SAVS, Costa Rica. Estilo: ${randomPick(COPY_STYLE_HINTS)} Variación #${crypto.randomInt(1000, 99999)}. Titular con gancho fuerte; descripción con CTA hacia Facebook. Solo JSON con titulo y descripcion.`
                             }
                         ]
                     }
                 ],
-                temperature: 0.7,
-                max_tokens: 256
+                temperature: 1,
+                max_tokens: 300
             },
             {
                 headers: {
