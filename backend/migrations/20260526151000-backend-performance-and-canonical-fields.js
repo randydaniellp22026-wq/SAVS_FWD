@@ -14,6 +14,29 @@ module.exports = {
       SET email = COALESCE(email, correo)
     `);
 
+    // Normalizar valores no enteros antes de INTEGER (strict mode / datos legacy)
+    await queryInterface.sequelize.query(`
+      UPDATE Autos
+      SET mileage = NULL
+      WHERE mileage IS NOT NULL
+        AND CAST(mileage AS CHAR) <> ''
+        AND CAST(mileage AS CHAR) NOT REGEXP '^[0-9]+$'
+    `);
+    await queryInterface.sequelize.query(`
+      UPDATE Autos
+      SET doors = NULL
+      WHERE doors IS NOT NULL
+        AND CAST(doors AS CHAR) <> ''
+        AND CAST(doors AS CHAR) NOT REGEXP '^[0-9]+$'
+    `);
+    await queryInterface.sequelize.query(`
+      UPDATE Autos
+      SET passengers = NULL
+      WHERE passengers IS NOT NULL
+        AND CAST(passengers AS CHAR) <> ''
+        AND CAST(passengers AS CHAR) NOT REGEXP '^[0-9]+$'
+    `);
+
     await queryInterface.changeColumn('Autos', 'mileage', {
       type: Sequelize.INTEGER,
       allowNull: true,
