@@ -2,17 +2,14 @@ import React from 'react';
 import './SlideTextButton.css';
 
 export default function SlideTextButton({
-  text = "Detalles",
-  hoverText = "Ver más",
+  text = 'Detalles',
+  hoverText = 'Ver más',
   onClick,
-  className = ""
+  className = '',
 }) {
   return (
     <div className="slide-btn-wrapper">
-      <button 
-        className={`slide-text-btn ${className}`}
-        onClick={onClick}
-      >
+      <button className={`slide-text-btn ${className}`} onClick={onClick}>
         <span className="slide-text-container">
           <span className="slide-text-main">
             <span className="slide-text-font">{text}</span>

@@ -1,0 +1,91 @@
+/* === PageLoader — Spinner de carga a pantalla completa === */
+
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-bg-main, #080808);
+  gap: 1.5rem;
+}
+
+/* Contenedor del spinner SVG */
+.page-loader__spinner {
+  width: 56px;
+  height: 56px;
+  animation: pageLoaderPulse 2s ease-in-out infinite;
+}
+
+/* SVG del anillo giratorio */
+.page-loader__svg {
+  width: 100%;
+  height: 100%;
+  animation: pageLoaderSpin 1.2s linear infinite;
+}
+
+/* Trazo del círculo con gradiente dorado */
+.page-loader__circle {
+  stroke: var(--color-primary, #eab308);
+  stroke-linecap: round;
+  stroke-dasharray: 90, 150;
+  stroke-dashoffset: 0;
+  animation: pageLoaderDash 1.5s ease-in-out infinite;
+}
+
+/* Texto de carga */
+.page-loader__text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #9ca3af);
+  letter-spacing: 0.05em;
+}
+
+/* Texto solo visible para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* === Animaciones === */
+@keyframes pageLoaderSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pageLoaderDash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+@keyframes pageLoaderPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

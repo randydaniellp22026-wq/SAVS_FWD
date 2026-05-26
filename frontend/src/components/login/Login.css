@@ -1,6 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: 'Outfit', sans-serif;
@@ -30,15 +34,20 @@ body {
 
 .hero-background {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.85)),
-              url('/src/assets/car_hero.png') center/cover no-repeat;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.85)),
+    url('/src/assets/car_hero.png') center/cover no-repeat;
   z-index: 1;
   transition: transform 1s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.login-visual-section:hover .hero-background { transform: scale(1.05); }
+.login-visual-section:hover .hero-background {
+  transform: scale(1.05);
+}
 
 .hero-content {
   position: relative;
@@ -48,8 +57,14 @@ body {
 }
 
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-badge {
@@ -72,7 +87,7 @@ body {
   font-weight: 800;
   line-height: 1.05;
   margin-bottom: 1.5rem;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content p {
@@ -122,11 +137,19 @@ body {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.form-header { margin-bottom: 1.75rem; }
+.form-header {
+  margin-bottom: 1.75rem;
+}
 
 .form-header h2 {
   font-size: 1.75rem;
@@ -135,10 +158,15 @@ body {
   margin-bottom: 0.25rem;
 }
 
-.form-header p { color: #9ca3af; font-size: 1rem; }
+.form-header p {
+  color: #9ca3af;
+  font-size: 1rem;
+}
 
 /* Form Styles */
-.form-group { margin-bottom: 1.25rem; }
+.form-group {
+  margin-bottom: 1.25rem;
+}
 
 .form-group label {
   display: block;
@@ -148,7 +176,9 @@ body {
   margin-bottom: 0.5rem;
 }
 
-.input-wrapper { position: relative; }
+.input-wrapper {
+  position: relative;
+}
 
 .premium-input {
   width: 100%;
@@ -162,13 +192,15 @@ body {
   color: #ffffff;
 }
 
-.premium-input::placeholder { color: #525252; }
+.premium-input::placeholder {
+  color: #525252;
+}
 
 .premium-input:focus {
   outline: none;
   border-color: rgba(234, 179, 8, 0.6);
   background: rgba(234, 179, 8, 0.05);
-  box-shadow: 
+  box-shadow:
     0 0 0 4px rgba(234, 179, 8, 0.1),
     0 0 20px rgba(234, 179, 8, 0.15);
   transform: translateY(-1px);
@@ -195,8 +227,14 @@ body {
   box-shadow: 0 8px 28px rgba(234, 179, 8, 0.45);
 }
 
-.login-submit-btn:active { transform: translateY(0); }
-.login-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.login-submit-btn:active {
+  transform: translateY(0);
+}
+.login-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
 .form-footer {
   margin-top: 1.5rem;
@@ -211,7 +249,10 @@ body {
   text-decoration: none;
   transition: color 0.2s;
 }
-.form-footer a:hover { color: #fbbf24; text-decoration: underline; }
+.form-footer a:hover {
+  color: #fbbf24;
+  text-decoration: underline;
+}
 
 .legal-notice {
   margin-top: 2rem;
@@ -221,7 +262,10 @@ body {
   line-height: 1.4;
 }
 
-.legal-notice a { color: #eab308; font-weight: 500; }
+.legal-notice a {
+  color: #eab308;
+  font-weight: 500;
+}
 
 .forgot-password-container {
   display: flex;
@@ -257,14 +301,24 @@ body {
   gap: 0.5rem;
 }
 
-@media (max-width: 1024px) { .hero-content h1 { font-size: 2.75rem; } }
+@media (max-width: 1024px) {
+  .hero-content h1 {
+    font-size: 2.75rem;
+  }
+}
 
 @media (max-width: 868px) {
-  .login-visual-section { display: none; }
-  .login-page { justify-content: center; background-color: #080808; }
+  .login-visual-section {
+    display: none;
+  }
+  .login-page {
+    justify-content: center;
+    background-color: #080808;
+  }
   .login-form-section {
     flex: none;
-    width: 100%; max-width: 500px;
+    width: 100%;
+    max-width: 500px;
     background: transparent;
     border-left: none;
     padding: 2rem;
@@ -274,19 +328,30 @@ body {
     padding: 3rem;
     border-radius: 1.5rem;
     border: 1px solid rgba(234, 179, 8, 0.2);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   }
 }
 
 /* --- LIGHT EFFECTS ANIMATIONS --- */
 @keyframes borderPan {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 @keyframes btnGlowPulse {
-  0%, 100% { box-shadow: 0 4px 18px rgba(234, 179, 8, 0.25); }
-  50% { box-shadow: 0 4px 25px rgba(255, 255, 255, 0.15), 0 0 30px rgba(234, 179, 8, 0.2); }
+  0%,
+  100% {
+    box-shadow: 0 4px 18px rgba(234, 179, 8, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 4px 25px rgba(255, 255, 255, 0.15),
+      0 0 30px rgba(234, 179, 8, 0.2);
+  }
 }
 
 /* Test Login Button Styles */

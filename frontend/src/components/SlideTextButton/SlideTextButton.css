@@ -6,7 +6,10 @@
 }
 
 @keyframes slideBtnIn {
-  to { opacity: 1; transform: translateX(0); }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .slide-text-btn {
@@ -49,7 +52,8 @@
   transform: translateY(-50%);
 }
 
-.slide-text-main, .slide-text-hover {
+.slide-text-main,
+.slide-text-hover {
   height: 50%; /* Takes exactly one half of the 200% height = 100% of button height */
   width: 100%;
   display: flex;

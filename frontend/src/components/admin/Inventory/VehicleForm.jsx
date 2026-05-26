@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  CarFront, 
-  Settings, 
-  Fuel, 
-  FileText, 
-  Image as ImageIcon, 
-  CheckCircle, 
-  X, 
-  Plus, 
+import {
+  CarFront,
+  Settings,
+  Fuel,
+  FileText,
+  Image as ImageIcon,
+  CheckCircle,
+  X,
+  Plus,
   ChevronRight,
   Info,
   Layers,
   Palette,
   Tag,
   Sparkles,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
@@ -23,7 +23,7 @@ import { vehicleService } from '../../../services/api';
 const darkSwal = {
   background: '#1a1a1a',
   color: '#fff',
-  confirmButtonColor: '#eab308'
+  confirmButtonColor: '#eab308',
 };
 
 const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
@@ -41,7 +41,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
         ...darkSwal,
         icon: 'warning',
         title: 'Archivo no válido',
-        text: 'Solo se aceptan imágenes (JPG, PNG, WebP, GIF).'
+        text: 'Solo se aceptan imágenes (JPG, PNG, WebP, GIF).',
       });
       return;
     }
@@ -50,7 +50,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
         ...darkSwal,
         icon: 'warning',
         title: 'Archivo muy grande',
-        text: 'El tamaño máximo es 5 MB.'
+        text: 'El tamaño máximo es 5 MB.',
       });
       return;
     }
@@ -62,7 +62,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
         const fields = result.data.detectedFields;
         const previewUrl = URL.createObjectURL(file);
 
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           name: fields.name || prev.name || '',
           motor: fields.motor || fields.engine_size || prev.motor || '',
@@ -78,7 +78,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
           doors: fields.doors ? String(fields.doors) : prev.doors || '5',
           passengers: fields.passengers ? String(fields.passengers) : prev.passengers || '5',
           image: file,
-          preview: previewUrl
+          preview: previewUrl,
         }));
 
         Swal.fire({
@@ -87,7 +87,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
           title: '¡Autocompletado con éxito!',
           text: 'Hemos analizado la imagen y rellenado la ficha técnica. Por favor, revísala.',
           timer: 3000,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         throw new Error(result.error || 'No se pudieron extraer datos de la imagen.');
@@ -98,7 +98,10 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
         ...darkSwal,
         icon: 'error',
         title: 'Error al analizar',
-        text: err.response?.data?.error || err.message || 'No se pudo obtener información del vehículo.'
+        text:
+          err.response?.data?.error ||
+          err.message ||
+          'No se pudo obtener información del vehículo.',
       });
     } finally {
       setAiLoading(false);
@@ -109,9 +112,9 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
     const { name, value } = e.target;
     // Sanitización básica para números
     if (['price', 'year', 'mileage', 'doors', 'passengers'].includes(name)) {
-      setFormData(prev => ({ ...prev, [name]: value.replace(/[^0-9]/g, '') }));
+      setFormData((prev) => ({ ...prev, [name]: value.replace(/[^0-9]/g, '') }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -120,53 +123,73 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
     if (file) {
       // Generamos una URL temporal solo para la previsualización visual
       const previewUrl = URL.createObjectURL(file);
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         image: file, // Guardamos el archivo REAL para el envío
-        preview: previewUrl // Guardamos la URL para la vista
+        preview: previewUrl, // Guardamos la URL para la vista
       }));
     }
   };
 
   const handleDetailImagesChange = (e) => {
     const files = Array.from(e.target.files);
-    const readers = files.map(file => {
+    const readers = files.map((file) => {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (ev) => resolve(ev.target.result);
         reader.readAsDataURL(file);
       });
     });
-    Promise.all(readers).then(results => {
-      setDetailImages(prev => [...prev, ...results]);
+    Promise.all(readers).then((results) => {
+      setDetailImages((prev) => [...prev, ...results]);
     });
   };
 
   const removeDetailImage = (index) => {
-    setDetailImages(prev => prev.filter((_, i) => i !== index));
+    setDetailImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Validaciones de Cliente - Robustas
     if (!formData.name?.trim()) {
-      Swal.fire({ ...darkSwal, icon: 'warning', title: 'Nombre requerido', text: 'El nombre del vehículo es obligatorio.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Nombre requerido',
+        text: 'El nombre del vehículo es obligatorio.',
+      });
       return;
     }
-    
+
     if (!formData.price || Number(formData.price) <= 0) {
-      Swal.fire({ ...darkSwal, icon: 'warning', title: 'Precio inválido', text: 'Debes ingresar un precio mayor a cero.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Precio inválido',
+        text: 'Debes ingresar un precio mayor a cero.',
+      });
       return;
     }
 
     if (!formData.year || Number(formData.year) < 1900 || Number(formData.year) > 2030) {
-      Swal.fire({ ...darkSwal, icon: 'warning', title: 'Año inválido', text: 'Por favor ingresa un año válido entre 1900 y 2030.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Año inválido',
+        text: 'Por favor ingresa un año válido entre 1900 y 2030.',
+      });
       return;
     }
 
     if (!formData.image) {
-      Swal.fire({ ...darkSwal, icon: 'warning', title: 'Imagen requerida', text: 'Debes subir al menos una imagen principal para el catálogo.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'Imagen requerida',
+        text: 'Debes subir al menos una imagen principal para el catálogo.',
+      });
       return;
     }
 
@@ -176,11 +199,11 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
   const tabs = [
     { id: 'general', label: 'Información General', icon: <Info size={18} /> },
     { id: 'technical', label: 'Ficha Técnica', icon: <Settings size={18} /> },
-    { id: 'media', label: 'Multimedia', icon: <ImageIcon size={18} /> }
+    { id: 'media', label: 'Multimedia', icon: <ImageIcon size={18} /> },
   ];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="inventory-form-card"
@@ -188,12 +211,25 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
       <div className="form-header">
         <div className="header-info">
           <h2>{formData.id ? 'Editar Vehículo' : 'Añadir Nuevo Vehículo'}</h2>
-          <p>{formData.id ? `ID: ${formData.id}` : 'Completa los campos para publicar en el catálogo'}</p>
+          <p>
+            {formData.id
+              ? `ID: ${formData.id}`
+              : 'Completa los campos para publicar en el catálogo'}
+          </p>
         </div>
         {!formData.id && (
-          <div className="header-actions-form" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: 'auto', marginRight: '1rem' }}>
-            <button 
-              type="button" 
+          <div
+            className="header-actions-form"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              marginLeft: 'auto',
+              marginRight: '1rem',
+            }}
+          >
+            <button
+              type="button"
               className="btn-ai-autofill"
               disabled={aiLoading}
               onClick={() => document.getElementById('ai-autofill-input').click()}
@@ -210,12 +246,12 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 </>
               )}
             </button>
-            <input 
-              id="ai-autofill-input" 
-              type="file" 
-              hidden 
-              onChange={handleAiAutofill} 
-              accept="image/*" 
+            <input
+              id="ai-autofill-input"
+              type="file"
+              hidden
+              onChange={handleAiAutofill}
+              accept="image/*"
             />
           </div>
         )}
@@ -225,7 +261,7 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
       </div>
 
       <div className="form-tabs">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -250,29 +286,33 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 className="form-section-grid"
               >
                 <div className="form-input-group full">
-                  <label><CarFront size={16} /> Marca y Modelo</label>
-                  <input 
-                    name="name" 
-                    value={formData.name} 
-                    onChange={handleChange} 
+                  <label>
+                    <CarFront size={16} /> Marca y Modelo
+                  </label>
+                  <input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
                     placeholder="Ej: Toyota Land Cruiser Prado 2024"
                   />
                 </div>
                 <div className="form-input-group">
-                  <label><Tag size={16} /> Precio (₡)</label>
-                  <input 
-                    name="price" 
-                    value={formData.price} 
-                    onChange={handleChange} 
+                  <label>
+                    <Tag size={16} /> Precio (₡)
+                  </label>
+                  <input
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
                     placeholder="Ej: 45000000"
                   />
                 </div>
                 <div className="form-input-group">
                   <label>Año</label>
-                  <input 
-                    name="year" 
-                    value={formData.year} 
-                    onChange={handleChange} 
+                  <input
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
                     placeholder="2024"
                   />
                 </div>
@@ -286,20 +326,24 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                   </select>
                 </div>
                 <div className="form-input-group">
-                  <label><Palette size={16} /> Color</label>
-                  <input 
-                    name="color" 
-                    value={formData.color} 
-                    onChange={handleChange} 
+                  <label>
+                    <Palette size={16} /> Color
+                  </label>
+                  <input
+                    name="color"
+                    value={formData.color}
+                    onChange={handleChange}
                     placeholder="Gris Metalizado"
                   />
                 </div>
                 <div className="form-input-group full">
-                  <label><FileText size={16} /> Descripción Breve</label>
-                  <textarea 
-                    name="summary" 
-                    value={formData.summary} 
-                    onChange={handleChange} 
+                  <label>
+                    <FileText size={16} /> Descripción Breve
+                  </label>
+                  <textarea
+                    name="summary"
+                    value={formData.summary}
+                    onChange={handleChange}
                     rows="3"
                     placeholder="Resumen del vehículo para el catálogo..."
                   />
@@ -316,11 +360,20 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 className="form-section-grid"
               >
                 <div className="form-input-group">
-                  <label><Settings size={16} /> Motor / Cilindrada</label>
-                  <input name="motor" value={formData.motor} onChange={handleChange} placeholder="3000cc V6" />
+                  <label>
+                    <Settings size={16} /> Motor / Cilindrada
+                  </label>
+                  <input
+                    name="motor"
+                    value={formData.motor}
+                    onChange={handleChange}
+                    placeholder="3000cc V6"
+                  />
                 </div>
                 <div className="form-input-group">
-                  <label><Fuel size={16} /> Combustible</label>
+                  <label>
+                    <Fuel size={16} /> Combustible
+                  </label>
                   <select name="fuel" value={formData.fuel} onChange={handleChange}>
                     <option value="Gasolina">Gasolina</option>
                     <option value="Diésel">Diésel</option>
@@ -329,7 +382,9 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                   </select>
                 </div>
                 <div className="form-input-group">
-                  <label><Layers size={16} /> Transmisión</label>
+                  <label>
+                    <Layers size={16} /> Transmisión
+                  </label>
                   <select name="transmission" value={formData.transmission} onChange={handleChange}>
                     <option value="Automática">Automática</option>
                     <option value="Manual">Manual</option>
@@ -338,15 +393,30 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 </div>
                 <div className="form-input-group">
                   <label>Kilometraje</label>
-                  <input name="mileage" value={formData.mileage} onChange={handleChange} placeholder="0 km" />
+                  <input
+                    name="mileage"
+                    value={formData.mileage}
+                    onChange={handleChange}
+                    placeholder="0 km"
+                  />
                 </div>
                 <div className="form-input-group">
                   <label>Puertas</label>
-                  <input name="doors" value={formData.doors} onChange={handleChange} placeholder="5" />
+                  <input
+                    name="doors"
+                    value={formData.doors}
+                    onChange={handleChange}
+                    placeholder="5"
+                  />
                 </div>
                 <div className="form-input-group">
                   <label>Pasajeros</label>
-                  <input name="passengers" value={formData.passengers} onChange={handleChange} placeholder="7" />
+                  <input
+                    name="passengers"
+                    value={formData.passengers}
+                    onChange={handleChange}
+                    placeholder="7"
+                  />
                 </div>
               </motion.div>
             )}
@@ -361,20 +431,21 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
               >
                 <div className="main-image-upload">
                   <label>Foto de Portada (Principal)</label>
-                  <div 
+                  <div
                     className="dropzone-area"
                     onClick={() => document.getElementById('main-img-input').click()}
                   >
                     {formData.preview || formData.image ? (
-                      <img 
+                      <img
                         src={
-                          formData.preview || 
-                          (typeof formData.image === 'string' && formData.image.startsWith('/uploads') 
-                            ? `http://localhost:5000${formData.image}` 
+                          formData.preview ||
+                          (typeof formData.image === 'string' &&
+                          formData.image.startsWith('/uploads')
+                            ? `http://localhost:5000${formData.image}`
                             : formData.image)
-                        } 
-                        alt="Preview" 
-                        className="img-preview-main" 
+                        }
+                        alt="Preview"
+                        className="img-preview-main"
                       />
                     ) : (
                       <div className="dropzone-placeholder">
@@ -382,12 +453,12 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                         <p>Haz clic para subir la imagen principal</p>
                       </div>
                     )}
-                    <input 
-                      id="main-img-input" 
-                      type="file" 
-                      hidden 
-                      onChange={handleMainImageChange} 
-                      accept="image/*" 
+                    <input
+                      id="main-img-input"
+                      type="file"
+                      hidden
+                      onChange={handleMainImageChange}
+                      accept="image/*"
                     />
                   </div>
                 </div>
@@ -395,26 +466,26 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
                 <div className="detail-images-gallery">
                   <label>Galería de Detalles (Carrusel interno)</label>
                   <div className="gallery-grid">
-                    <div 
+                    <div
                       className="add-gallery-item"
                       onClick={() => document.getElementById('gallery-input').click()}
                     >
                       <Plus size={24} />
-                      <input 
-                        id="gallery-input" 
-                        type="file" 
-                        hidden 
-                        multiple 
-                        onChange={handleDetailImagesChange} 
-                        accept="image/*" 
+                      <input
+                        id="gallery-input"
+                        type="file"
+                        hidden
+                        multiple
+                        onChange={handleDetailImagesChange}
+                        accept="image/*"
                       />
                     </div>
                     {detailImages.map((img, idx) => (
                       <div key={idx} className="gallery-item">
                         <img src={img} alt={`Detail ${idx}`} />
-                        <button 
-                          type="button" 
-                          onClick={() => removeDetailImage(idx)} 
+                        <button
+                          type="button"
+                          onClick={() => removeDetailImage(idx)}
                           className="remove-detail-btn"
                         >
                           <X size={14} />
@@ -432,12 +503,14 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
           <button type="button" onClick={onCancel} className="btn-cancel">
             Cancelar
           </button>
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className={`btn-save ${loading ? 'loading' : ''}`}
           >
-            {loading ? 'Procesando...' : (
+            {loading ? (
+              'Procesando...'
+            ) : (
               <>
                 <CheckCircle size={18} />
                 <span>{formData.id ? 'Guardar Cambios' : 'Publicar Vehículo'}</span>

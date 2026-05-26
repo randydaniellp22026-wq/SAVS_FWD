@@ -213,20 +213,24 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   transform: rotate(45deg);
   animation: shine-btn 3s infinite;
 }
 
 @keyframes shine-btn {
-  0% { left: -100%; transition: property 0.5s ease; }
-  20% { left: 100%; transition: property 0.5s ease; }
-  100% { left: 100%; transition: property 0.5s ease; }
+  0% {
+    left: -100%;
+    transition: property 0.5s ease;
+  }
+  20% {
+    left: 100%;
+    transition: property 0.5s ease;
+  }
+  100% {
+    left: 100%;
+    transition: property 0.5s ease;
+  }
 }
 
 .action-btn.promote-shine:hover {
@@ -266,7 +270,10 @@
     display: none;
   }
 
-  .users-table, .users-table tbody, .users-table tr, .users-table td {
+  .users-table,
+  .users-table tbody,
+  .users-table tr,
+  .users-table td {
     display: block;
     width: 100%;
   }
@@ -297,14 +304,31 @@
     text-align: left;
   }
 
-  .user-cell { justify-content: flex-end; }
-  .contact-cell { align-items: flex-end; }
-  .location-cell { justify-content: flex-end; }
-  .actions-cell { justify-content: flex-end; width: 100%; }
+  .user-cell {
+    justify-content: flex-end;
+  }
+  .contact-cell {
+    align-items: flex-end;
+  }
+  .location-cell {
+    justify-content: flex-end;
+  }
+  .actions-cell {
+    justify-content: flex-end;
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
-  .mgmt-header h1 { font-size: 1.8rem; }
-  .search-bar { padding: 0.6rem 1rem; }
-  .user-cell { flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+  .mgmt-header h1 {
+    font-size: 1.8rem;
+  }
+  .search-bar {
+    padding: 0.6rem 1rem;
+  }
+  .user-cell {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
 }

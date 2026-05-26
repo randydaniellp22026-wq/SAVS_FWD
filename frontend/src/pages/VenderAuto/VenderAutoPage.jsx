@@ -7,6 +7,8 @@ import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
 import { handleApiError } from '../../utils/apiError';
 import '../../components/IntercambioDeAutos/IntercambioDeAutos.css';
 
+import styles from './VenderAutoPage.module.css';
+
 const VenderAutoPage = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState(null);
@@ -18,8 +20,11 @@ const VenderAutoPage = () => {
   useEffect(() => {
     const saved = localStorage.getItem('user');
     if (!saved) {
-      Swal.fire({ icon: 'warning', title: 'Acceso denegado', text: 'Inicia sesión para vender tu auto.' })
-        .then(() => navigate('/login'));
+      Swal.fire({
+        icon: 'warning',
+        title: 'Acceso denegado',
+        text: 'Inicia sesión para vender tu auto.',
+      }).then(() => navigate('/login'));
       return;
     }
     const user = JSON.parse(saved);
@@ -44,7 +49,7 @@ const VenderAutoPage = () => {
       Pendiente: 'status-pendiente',
       'En revisión': 'status-revision',
       Aprobado: 'status-aprobado',
-      Rechazado: 'status-rechazado'
+      Rechazado: 'status-rechazado',
     };
     return map[estado] || 'status-pendiente';
   };
@@ -56,7 +61,7 @@ const VenderAutoPage = () => {
         <p>Registra tu vehículo actual y úsalo como parte de pago en tu próxima compra.</p>
       </div>
 
-      <div style={{ padding: '0 2rem', marginBottom: '2rem' }}>
+      <div className={styles.promoWrapper}>
         <FacebookPromo type="banner" reverse={false} />
       </div>
 
@@ -69,8 +74,15 @@ const VenderAutoPage = () => {
                 userId={userId}
                 isEditing={isEditing}
                 editData={editData}
-                onCancelEdit={() => { setIsEditing(false); setEditData(null); }}
-                onSuccess={() => { setIsEditing(false); setEditData(null); loadMine(userId); }}
+                onCancelEdit={() => {
+                  setIsEditing(false);
+                  setEditData(null);
+                }}
+                onSuccess={() => {
+                  setIsEditing(false);
+                  setEditData(null);
+                  loadMine(userId);
+                }}
               />
             )}
           </div>
@@ -89,14 +101,31 @@ const VenderAutoPage = () => {
               {vehiculos.map((v) => (
                 <div key={v.id} className="vehiculo-card">
                   <div className="vehiculo-card-image">
-                    {v.imagen ? <img src={v.imagen} alt={v.marca} /> : <div className="no-image">Sin imagen</div>}
-                    <span className={`vende-status-badge ${getStatusClass(v.estado)}`}>{v.estado}</span>
+                    {v.imagen ? (
+                      <img src={v.imagen} alt={v.marca} />
+                    ) : (
+                      <div className="no-image">Sin imagen</div>
+                    )}
+                    <span className={`vende-status-badge ${getStatusClass(v.estado)}`}>
+                      {v.estado}
+                    </span>
                   </div>
                   <div className="vehiculo-card-content">
-                    <h3>{v.marca} {v.modelo} <span>{v.anio}</span></h3>
+                    <h3>
+                      {v.marca} {v.modelo} <span>{v.anio}</span>
+                    </h3>
                     <p className="vehiculo-price">₡{Number(v.precio).toLocaleString()}</p>
                     <p className="vehiculo-desc">{v.descripcion}</p>
-                    <button type="button" className="btn-edit" onClick={() => { setIsEditing(true); setEditData(v); }}>Editar</button>
+                    <button
+                      type="button"
+                      className="btn-edit"
+                      onClick={() => {
+                        setIsEditing(true);
+                        setEditData(v);
+                      }}
+                    >
+                      Editar
+                    </button>
                   </div>
                 </div>
               ))}

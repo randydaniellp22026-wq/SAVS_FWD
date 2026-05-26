@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { motion } from "motion/react";
+import React, { useRef, useState } from 'react';
+import { motion } from 'motion/react';
 
 export function Magnetic({ children, intensity = 0.3, springOptions, className, style }) {
   const ref = useRef(null);
@@ -19,12 +19,12 @@ export function Magnetic({ children, intensity = 0.3, springOptions, className, 
   };
 
   const { x, y } = position;
-  
-  const defaultSpring = { type: "spring", stiffness: 150, damping: 15, mass: 0.1 };
+
+  const defaultSpring = { type: 'spring', stiffness: 150, damping: 15, mass: 0.1 };
 
   return (
     <motion.div
-      style={{ display: "inline-block", ...style }}
+      style={{ display: 'inline-block', ...style }}
       className={className}
       ref={ref}
       onMouseMove={handleMouse}

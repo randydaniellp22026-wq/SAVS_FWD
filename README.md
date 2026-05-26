@@ -1,7 +1,8 @@
 # Importadora SAVS - The Destiny Vault 🚗💨
 
 ## 📝 Descripción General
-**Importadora SAVS (The Destiny Vault)** es una plataforma web full-stack moderna y robusta diseñada para la gestión, exhibición y comercialización de vehículos de importación, principalmente desde Corea del Sur hacia Costa Rica. 
+
+**Importadora SAVS (The Destiny Vault)** es una plataforma web full-stack moderna y robusta diseñada para la gestión, exhibición y comercialización de vehículos de importación, principalmente desde Corea del Sur hacia Costa Rica.
 
 La aplicación fue desarrollada para ofrecer una **experiencia de usuario premium** con una estética elegante (Glassmorphism), mientras provee a los administradores de un **robusto panel de gestión centralizado**. Desde calcular financiamientos y explorar el inventario de manera dinámica, hasta interactuar con un asistente virtual inteligente, SAVS eleva el estándar de las importadoras automotrices.
 
@@ -10,16 +11,21 @@ La aplicación fue desarrollada para ofrecer una **experiencia de usuario premiu
 ## 🚀 Funcionalidades Clave y Funcionamiento
 
 ### 🔍 Catálogo Inteligente y Filtros Dinámicos
+
 El corazón del sistema es un catálogo de vehículos conectado en tiempo real a la base de datos. Permite a los usuarios buscar y filtrar vehículos por **marca, modelo, tipo de combustible, transmisión y rango de precio**. Todo impulsado por una API propia que soporta **paginación desde el servidor** para un rendimiento óptimo.
 
 ### 🤖 Asistente Virtual IA Integrado
+
 Para mejorar la conversión de ventas, la plataforma integra un chatbot conversacional potenciado por **Groq Cloud (LLaMA 3.3 70B)**. Este asistente responde preguntas técnicas leyendo el inventario de la base de datos, y cuando detecta intención de compra o no puede resolver una duda compleja, transfiere suavemente la conversación al WhatsApp oficial de ventas.
 
 ### 🧮 Simulador de Financiamiento
+
 Los usuarios pueden abrir desde cualquier parte de la página una calculadora flotante interactiva. Tras seleccionar un vehículo (con su imagen y precio importados dinámicamente), el simulador les permite ajustar plazos y enganches para estimar su cuota mensual de inmediato.
 
 ### ⚙️ Portal de Administración (Dashboard CRUD)
+
 Un entorno seguro y privado donde los perfiles con rol de `admin` pueden:
+
 - **Gestión de Inventario**: Crear (con subida de imágenes), editar y eliminar vehículos.
 - **Gestión de Usuarios**: Administrar cuentas registradas y asignar privilegios.
 - **Tracking de Importación**: Actualizar las etapas logísticas (En Tránsito, Aduanas, Entrega) de los clientes que ya compraron.
@@ -32,6 +38,7 @@ Un entorno seguro y privado donde los perfiles con rol de `admin` pueden:
 El proyecto utiliza un stack de tecnologías líder en la industria, separado en dos grandes pilares orquestados:
 
 ### 🎨 Frontend (Interfaz de Usuario)
+
 - **React.js 19 + Vite**: Motor principal para la reactividad y velocidad de carga.
 - **React Router Dom 7**: Enrutamiento tipo SPA y protección asíncrona de rutas.
 - **Framer Motion**: Animaciones fluidas, modales emergentes y transiciones.
@@ -39,11 +46,13 @@ El proyecto utiliza un stack de tecnologías líder en la industria, separado en
 - **SweetAlert2 & React Hot Toast**: Para notificaciones amigables y modales de confirmación.
 
 ### 🏗️ Backend (Lógica y Servidor)
+
 - **Node.js + Express.js v5**: Servidor HTTP y enrutador RESTful (`/api/v1`).
 - **MySQL 8 + Sequelize ORM**: Base de datos relacional para persistencia de usuarios, roles, inventarios y ajustes.
 - **Multer**: Gestión eficiente para la subida de imágenes al sistema de archivos local (`/uploads`).
 
 ### 🛡️ Seguridad y Autenticación
+
 - **JWT (JSON Web Tokens)**: Manejo de sesiones de manera inquebrantable a través de **Cookies HttpOnly**, mitigando inyecciones XSS.
 - **Bcrypt**: Encriptado fuerte de contraseñas de los usuarios.
 - **Express Rate Limit & Helmet**: Protección activa contra ataques de fuerza bruta y configuración segura de cabeceras HTTP.
@@ -64,6 +73,7 @@ Para mantener este documento limpio, toda la estructura técnica y diagramas de 
 ## 🔧 Guía de Arranque Rápido
 
 ### Prerrequisitos
+
 - **Node.js** (v18 o superior)
 - Servidor de **MySQL** ejecutándose en el puerto 3306.
 
@@ -83,12 +93,52 @@ Para mantener este documento limpio, toda la estructura técnica y diagramas de 
    ```
 
 ### Ejecución
+
 Usa el comando `dev:full` desde la raíz para levantar paralelamente la base de datos, el cliente Vite y el servidor Node.
+
 ```bash
 npm run dev:full
 ```
+
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:5000
 
+## 🚀 Despliegue en Producción
+
+### Requisitos previos
+
+- Docker 24+ y Docker Compose 2.20+
+- Node.js 20 LTS (solo para desarrollo local)
+
+### Variables de entorno
+
+Copia `.env.example` a `.env` y rellena todos los valores:
+
+```bash
+cp .env.example .env
+```
+
+### Levantar con Docker Compose
+
+```bash
+# Producción
+docker compose up -d
+
+# Desarrollo local con hot-reload
+docker compose -f docker-compose.yml -f docker-compose.override.yml up
+```
+
+### CI/CD automático
+
+- Cada push a `develop` o `main` ejecuta linter, tests y build (Integración Continua).
+- Cada merge a `main` compila las imágenes Docker correspondientes, las sube a GitHub Container Registry y las despliega automáticamente al entorno de staging (Despliegue Continuo).
+- Revisa `.github/workflows/` para los detalles.
+
+### Monitoreo
+
+- **Servicio de Base de Datos**: Docker Compose monitoriza la salud de la base de datos MySQL mediante `mysqladmin ping` integrado en el healthcheck.
+- **Logs de contenedores**: Los logs agregados pueden consultarse en tiempo real usando `docker compose logs -f` o individualmente para cada servicio (`frontend` y `backend`).
+
 ---
+
 **Desarrollado para Importadora SAVS - Calidad y Confianza en cada kilómetro.**

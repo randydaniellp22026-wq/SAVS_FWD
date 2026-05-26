@@ -1,0 +1,59 @@
+# ============================================================
+# Docker Compose Override — Desarrollo Local
+# Proyecto: The Destiny Vault / Importadora SAVS
+#
+# Este archivo se combina automáticamente con docker-compose.yml
+# cuando se ejecuta `docker compose up` sin -f explícito.
+#
+# USO (desarrollo con hot-reload):
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml up
+#
+# CARACTERÍSTICAS:
+#   - Monta el código fuente como volumen para hot-reload
+#   - Activa modo development en las variables
+#   - Usa nodemon para reiniciar el backend al detectar cambios
+#   - Expone el puerto de Vite dev server (5173)
+# ============================================================
+
+services:
+  # ──── Frontend en modo desarrollo (Vite dev server) ────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # En desarrollo, usamos Vite directamente en lugar de Nginx
+    # Si prefieres usar Vite directamente, descomenta lo siguiente:
+    # command: npm run dev -- --host 0.0.0.0
+    # ports:
+    #   - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+    environment:
+      - NODE_ENV=development
+
+  # ──── Backend en modo desarrollo (nodemon + código montado) ────
+  backend:
+    # Sobreescribir comando para usar nodemon con hot-reload
+    command: npx nodemon server.js
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-1234}
+      - DB_NAME=${DB_NAME:-SAVS_DB}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_key_cambiar_en_produccion}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+
+  # ──── Base de Datos sin restricciones estrictas para desarrollo ────
+  db:
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-1234}
+      - MYSQL_DATABASE=${DB_NAME:-SAVS_DB}

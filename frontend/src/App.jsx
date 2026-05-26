@@ -14,7 +14,10 @@ function App() {
 
   return (
     <div className="app-container">
-      <Toaster 
+      <a href="#main-content" className="sr-only-focusable">
+        Saltar al contenido principal
+      </a>
+      <Toaster
         position="top-right"
         containerStyle={{
           top: 20,

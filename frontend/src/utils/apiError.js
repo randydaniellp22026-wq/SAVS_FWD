@@ -9,7 +9,7 @@ export const logApiError = (context, error) => {
     message: error?.message,
     status: error?.response?.status,
     data: error?.response?.data,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
   console.error('[API Error]', payload);
   return payload;

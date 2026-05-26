@@ -20,12 +20,15 @@ const ProtectedRoute = ({ children, allowedRoles = ['admin', 'gerente'] }) => {
           setUserRole(userData.rol.nombre?.toLowerCase() || 'user');
           setIsAuthenticated(true);
           // Opcional: sincronizar localStorage
-          localStorage.setItem('user', JSON.stringify({
-            id: userData.id,
-            nombre: userData.nombre,
-            email: userData.email,
-            rol: userData.rol.nombre?.toLowerCase() || 'user'
-          }));
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              id: userData.id,
+              nombre: userData.nombre,
+              email: userData.email,
+              rol: userData.rol.nombre?.toLowerCase() || 'user',
+            })
+          );
         } else {
           setIsAuthenticated(false);
         }
@@ -40,7 +43,19 @@ const ProtectedRoute = ({ children, allowedRoles = ['admin', 'gerente'] }) => {
   }, []);
 
   if (isLoading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: '#eab308' }}>Cargando...</div>;
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: '#eab308',
+        }}
+      >
+        Cargando...
+      </div>
+    );
   }
 
   // 1. Si no hay usuario, redirigir al login

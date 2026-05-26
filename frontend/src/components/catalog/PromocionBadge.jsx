@@ -5,7 +5,8 @@ import './PromocionBadge.css';
 const PROMO_TAGS = ['Oferta', 'Promoción', 'Descuento', 'Hot Deal'];
 
 const PromocionBadge = ({ tag, promoActiva }) => {
-  const isPromo = promoActiva || PROMO_TAGS.some((t) => (tag || '').toLowerCase().includes(t.toLowerCase()));
+  const isPromo =
+    promoActiva || PROMO_TAGS.some((t) => (tag || '').toLowerCase().includes(t.toLowerCase()));
 
   if (!isPromo) return null;
 

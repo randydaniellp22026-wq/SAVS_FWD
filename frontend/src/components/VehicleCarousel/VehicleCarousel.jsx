@@ -4,8 +4,14 @@ import { ChevronRight, ChevronLeft, Pause, Play } from 'lucide-react';
 import ImageLens from '../ImageLens/ImageLens';
 
 // Cargar todas las imágenes de la carpeta img dinámicamente
-const allGalleryImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' });
-const localCarrosImages = import.meta.glob('../../carros/*.{jpg,jpeg,png,webp,avif}', { eager: true, import: 'default' });
+const allGalleryImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+  import: 'default',
+});
+const localCarrosImages = import.meta.glob('../../carros/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+  import: 'default',
+});
 
 const VehicleCarousel = ({ vehicle }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -15,14 +21,14 @@ const VehicleCarousel = ({ vehicle }) => {
   // Mapeamos las imágenes según el vehículo
   const slides = useMemo(() => {
     let selectedImages = [];
-    
+
     if (vehicle?.galleryPath) {
       // Filtrar imágenes que pertenezcan a la carpeta del vehículo
       // La ruta en allGalleryImages será algo como ../../img/Carpeta/imagen.jpg
       const searchPath = `../../img/${vehicle.galleryPath}/`.toLowerCase();
       selectedImages = Object.keys(allGalleryImages)
-        .filter(key => key.toLowerCase().startsWith(searchPath))
-        .map(key => allGalleryImages[key]);
+        .filter((key) => key.toLowerCase().startsWith(searchPath))
+        .map((key) => allGalleryImages[key]);
     }
 
     // Fallback 1: imágenes de detalle subidas desde el panel admin (base64 o URLs)
@@ -42,9 +48,11 @@ const VehicleCarousel = ({ vehicle }) => {
       image: imgUrl,
       title: vehicle?.name || 'Diseño Excepcional',
       subtitle: index === 0 ? 'DATOS TÉCNICOS' : `VISTA ${index + 1}`,
-      text: index === 0 
-        ? (vehicle?.summary || 'Explora cada detalle de este increíble vehículo. Rendimiento, confort y tecnología avanzada.')
-        : 'Cada ángulo está pensado para brindarte la mejor experiencia de conducción premium.'
+      text:
+        index === 0
+          ? vehicle?.summary ||
+            'Explora cada detalle de este increíble vehículo. Rendimiento, confort y tecnología avanzada.'
+          : 'Cada ángulo está pensado para brindarte la mejor experiencia de conducción premium.',
     }));
   }, [vehicle]);
 
@@ -76,15 +84,15 @@ const VehicleCarousel = ({ vehicle }) => {
   if (slides.length === 0) return null;
 
   return (
-    <div 
+    <div
       className="fc-carousel-container"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Background borroso adaptativo al slide activo */}
-      <div 
-        className="fc-slide-bg-blur" 
-        style={{ backgroundImage: `url("${slides[currentSlide].image}")` }} 
+      <div
+        className="fc-slide-bg-blur"
+        style={{ backgroundImage: `url("${slides[currentSlide].image}")` }}
       />
       <div className="fc-slide-overlay-dark" />
 
@@ -93,7 +101,7 @@ const VehicleCarousel = ({ vehicle }) => {
         {slides.map((slide, index) => {
           const diff = (index - currentSlide + slides.length) % slides.length;
           let positionClass = 'fc-slide-hidden';
-          
+
           if (diff === 0) positionClass = 'fc-slide-active';
           else if (diff === 1) positionClass = 'fc-slide-next';
           else if (diff === slides.length - 1) positionClass = 'fc-slide-prev';
@@ -101,19 +109,19 @@ const VehicleCarousel = ({ vehicle }) => {
           else if (diff === slides.length - 2) positionClass = 'fc-slide-hidden-left';
 
           return (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`fc-slide-item ${positionClass}`}
               onClick={() => {
                 if (diff === 1) nextSlide();
                 if (diff === slides.length - 1) prevSlide();
               }}
             >
-              <ImageLens 
-                src={slide.image} 
-                alt={`Vista ${index + 1}`} 
-                className="fc-slide-image-contain" 
-                isActive={diff === 0} 
+              <ImageLens
+                src={slide.image}
+                alt={`Vista ${index + 1}`}
+                className="fc-slide-image-contain"
+                isActive={diff === 0}
               />
             </div>
           );
@@ -121,7 +129,7 @@ const VehicleCarousel = ({ vehicle }) => {
       </div>
 
       <div className="fc-slide-overlay" />
-      
+
       {/* Contenido de texto dinámico renderizado arriba */}
       <div className="fc-slide-content" key={currentSlide}>
         <h4 className="fc-subtitle">{slides[currentSlide].subtitle}</h4>
@@ -139,7 +147,10 @@ const VehicleCarousel = ({ vehicle }) => {
       </div>
 
       <div className="fc-indicators-wrapper">
-        <div className="fc-indicators" style={{ flexWrap: 'wrap', justifyContent: 'center', maxWidth: '60vw' }}>
+        <div
+          className="fc-indicators"
+          style={{ flexWrap: 'wrap', justifyContent: 'center', maxWidth: '60vw' }}
+        >
           {slides.map((_, index) => (
             <button
               key={index}
@@ -149,8 +160,8 @@ const VehicleCarousel = ({ vehicle }) => {
             />
           ))}
         </div>
-        <button 
-          className="fc-play-pause-btn" 
+        <button
+          className="fc-play-pause-btn"
           onClick={() => setIsPlaying(!isPlaying)}
           aria-label={isPlaying ? 'Pausar Autoplay' : 'Empezar Autoplay'}
         >

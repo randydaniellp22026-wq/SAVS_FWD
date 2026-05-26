@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 const darkSwal = {
   background: '#0a0a0a',
   color: '#fff',
-  confirmButtonColor: '#eab308'
+  confirmButtonColor: '#eab308',
 };
 
 export const useVehicleCardLogica = (vehicleId) => {
@@ -23,11 +23,15 @@ export const useVehicleCardLogica = (vehicleId) => {
   }, [vehicleId]);
 
   const getTagClass = (tag) => {
-    switch(tag) {
-      case 'Nuevo': return 'tag-new';
-      case 'Recomendado': return 'tag-recommended';
-      case 'Oferta': return 'tag-offer';
-      default: return 'tag-default';
+    switch (tag) {
+      case 'Nuevo':
+        return 'tag-new';
+      case 'Recomendado':
+        return 'tag-recommended';
+      case 'Oferta':
+        return 'tag-offer';
+      default:
+        return 'tag-default';
     }
   };
 
@@ -36,26 +40,26 @@ export const useVehicleCardLogica = (vehicleId) => {
       e.preventDefault();
       e.stopPropagation(); // Evitar navegar a detalles al dar click al corazón
     }
-    
+
     const savedUser = localStorage.getItem('user');
     if (!savedUser) {
       Swal.fire({
         ...darkSwal,
         icon: 'info',
         title: '¡Añade a favoritos!',
-        text: 'Debes iniciar sesión para guardar tus favoritos.'
+        text: 'Debes iniciar sesión para guardar tus favoritos.',
       });
       return;
     }
 
     const user = JSON.parse(savedUser);
-    
+
     if (!user.id) {
       Swal.fire({
         ...darkSwal,
         icon: 'error',
         title: 'Sesión Inválida',
-        text: 'Tu sesión ha expirado o es antigua. Por favor, cierra sesión e inicia de nuevo.'
+        text: 'Tu sesión ha expirado o es antigua. Por favor, cierra sesión e inicia de nuevo.',
       });
       return;
     }
@@ -64,7 +68,7 @@ export const useVehicleCardLogica = (vehicleId) => {
     const vidStr = String(vehicleId);
 
     if (isFavorite) {
-      updatedFavorites = updatedFavorites.filter(id => String(id) !== vidStr);
+      updatedFavorites = updatedFavorites.filter((id) => String(id) !== vidStr);
     } else {
       updatedFavorites.push(vidStr);
     }
@@ -74,7 +78,7 @@ export const useVehicleCardLogica = (vehicleId) => {
       const res = await fetch(`http://localhost:5000/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ favorites: updatedFavorites })
+        body: JSON.stringify({ favorites: updatedFavorites }),
       });
 
       if (!res.ok) {
@@ -86,20 +90,19 @@ export const useVehicleCardLogica = (vehicleId) => {
       setIsFavorite(!isFavorite);
       user.favorites = updatedFavorites;
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       if (!isFavorite) {
         toast.success('Añadido a favoritos', { icon: '⭐' });
       } else {
         toast('Eliminado de favoritos');
       }
-
     } catch (err) {
-      console.error("Error al guardar favorito:", err);
-      Swal.fire({ 
+      console.error('Error al guardar favorito:', err);
+      Swal.fire({
         ...darkSwal,
-        icon: 'error', 
-        title: 'Error de Red', 
-        text: 'Asegúrate de que el servidor esté encendido o intenta cerrar y abrir sesión de nuevo.' 
+        icon: 'error',
+        title: 'Error de Red',
+        text: 'Asegúrate de que el servidor esté encendido o intenta cerrar y abrir sesión de nuevo.',
       });
     }
   };

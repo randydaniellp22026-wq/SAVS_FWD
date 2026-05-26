@@ -9,18 +9,16 @@ import { settingsService } from './settingsService';
  * Carga paralela de datos para el dashboard administrativo.
  */
 export async function fetchDashboardData() {
-  const [vehicles, users, requests, reviews, saleRequests, settings] =
-    await Promise.allSettled([
-      adminVehiclesService.getAll(),
-      usersService.getAll(),
-      requestsService.getAll(),
-      reviewsService.getAll(),
-      saleRequestsService.getAll(),
-      settingsService.getAll(),
-    ]);
+  const [vehicles, users, requests, reviews, saleRequests, settings] = await Promise.allSettled([
+    adminVehiclesService.getAll(),
+    usersService.getAll(),
+    requestsService.getAll(),
+    reviewsService.getAll(),
+    saleRequestsService.getAll(),
+    settingsService.getAll(),
+  ]);
 
-  const pick = (result, fallback = []) =>
-    result.status === 'fulfilled' ? result.value : fallback;
+  const pick = (result, fallback = []) => (result.status === 'fulfilled' ? result.value : fallback);
 
   const vehiclesRaw = pick(vehicles, []);
   const { items: vehicleList, total: vehicleTotal } =
@@ -92,8 +90,8 @@ export async function fetchDashboardData() {
       },
     },
     dataSets: { fuelData, transData, yearData, reqData, tradeInData },
-    vehicleList: safeV.slice().sort((a, b) => (b.id - a.id)),
-    tradeInList: safeSreq.slice().sort((a, b) => (b.id - a.id)),
+    vehicleList: safeV.slice().sort((a, b) => b.id - a.id),
+    tradeInList: safeSreq.slice().sort((a, b) => b.id - a.id),
     raw: {
       vehicles: vehiclesRaw,
       users: userList,

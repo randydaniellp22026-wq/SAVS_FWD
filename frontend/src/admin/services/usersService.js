@@ -20,6 +20,5 @@ export const usersService = {
     return list.filter((u) => u.rol === 'Cliente' || u.tracking);
   },
 
-  updateTracking: async (userId, tracking) =>
-    usersService.patch(userId, { tracking }),
+  updateTracking: async (userId, tracking) => usersService.patch(userId, { tracking }),
 };

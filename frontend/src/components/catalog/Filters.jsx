@@ -8,7 +8,6 @@ const Filters = () => {
   return (
     <div className="filters-container">
       <div className="filters-grid">
-        
         {/* Mileage Filters */}
         <div className="filter-group">
           <h4 className="filter-title">Rangos de Kilometraje</h4>
@@ -28,7 +27,7 @@ const Filters = () => {
           <h4 className="filter-title">Años de Producción</h4>
           <div className="year-options">
             {years.map((year) => (
-              <button 
+              <button
                 key={year}
                 className={`year-btn ${activeYear === year ? 'active' : ''}`}
                 onClick={() => setActiveYear(year)}
@@ -38,7 +37,6 @@ const Filters = () => {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

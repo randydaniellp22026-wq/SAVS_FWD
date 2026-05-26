@@ -25,12 +25,13 @@ api.interceptors.response.use(
   (error) => {
     if (!error.response) {
       console.error('[API] Error de red', { url: error.config?.url, message: error.message });
-      error.message = 'Error de conexión: El servidor no responde. Asegúrate de que el backend esté encendido.';
+      error.message =
+        'Error de conexión: El servidor no responde. Asegúrate de que el backend esté encendido.';
     } else {
       console.error('[API]', {
         status: error.response.status,
         url: error.config?.url,
-        data: error.response.data
+        data: error.response.data,
       });
       if (error.response.status === 401 && !window.location.pathname.includes('/login')) {
         localStorage.removeItem('user');
@@ -68,7 +69,7 @@ export const vehicleService = {
   // Crear nuevo (Soporta FormData para imágenes)
   create: async (data) => {
     const response = await api.post('/vehicles', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
@@ -76,7 +77,7 @@ export const vehicleService = {
   // Actualizar
   update: async (id, data) => {
     const response = await api.put(`/vehicles/${id}`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
   },
@@ -94,10 +95,10 @@ export const vehicleService = {
     const formData = new FormData();
     formData.append('image', imageFile);
     const response = await apiForm.post('/vehicles/auto-ad', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
-  }
+  },
 };
 
 /**
@@ -119,7 +120,7 @@ export const authService = {
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
-  }
+  },
 };
 
 export const tradeInService = {
@@ -136,7 +137,8 @@ export const appointmentService = {
 
 export const pointsService = {
   getMine: () => api.get('/points/mine').then((r) => r.data),
-  redeem: (cantidad, descripcion) => api.post('/points/redeem', { cantidad, descripcion }).then((r) => r.data),
+  redeem: (cantidad, descripcion) =>
+    api.post('/points/redeem', { cantidad, descripcion }).then((r) => r.data),
 };
 
 export const marketingService = {
@@ -159,8 +161,8 @@ export const chatService = {
   // Mensaje con imagen adjunta (multipart/form-data)
   sendWithImage: async (formData) => {
     const response = await apiForm.post('/chatbot', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
-  }
+  },
 };

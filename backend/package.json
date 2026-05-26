@@ -13,7 +13,7 @@
     "db:seed": "node seed.js",
     "db:seed:pipeline": "npx sequelize-cli db:seed --seed 20260522140001-pipeline-stages.js",
     "db:fix-passwords": "node scripts/fix-passwords.js",
-    "db:migrate-json": "node migrate_json_to_mysql.js",
+    "db:migrate-json": "node scripts/migrate_json_to_mysql.js",
     "db:migrate-tracking": "node scripts/migrate-tracking-data.js"
   },
   "jest": {
@@ -43,6 +43,7 @@
     "pdfkit": "^0.18.0",
     "resend": "^6.12.3",
     "sequelize": "^6.37.8",
+    "swagger-ui-express": "^5.0.1",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
@@ -50,6 +51,7 @@
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "sequelize-cli": "^6.6.5",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "swagger-jsdoc": "^6.3.0"
   }
 }

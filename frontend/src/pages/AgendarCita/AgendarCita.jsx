@@ -66,7 +66,8 @@ const AgendarCita = () => {
     }
   };
 
-  const estadoLabel = (e) => ({ pendiente: 'Pendiente', confirmada: 'Confirmada', cancelada: 'Cancelada' }[e] || e);
+  const estadoLabel = (e) =>
+    ({ pendiente: 'Pendiente', confirmada: 'Confirmada', cancelada: 'Cancelada' })[e] || e;
 
   return (
     <div className="agendar-cita-page">
@@ -79,24 +80,43 @@ const AgendarCita = () => {
         <form className="agendar-form" onSubmit={handleSubmit}>
           <label>
             Fecha
-            <input type="date" value={form.fecha} min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
+            <input
+              type="date"
+              value={form.fecha}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setForm({ ...form, fecha: e.target.value })}
+            />
             {errors.fecha && <span className="field-error">{errors.fecha}</span>}
           </label>
           <label>
             Hora
-            <input type="time" value={form.hora} onChange={(e) => setForm({ ...form, hora: e.target.value })} />
+            <input
+              type="time"
+              value={form.hora}
+              onChange={(e) => setForm({ ...form, hora: e.target.value })}
+            />
             {errors.hora && <span className="field-error">{errors.hora}</span>}
           </label>
           <label>
             Tipo de servicio
-            <select value={form.tipo_servicio} onChange={(e) => setForm({ ...form, tipo_servicio: e.target.value })}>
-              {TIPOS.map((t) => <option key={t} value={t}>{t}</option>)}
+            <select
+              value={form.tipo_servicio}
+              onChange={(e) => setForm({ ...form, tipo_servicio: e.target.value })}
+            >
+              {TIPOS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </select>
           </label>
           <label>
             Notas (opcional)
-            <textarea value={form.notas} rows={3} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
+            <textarea
+              value={form.notas}
+              rows={3}
+              onChange={(e) => setForm({ ...form, notas: e.target.value })}
+            />
           </label>
           <button type="submit" className="btn-agendar" disabled={loading}>
             {loading ? 'Agendando...' : 'Confirmar cita'}
@@ -112,11 +132,15 @@ const AgendarCita = () => {
               <div key={c.id} className={`cita-card estado-${c.estado}`}>
                 <div>
                   <strong>{c.tipo_servicio}</strong>
-                  <p>{c.fecha} — {c.hora}</p>
+                  <p>
+                    {c.fecha} — {c.hora}
+                  </p>
                   <span className="cita-estado">{estadoLabel(c.estado)}</span>
                 </div>
                 {c.estado !== 'cancelada' && (
-                  <button type="button" onClick={() => cancelar(c.id)}>Cancelar</button>
+                  <button type="button" onClick={() => cancelar(c.id)}>
+                    Cancelar
+                  </button>
                 )}
               </div>
             ))

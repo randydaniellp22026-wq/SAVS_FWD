@@ -1,9 +1,27 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  Ship, Search, Edit3, Check, Clock, MapPin, User, Package,
-  ArrowRight, RefreshCw, ChevronDown, ChevronUp, Mail,
-  AlertCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft,
-  ChevronRight as ChevronRightIcon, Filter, X, Calendar,
+  Ship,
+  Search,
+  Edit3,
+  Check,
+  Clock,
+  MapPin,
+  User,
+  Package,
+  ArrowRight,
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  AlertCircle,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+  Filter,
+  X,
+  Calendar,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { usersService } from '../../admin/services';
@@ -11,20 +29,19 @@ import AdminLoader from '../../components/admin/AdminLoader';
 import TrackingTimeline from '../../admin/components/TrackingTimeline/TrackingTimeline';
 import './Admin.css';
 
-
 /* ─── Constantes ─── */
 const STAGES = [
-  { step: 1, label: 'Compra Realizada', icon: Check,   color: '#10b981' },
-  { step: 2, label: 'En Tránsito',      icon: Ship,    color: '#3b82f6' },
-  { step: 3, label: 'En Aduanas',       icon: Clock,   color: '#eab308' },
-  { step: 4, label: 'Entrega Final',    icon: MapPin,  color: '#a855f7' },
+  { step: 1, label: 'Compra Realizada', icon: Check, color: '#10b981' },
+  { step: 2, label: 'En Tránsito', icon: Ship, color: '#3b82f6' },
+  { step: 3, label: 'En Aduanas', icon: Clock, color: '#eab308' },
+  { step: 4, label: 'Entrega Final', icon: MapPin, color: '#a855f7' },
 ];
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 /* ─── Utilidades ─── */
 const stageBadge = (step) => {
-  const s = STAGES.find(x => x.step === step);
+  const s = STAGES.find((x) => x.step === step);
   if (!s) return <span className="stage-badge stage-0">Sin asignar</span>;
   return (
     <span className={`stage-badge stage-${step}`}>
@@ -35,9 +52,11 @@ const stageBadge = (step) => {
 
 const SortIcon = ({ field, sortKey, dir }) => {
   if (sortKey !== field) return <ArrowUpDown size={14} className="sort-icon-neutral" />;
-  return dir === 'asc'
-    ? <ArrowUp size={14} className="sort-icon-active" />
-    : <ArrowDown size={14} className="sort-icon-active" />;
+  return dir === 'asc' ? (
+    <ArrowUp size={14} className="sort-icon-active" />
+  ) : (
+    <ArrowDown size={14} className="sort-icon-active" />
+  );
 };
 
 /* ─── Barra de progreso mini ─── */
@@ -67,16 +86,16 @@ const MiniProgress = ({ step }) => (
    ════════════════════════════════════════════════ */
 const TrackingManagement = () => {
   /* ── Estado de datos ── */
-  const [users,   setUsers]   = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
 
   /* ── Filtros y búsqueda ── */
-  const [search,      setSearch]      = useState('');
-  const [stageFilter, setStageFilter] = useState(0);       // 0 = todos
-  const [hasTracking, setHasTracking] = useState('all');   // all | yes | no
-  const [dateFrom,    setDateFrom]    = useState('');
-  const [dateTo,      setDateTo]      = useState('');
+  const [search, setSearch] = useState('');
+  const [stageFilter, setStageFilter] = useState(0); // 0 = todos
+  const [hasTracking, setHasTracking] = useState('all'); // all | yes | no
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   /* ── Ordenamiento ── */
@@ -84,7 +103,7 @@ const TrackingManagement = () => {
   const [sortDir, setSortDir] = useState('asc');
 
   /* ── Paginación ── */
-  const [page,     setPage]     = useState(1);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   /* ─── Fetch ─── */
@@ -100,10 +119,14 @@ const TrackingManagement = () => {
     }
   }, []);
 
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   /* ─── Reset de página al cambiar filtros ─── */
-  useEffect(() => { setPage(1); }, [search, stageFilter, hasTracking, dateFrom, dateTo, sortKey, sortDir]);
+  useEffect(() => {
+    setPage(1);
+  }, [search, stageFilter, hasTracking, dateFrom, dateTo, sortKey, sortDir]);
 
   /* ─── Filtrado y ordenamiento (memoizado) ─── */
   const filtered = useMemo(() => {
@@ -112,31 +135,32 @@ const TrackingManagement = () => {
     // Búsqueda en tiempo real
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(u =>
-        (u.nombre || '').toLowerCase().includes(q) ||
-        (u.email  || '').toLowerCase().includes(q) ||
-        (u.tracking?.vehicleName || '').toLowerCase().includes(q)
+      list = list.filter(
+        (u) =>
+          (u.nombre || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q) ||
+          (u.tracking?.vehicleName || '').toLowerCase().includes(q)
       );
     }
 
     // Filtro por etapa
     if (stageFilter !== 0) {
-      list = list.filter(u => u.tracking?.importStatus === stageFilter);
+      list = list.filter((u) => u.tracking?.importStatus === stageFilter);
     }
 
     // Filtro tiene tracking
-    if (hasTracking === 'yes') list = list.filter(u => !!u.tracking?.vehicleName);
-    if (hasTracking === 'no')  list = list.filter(u => !u.tracking?.vehicleName);
+    if (hasTracking === 'yes') list = list.filter((u) => !!u.tracking?.vehicleName);
+    if (hasTracking === 'no') list = list.filter((u) => !u.tracking?.vehicleName);
 
     // Filtro por fecha estimada (si existe)
     if (dateFrom) {
-      list = list.filter(u => {
+      list = list.filter((u) => {
         const d = u.tracking?.estimatedDate;
         return d && new Date(d) >= new Date(dateFrom);
       });
     }
     if (dateTo) {
-      list = list.filter(u => {
+      list = list.filter((u) => {
         const d = u.tracking?.estimatedDate;
         return d && new Date(d) <= new Date(dateTo);
       });
@@ -163,10 +187,11 @@ const TrackingManagement = () => {
           vb = b.tracking?.importStatus || 0;
           break;
         default:
-          va = ''; vb = '';
+          va = '';
+          vb = '';
       }
-      if (va < vb) return sortDir === 'asc' ? -1 :  1;
-      if (va > vb) return sortDir === 'asc' ?  1 : -1;
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
       return 0;
     });
 
@@ -174,18 +199,21 @@ const TrackingManagement = () => {
   }, [users, search, stageFilter, hasTracking, dateFrom, dateTo, sortKey, sortDir]);
 
   /* ─── Paginación ─── */
-  const totalPages  = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paginated   = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const handleSort = (key) => {
-    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setSortKey(key); setSortDir('asc'); }
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+    else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
   };
 
   /* ─── KPIs ─── */
-  const withTracking    = users.filter(u => u.tracking?.vehicleName).length;
+  const withTracking = users.filter((u) => u.tracking?.vehicleName).length;
   const withoutTracking = users.length - withTracking;
-  const inCustoms       = users.filter(u => u.tracking?.importStatus === 3).length;
+  const inCustoms = users.filter((u) => u.tracking?.importStatus === 3).length;
 
   /* ─── Modal de edición (SweetAlert2) ─── */
   const handleEditTracking = (user) => {
@@ -201,10 +229,10 @@ const TrackingManagement = () => {
           <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Etapa de Importación</label>
           <select id="t-status" class="swal2-input"
             style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;background:#222;color:#fff;">
-            <option value="1" ${t.importStatus===1?'selected':''}>1. Compra Realizada</option>
-            <option value="2" ${t.importStatus===2?'selected':''}>2. En Tránsito</option>
-            <option value="3" ${t.importStatus===3?'selected':''}>3. En Aduanas</option>
-            <option value="4" ${t.importStatus===4?'selected':''}>4. Entrega Final</option>
+            <option value="1" ${t.importStatus === 1 ? 'selected' : ''}>1. Compra Realizada</option>
+            <option value="2" ${t.importStatus === 2 ? 'selected' : ''}>2. En Tránsito</option>
+            <option value="3" ${t.importStatus === 3 ? 'selected' : ''}>3. En Aduanas</option>
+            <option value="4" ${t.importStatus === 4 ? 'selected' : ''}>4. Entrega Final</option>
           </select>
 
           <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Fecha Estimada de Arribo</label>
@@ -225,37 +253,41 @@ const TrackingManagement = () => {
           <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Descripción del Estado</label>
           <select id="t-text" class="swal2-input"
             style="margin-top:0;margin-bottom:4px;width:100%;box-sizing:border-box;background:#222;color:#fff;">
-            <option value="Compra procesada correctamente"  ${t.statusText==='Compra procesada correctamente'?'selected':''}>Compra procesada correctamente</option>
-            <option value="Vehículo en tránsito marítimo"  ${t.statusText==='Vehículo en tránsito marítimo'?'selected':''}>Vehículo en tránsito marítimo</option>
-            <option value="En trámite aduanal"             ${t.statusText==='En trámite aduanal'?'selected':''}>En trámite aduanal</option>
-            <option value="Listo para entrega al cliente"  ${t.statusText==='Listo para entrega al cliente'?'selected':''}>Listo para entrega al cliente</option>
+            <option value="Compra procesada correctamente"  ${t.statusText === 'Compra procesada correctamente' ? 'selected' : ''}>Compra procesada correctamente</option>
+            <option value="Vehículo en tránsito marítimo"  ${t.statusText === 'Vehículo en tránsito marítimo' ? 'selected' : ''}>Vehículo en tránsito marítimo</option>
+            <option value="En trámite aduanal"             ${t.statusText === 'En trámite aduanal' ? 'selected' : ''}>En trámite aduanal</option>
+            <option value="Listo para entrega al cliente"  ${t.statusText === 'Listo para entrega al cliente' ? 'selected' : ''}>Listo para entrega al cliente</option>
           </select>
         </div>
       `,
-      showCancelButton:   true,
-      confirmButtonText:  'Guardar',
-      cancelButtonText:   'Cancelar',
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
       confirmButtonColor: '#eab308',
       background: '#141414',
       color: '#fff',
       width: '540px',
       preConfirm: () => ({
-        vehicleName:   document.getElementById('t-vehicle').value.trim(),
-        importStatus:  parseInt(document.getElementById('t-status').value),
+        vehicleName: document.getElementById('t-vehicle').value.trim(),
+        importStatus: parseInt(document.getElementById('t-status').value),
         estimatedDate: document.getElementById('t-date').value.trim(),
-        location:      document.getElementById('t-location').value.trim(),
-        vessel:        document.getElementById('t-vessel').value.trim(),
-        statusText:    document.getElementById('t-text').value,
+        location: document.getElementById('t-location').value.trim(),
+        vessel: document.getElementById('t-vessel').value.trim(),
+        statusText: document.getElementById('t-text').value,
       }),
     }).then(async (result) => {
       if (!result.isConfirmed) return;
       try {
         await usersService.updateTracking(user.id, result.value);
         Swal.fire({
-          icon: 'success', title: '¡Actualizado!',
+          icon: 'success',
+          title: '¡Actualizado!',
           text: `El tracking de ${user.nombre} fue guardado correctamente.`,
-          confirmButtonColor: '#eab308', background: '#141414',
-          color: '#fff', timer: 2000, showConfirmButton: false,
+          confirmButtonColor: '#eab308',
+          background: '#141414',
+          color: '#fff',
+          timer: 2000,
+          showConfirmButton: false,
         });
         fetchUsers();
         setExpanded(null);
@@ -266,22 +298,31 @@ const TrackingManagement = () => {
   };
 
   const clearFilters = () => {
-    setSearch(''); setStageFilter(0); setHasTracking('all');
-    setDateFrom(''); setDateTo(''); setSortKey('nombre'); setSortDir('asc');
+    setSearch('');
+    setStageFilter(0);
+    setHasTracking('all');
+    setDateFrom('');
+    setDateTo('');
+    setSortKey('nombre');
+    setSortDir('asc');
   };
 
   const activeFiltersCount = [
-    stageFilter !== 0, hasTracking !== 'all', !!dateFrom, !!dateTo
+    stageFilter !== 0,
+    hasTracking !== 'all',
+    !!dateFrom,
+    !!dateTo,
   ].filter(Boolean).length;
 
   /* ══════════════════ RENDER ══════════════════ */
   return (
     <div className="admin-container tracking-mgmt">
-
       {/* ── Header ── */}
       <header className="tracking-header">
         <div className="tracking-title-row">
-          <div className="tracking-icon-wrapper"><Ship size={28} /></div>
+          <div className="tracking-icon-wrapper">
+            <Ship size={28} />
+          </div>
           <div>
             <h1 className="admin-title">
               Tracking de <span className="highlight-gold">Importaciones</span>
@@ -296,11 +337,16 @@ const TrackingManagement = () => {
       {/* ── KPIs ── */}
       <div className="tracking-kpis-grid">
         {[
-          { label: 'Total Clientes',        value: users.length,   icon: User,        color: '#3b82f6' },
-          { label: 'Con Tracking Activo',   value: withTracking,   icon: Ship,        color: '#10b981' },
-          { label: 'Sin Tracking Asignado', value: withoutTracking, icon: AlertCircle, color: '#ef4444' },
-          { label: 'En Aduanas',            value: inCustoms,       icon: Clock,       color: '#eab308' },
-        ].map(k => (
+          { label: 'Total Clientes', value: users.length, icon: User, color: '#3b82f6' },
+          { label: 'Con Tracking Activo', value: withTracking, icon: Ship, color: '#10b981' },
+          {
+            label: 'Sin Tracking Asignado',
+            value: withoutTracking,
+            icon: AlertCircle,
+            color: '#ef4444',
+          },
+          { label: 'En Aduanas', value: inCustoms, icon: Clock, color: '#eab308' },
+        ].map((k) => (
           <div key={k.label} className="tracking-kpi-card">
             <div className="kpi-icon" style={{ '--kpi-color': k.color }}>
               <k.icon size={22} />
@@ -321,7 +367,7 @@ const TrackingManagement = () => {
             type="text"
             placeholder="Buscar por nombre, email o vehículo..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
           {search && (
             <button className="search-clear-btn" onClick={() => setSearch('')}>
@@ -334,21 +380,21 @@ const TrackingManagement = () => {
           {/* Botón filtros avanzados */}
           <button
             className={`btn-filters ${showFilters ? 'active' : ''}`}
-            onClick={() => setShowFilters(v => !v)}
+            onClick={() => setShowFilters((v) => !v)}
           >
             <Filter size={15} />
             Filtros
-            {activeFiltersCount > 0 && (
-              <span className="filter-badge">{activeFiltersCount}</span>
-            )}
+            {activeFiltersCount > 0 && <span className="filter-badge">{activeFiltersCount}</span>}
           </button>
 
           {/* Selector tamaño de página */}
           <div className="page-size-selector">
             <span>Mostrar</span>
-            <select value={pageSize} onChange={e => setPageSize(Number(e.target.value))}>
-              {PAGE_SIZE_OPTIONS.map(n => (
-                <option key={n} value={n}>{n}</option>
+            <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+              {PAGE_SIZE_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
               ))}
             </select>
           </div>
@@ -366,7 +412,7 @@ const TrackingManagement = () => {
           <div className="filter-group">
             <label>Etapa</label>
             <div className="tracking-stage-filters">
-              {[{ step: 0, label: 'Todos' }, ...STAGES].map(f => (
+              {[{ step: 0, label: 'Todos' }, ...STAGES].map((f) => (
                 <button
                   key={f.step}
                   onClick={() => setStageFilter(f.step)}
@@ -382,7 +428,11 @@ const TrackingManagement = () => {
           <div className="filter-group">
             <label>Estado de Tracking</label>
             <div className="tracking-stage-filters">
-              {[['all','Todos'],['yes','Con Tracking'],['no','Sin Tracking']].map(([v, l]) => (
+              {[
+                ['all', 'Todos'],
+                ['yes', 'Con Tracking'],
+                ['no', 'Sin Tracking'],
+              ].map(([v, l]) => (
                 <button
                   key={v}
                   onClick={() => setHasTracking(v)}
@@ -396,12 +446,14 @@ const TrackingManagement = () => {
 
           {/* Filtro por rango de fechas */}
           <div className="filter-group filter-dates">
-            <label><Calendar size={14} /> Fecha estimada</label>
+            <label>
+              <Calendar size={14} /> Fecha estimada
+            </label>
             <div className="date-range-row">
               <input
                 type="date"
                 value={dateFrom}
-                onChange={e => setDateFrom(e.target.value)}
+                onChange={(e) => setDateFrom(e.target.value)}
                 className="date-input"
                 placeholder="Desde"
               />
@@ -409,7 +461,7 @@ const TrackingManagement = () => {
               <input
                 type="date"
                 value={dateTo}
-                onChange={e => setDateTo(e.target.value)}
+                onChange={(e) => setDateTo(e.target.value)}
                 className="date-input"
                 placeholder="Hasta"
               />
@@ -426,10 +478,10 @@ const TrackingManagement = () => {
 
       {/* ── Resultados info ── */}
       <div className="tracking-results-info">
-        <span>{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</span>
-        {activeFiltersCount > 0 && (
-          <span className="filter-active-tag">Filtros activos</span>
-        )}
+        <span>
+          {filtered.length} resultado{filtered.length !== 1 ? 's' : ''}
+        </span>
+        {activeFiltersCount > 0 && <span className="filter-active-tag">Filtros activos</span>}
       </div>
 
       {/* ── Tabla / Lista con cabeceras ordenables ── */}
@@ -448,11 +500,11 @@ const TrackingManagement = () => {
           {/* Cabeceras de ordenamiento */}
           <div className="tracking-table-header">
             {[
-              { key: 'nombre',   label: 'Cliente' },
-              { key: 'email',    label: 'Email' },
+              { key: 'nombre', label: 'Cliente' },
+              { key: 'email', label: 'Email' },
               { key: 'vehiculo', label: 'Vehículo' },
-              { key: 'etapa',    label: 'Etapa' },
-            ].map(col => (
+              { key: 'etapa', label: 'Etapa' },
+            ].map((col) => (
               <button
                 key={col.key}
                 className={`sort-col-btn ${sortKey === col.key ? 'sorted' : ''}`}
@@ -467,10 +519,10 @@ const TrackingManagement = () => {
 
           {/* Lista de tarjetas */}
           <div className="tracking-list">
-            {paginated.map(user => {
-              const t        = user.tracking || {};
+            {paginated.map((user) => {
+              const t = user.tracking || {};
               const hasTrack = !!t.vehicleName;
-              const isOpen   = expanded === user.id;
+              const isOpen = expanded === user.id;
 
               return (
                 <div key={user.id} className={`tracking-user-card ${isOpen ? 'expanded' : ''}`}>
@@ -483,9 +535,11 @@ const TrackingManagement = () => {
                     </div>
                     <div className="tracking-card-header-top">
                       <div className="tracking-avatar">
-                        {user.image
-                          ? <img src={user.image} alt="" />
-                          : (user.nombre?.charAt(0) || 'U')}
+                        {user.image ? (
+                          <img src={user.image} alt="" />
+                        ) : (
+                          user.nombre?.charAt(0) || 'U'
+                        )}
                       </div>
                       <div className="tracking-user-info">
                         <div className="user-name-text">{user.nombre}</div>
@@ -519,11 +573,11 @@ const TrackingManagement = () => {
 
                           <div className="tracking-details-grid">
                             {[
-                              { label: 'Fecha Estimada',  value: t.estimatedDate || 'N/A' },
-                              { label: 'Ubicación',       value: t.location      || 'N/A' },
-                              { label: 'Barco / Naviera', value: t.vessel        || 'N/A' },
-                              { label: 'Estado',          value: t.statusText    || 'N/A' },
-                            ].map(d => (
+                              { label: 'Fecha Estimada', value: t.estimatedDate || 'N/A' },
+                              { label: 'Ubicación', value: t.location || 'N/A' },
+                              { label: 'Barco / Naviera', value: t.vessel || 'N/A' },
+                              { label: 'Estado', value: t.statusText || 'N/A' },
+                            ].map((d) => (
                               <div key={d.label} className="detail-item-box">
                                 <div className="detail-label">{d.label}</div>
                                 <div className="detail-value">{d.value}</div>
@@ -557,7 +611,7 @@ const TrackingManagement = () => {
             <div className="tracking-pagination">
               <button
                 className="page-btn"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
               >
                 <ChevronLeft size={16} />
@@ -565,30 +619,31 @@ const TrackingManagement = () => {
 
               {/* Números de página */}
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                .filter((n) => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
                 .reduce((acc, n, idx, arr) => {
                   if (idx > 0 && n - arr[idx - 1] > 1) acc.push('…');
                   acc.push(n);
                   return acc;
                 }, [])
                 .map((n, i) =>
-                  n === '…'
-                    ? <span key={`ellipsis-${i}`} className="page-ellipsis">…</span>
-                    : (
-                      <button
-                        key={n}
-                        className={`page-btn ${page === n ? 'active' : ''}`}
-                        onClick={() => setPage(n)}
-                      >
-                        {n}
-                      </button>
-                    )
-                )
-              }
+                  n === '…' ? (
+                    <span key={`ellipsis-${i}`} className="page-ellipsis">
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={n}
+                      className={`page-btn ${page === n ? 'active' : ''}`}
+                      onClick={() => setPage(n)}
+                    >
+                      {n}
+                    </button>
+                  )
+                )}
 
               <button
                 className="page-btn"
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
               >
                 <ChevronRightIcon size={16} />

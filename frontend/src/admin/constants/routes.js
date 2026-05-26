@@ -119,7 +119,13 @@ export const ADMIN_NAV_SECTIONS = {
 export const ADMIN_USER_MENU_ACTIONS = [
   { id: 'profile', label: 'Mi perfil', icon: 'UserCircle', to: '/perfil', type: 'link' },
   { id: 'site', label: 'Ver sitio público', icon: 'ExternalLink', to: '/', type: 'link' },
-  { id: 'dashboard', label: 'Ir al dashboard', icon: 'LayoutDashboard', to: ADMIN_ROUTES.dashboard, type: 'link' },
+  {
+    id: 'dashboard',
+    label: 'Ir al dashboard',
+    icon: 'LayoutDashboard',
+    to: ADMIN_ROUTES.dashboard,
+    type: 'link',
+  },
   { id: 'logout', label: 'Cerrar sesión', icon: 'LogOut', type: 'logout' },
 ];
 

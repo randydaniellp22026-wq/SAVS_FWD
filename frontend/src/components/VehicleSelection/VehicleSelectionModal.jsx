@@ -21,26 +21,27 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   const [fadeState, setFadeState] = useState('fade-in');
   const [models, setModels] = useState([]);
   const [allVehicles, setAllVehicles] = useState([]);
-  
+
   const carouselRef = useRef(null);
 
   // Fetch all vehicles once when the modal opens
   useEffect(() => {
     if (isOpen) {
-      api.get('/vehicles')
-        .then(res => {
+      api
+        .get('/vehicles')
+        .then((res) => {
           // El backend envuelve los resultados en "data" (junto con pagination)
           const vehicleArray = res.data.data || res.data || [];
           setAllVehicles(Array.isArray(vehicleArray) ? vehicleArray : []);
         })
-        .catch(err => console.error("Error loading vehicles for selection:", err));
+        .catch((err) => console.error('Error loading vehicles for selection:', err));
     }
   }, [isOpen]);
 
   // When category changes, filter models
   useEffect(() => {
     if (selectedCategory && allVehicles.length > 0) {
-      const filtered = allVehicles.filter(v => 
+      const filtered = allVehicles.filter((v) =>
         v.type.toLowerCase().includes(selectedCategory.toLowerCase())
       );
       // Fallback to slicing some vehicles if category is empty
@@ -97,13 +98,13 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                 <ArrowLeft size={20} /> Volver
               </button>
               <h2 className="vehicle-selection-title">Seleccioná el tipo de vehículo</h2>
-              
+
               <div className="category-grid">
                 {categoriesData.map((cat) => {
                   const Icon = cat.icon;
                   return (
-                    <div 
-                      key={cat.id} 
+                    <div
+                      key={cat.id}
                       className={`category-card ${selectedCategory === cat.id ? 'selected' : ''}`}
                       onClick={() => handleCategorySelect(cat.id)}
                     >
@@ -124,31 +125,31 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                 <ArrowLeft size={20} /> Volver
               </button>
               <h2 className="vehicle-selection-title">Seleccioná el vehículo de interés</h2>
-              
+
               <div className="models-carousel-wrapper">
                 <button className="carousel-nav-btn" onClick={() => scrollCarousel('left')}>
                   <ChevronLeft size={48} />
                 </button>
-                
+
                 <div className="models-grid" ref={carouselRef}>
                   {models.map((vehicle) => (
-                    <div 
-                      key={vehicle.id} 
+                    <div
+                      key={vehicle.id}
                       className={`model-card ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
                       onClick={() => handleVehicleSelect(vehicle)}
                     >
-                      <div className={`model-radio ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}></div>
+                      <div
+                        className={`model-radio ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
+                      ></div>
                       <div className="model-image-wrapper">
-                        <img 
-                          src={vehicle.image} 
-                          alt={vehicle.name} 
-                          className="model-image" 
+                        <img
+                          src={vehicle.image}
+                          alt={vehicle.name}
+                          className="model-image"
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <span className="model-name">
-                        {vehicle.name}
-                      </span>
+                      <span className="model-name">{vehicle.name}</span>
                     </div>
                   ))}
                 </div>

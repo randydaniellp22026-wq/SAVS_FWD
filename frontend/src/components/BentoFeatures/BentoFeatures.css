@@ -6,7 +6,7 @@
   overflow: hidden;
   border-radius: 1rem;
   padding: 2.25rem 2rem 2.5rem;
-  background-color: transparent; 
+  background-color: transparent;
 }
 
 /* Header */
@@ -24,7 +24,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: var(--color-primary, #eab308); 
+  color: var(--color-primary, #eab308);
   margin: 0;
 }
 
@@ -68,7 +68,10 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
   background-color: rgba(255, 255, 255, 0.03);
   padding: 1.5rem;
-  transition: transform 0.18s ease-out, border-color 0.3s, opacity 0.3s;
+  transition:
+    transform 0.18s ease-out,
+    border-color 0.3s,
+    opacity 0.3s;
   transform-style: preserve-3d;
   will-change: transform;
 }
@@ -102,7 +105,7 @@
   left: 0;
   width: 55%;
   transform: translateX(-100%) skewX(-12deg);
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.045), transparent);
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.045), transparent);
   transition: transform 0.7s ease-out;
   z-index: 1;
 }

@@ -10,7 +10,7 @@ import './IntercambioDeAutos.css';
 const darkSwal = {
   background: '#141414',
   color: '#fff',
-  confirmButtonColor: '#f5b400'
+  confirmButtonColor: '#f5b400',
 };
 
 const API_URL = '/sale_requests';
@@ -25,7 +25,7 @@ const initialFormState = {
   descripcion: '',
   imagen: null,
   estado: 'Pendiente',
-  userId: null
+  userId: null,
 };
 
 const IntercambioDeAutos = () => {
@@ -54,13 +54,12 @@ const IntercambioDeAutos = () => {
       });
       return;
     }
-    
-    
+
     const user = JSON.parse(savedUser);
     const role = (user.rol || '').toLowerCase();
     setUserId(user.id);
     setUserRole(role);
-    
+
     if (role === 'admin' || role === 'gerente' || role === 'manager') {
       fetchAllVehicles();
       fetchAllUsers();
@@ -74,12 +73,12 @@ const IntercambioDeAutos = () => {
       const response = await api.get('/users');
       const users = response.data;
       const map = {};
-      users.forEach(u => {
+      users.forEach((u) => {
         map[u.id] = u;
       });
       setUsersMap(map);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error('Error fetching users:', error);
     }
   };
 
@@ -89,19 +88,21 @@ const IntercambioDeAutos = () => {
       const response = await api.get(API_URL);
       setVehiculos(formatVehicles(response.data));
     } catch (error) {
-      console.error("Error fetching all vehicles:", error);
+      console.error('Error fetching all vehicles:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatVehicles = (data) => {
-    return data.map(v => ({
-      ...v,
-      precio: Number(v.precio),
-      kilometraje: Number(v.kilometraje),
-      anio: Number(v.anio)
-    })).reverse();
+    return data
+      .map((v) => ({
+        ...v,
+        precio: Number(v.precio),
+        kilometraje: Number(v.kilometraje),
+        anio: Number(v.anio),
+      }))
+      .reverse();
   };
 
   const fetchUserVehicles = async (uid) => {
@@ -110,7 +111,7 @@ const IntercambioDeAutos = () => {
       const response = await api.get(`${API_URL}?userId=${uid}`);
       setVehiculos(formatVehicles(response.data));
     } catch (error) {
-      console.error("Error fetching user vehicles:", error);
+      console.error('Error fetching user vehicles:', error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +119,7 @@ const IntercambioDeAutos = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // 1. Bloqueo total de cualquier signo menos "-" en todos los campos
     const valueWithoutMinuses = value.replace(/-/g, '');
 
@@ -126,17 +127,17 @@ const IntercambioDeAutos = () => {
     if (name === 'precio' || name === 'kilometraje' || name === 'anio') {
       const cleanValue = valueWithoutMinuses.replace(/\D/g, '');
       // Evitar ceros a la izquierda innecesarios
-      const finalValue = cleanValue === "" ? "" : parseInt(cleanValue, 10).toString();
+      const finalValue = cleanValue === '' ? '' : parseInt(cleanValue, 10).toString();
       setFormData({
         ...formData,
-        [name]: finalValue
+        [name]: finalValue,
       });
       return;
     }
 
     setFormData({
       ...formData,
-      [name]: valueWithoutMinuses
+      [name]: valueWithoutMinuses,
     });
   };
 
@@ -147,7 +148,7 @@ const IntercambioDeAutos = () => {
       reader.onload = (event) => {
         setFormData({
           ...formData,
-          imagen: event.target.result
+          imagen: event.target.result,
         });
       };
       reader.readAsDataURL(file);
@@ -156,17 +157,17 @@ const IntercambioDeAutos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validaciones de espacios en blanco, valores vacíos y signos menos
     const camposTexto = ['marca', 'modelo', 'descripcion'];
     for (const campo of camposTexto) {
-      const valor = formData[campo] ? formData[campo].toString() : "";
+      const valor = formData[campo] ? formData[campo].toString() : '';
       if (valor.trim().length === 0) {
         Swal.fire({
           ...darkSwal,
           icon: 'error',
           title: 'Campo inválido',
-          text: `El campo ${campo} no puede estar vacío.`
+          text: `El campo ${campo} no puede estar vacío.`,
         });
         return;
       }
@@ -175,7 +176,7 @@ const IntercambioDeAutos = () => {
           ...darkSwal,
           icon: 'error',
           title: 'Carácter no permitido',
-          text: `El signo menos (-) no está permitido en el campo ${campo}.`
+          text: `El signo menos (-) no está permitido en el campo ${campo}.`,
         });
         return;
       }
@@ -191,7 +192,7 @@ const IntercambioDeAutos = () => {
         ...darkSwal,
         icon: 'error',
         title: 'Valores inválidos',
-        text: 'Los valores de precio, kilometraje y año deben ser válidos y no negativos.'
+        text: 'Los valores de precio, kilometraje y año deben ser válidos y no negativos.',
       });
       return;
     }
@@ -201,7 +202,7 @@ const IntercambioDeAutos = () => {
         ...darkSwal,
         icon: 'warning',
         title: 'Falta imagen',
-        text: 'Por favor, selecciona al menos una imagen de tu vehículo.'
+        text: 'Por favor, selecciona al menos una imagen de tu vehículo.',
       });
       return;
     }
@@ -215,27 +216,27 @@ const IntercambioDeAutos = () => {
       precio: precioNum,
       kilometraje: kmNum,
       anio: anioNum,
-      userId: isEditing ? formData.userId : userId // IMPORTANTE: Mantener el dueño original si estamos editando
+      userId: isEditing ? formData.userId : userId, // IMPORTANTE: Mantener el dueño original si estamos editando
     };
 
     setLoading(true);
     try {
       if (isEditing) {
         const response = await api.put(`${API_URL}/${cleanData.id}`, cleanData);
-        setVehiculos(vehiculos.map(v => v.id === response.data.id ? response.data : v));
+        setVehiculos(vehiculos.map((v) => (v.id === response.data.id ? response.data : v)));
         Swal.fire({
           icon: 'success',
           title: '¡Actualizado!',
           text: 'Tu solicitud ha sido modificada con éxito.',
           background: '#141414',
           color: '#fff',
-          confirmButtonColor: '#f5b400'
+          confirmButtonColor: '#f5b400',
         });
         setIsEditing(false);
       } else {
         const response = await api.post(API_URL, { ...cleanData, id: String(Date.now()) });
         setVehiculos([response.data, ...vehiculos]);
-        
+
         toast.success('Solicitud enviada correctamente', {
           duration: 4000,
           icon: '📋',
@@ -247,15 +248,21 @@ const IntercambioDeAutos = () => {
           text: 'Tu solicitud de intercambio ha sido registrada correctamente.',
           background: '#141414',
           color: '#fff',
-          confirmButtonColor: '#f5b400'
+          confirmButtonColor: '#f5b400',
         });
       }
       setFormData(initialFormState);
-      if(document.getElementById('imagen-upload')) {
-          document.getElementById('imagen-upload').value = '';
+      if (document.getElementById('imagen-upload')) {
+        document.getElementById('imagen-upload').value = '';
       }
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo conectar con el servidor.', background: '#141414', color: '#fff' });
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo conectar con el servidor.',
+        background: '#141414',
+        color: '#fff',
+      });
     } finally {
       setLoading(false);
     }
@@ -276,7 +283,7 @@ const IntercambioDeAutos = () => {
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#e63946'
+      confirmButtonColor: '#e63946',
     }).then((result) => {
       if (result.isConfirmed) {
         handleDelete(vehiculo.id);
@@ -285,24 +292,29 @@ const IntercambioDeAutos = () => {
   };
 
   const updateStatus = async (id, nuevoEstado) => {
-    const vehiculo = vehiculos.find(v => v.id === id);
+    const vehiculo = vehiculos.find((v) => v.id === id);
     if (!vehiculo) return;
 
     const updatedVehiculo = { ...vehiculo, estado: nuevoEstado };
-    
+
     try {
       const response = await api.put(`${API_URL}/${id}`, updatedVehiculo);
-      setVehiculos(vehiculos.map(v => v.id === id ? updatedVehiculo : v));
+      setVehiculos(vehiculos.map((v) => (v.id === id ? updatedVehiculo : v)));
       Swal.fire({
         ...darkSwal,
         icon: 'success',
         title: 'Estado actualizado',
         text: `La solicitud ha sido marcada como ${nuevoEstado}.`,
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo actualizar el estado.',
+      });
     }
   };
 
@@ -310,7 +322,12 @@ const IntercambioDeAutos = () => {
     const user = usersMap[vehiculo.userId];
     const phone = user?.telefono || user?.phone;
     if (!phone) {
-      Swal.fire({ ...darkSwal, icon: 'info', title: 'Sin teléfono', text: 'El cliente no tiene un teléfono registrado.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'info',
+        title: 'Sin teléfono',
+        text: 'El cliente no tiene un teléfono registrado.',
+      });
       return;
     }
     const message = `Hola ${user.nombre}, te contacto de SAVS sobre tu solicitud de avalúo para el ${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio}.`;
@@ -321,13 +338,13 @@ const IntercambioDeAutos = () => {
   const handleDelete = async (id) => {
     try {
       await api.delete(`${API_URL}/${id}`);
-      setVehiculos(vehiculos.filter(v => v.id !== id));
+      setVehiculos(vehiculos.filter((v) => v.id !== id));
       Swal.fire({
         ...darkSwal,
         icon: 'success',
         title: 'Eliminado',
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } catch (error) {
       Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo eliminar.' });
@@ -337,16 +354,23 @@ const IntercambioDeAutos = () => {
   const handleAction = async (vehiculo, nuevoEstado) => {
     try {
       await api.patch(`${API_URL}/${vehiculo.id}`, { estado: nuevoEstado });
-      setVehiculos(vehiculos.map(v => v.id === vehiculo.id ? { ...v, estado: nuevoEstado } : v));
+      setVehiculos(
+        vehiculos.map((v) => (v.id === vehiculo.id ? { ...v, estado: nuevoEstado } : v))
+      );
       Swal.fire({
         ...darkSwal,
         icon: 'success',
         title: `Vehículo ${nuevoEstado}`,
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo actualizar el estado.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo actualizar el estado.',
+      });
     }
   };
 
@@ -362,13 +386,13 @@ const IntercambioDeAutos = () => {
       cancelButtonText: 'Cancelar',
       inputValidator: (value) => {
         if (!value) return 'Debes escribir un mensaje';
-      }
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
           ...darkSwal,
           title: 'Enviando correo...',
-          didOpen: () => Swal.showLoading()
+          didOpen: () => Swal.showLoading(),
         });
         setTimeout(() => {
           Swal.fire({
@@ -384,11 +408,16 @@ const IntercambioDeAutos = () => {
 
   const getStatusColor = (estado) => {
     switch (estado) {
-      case 'Pendiente': return 'status-pendiente';
-      case 'En revisión': return 'status-revision';
-      case 'Aprobado': return 'status-aprobado';
-      case 'Rechazado': return 'status-rechazado';
-      default: return 'status-pendiente';
+      case 'Pendiente':
+        return 'status-pendiente';
+      case 'En revisión':
+        return 'status-revision';
+      case 'Aprobado':
+        return 'status-aprobado';
+      case 'Rechazado':
+        return 'status-rechazado';
+      default:
+        return 'status-pendiente';
     }
   };
 
@@ -396,7 +425,10 @@ const IntercambioDeAutos = () => {
     <div className="vender-auto-container">
       <div className="vender-auto-header">
         <h1>Intercambio de Vehículo</h1>
-        <p>El valor asignado a tu auto tras la revisión administrativa se aplicará como una reducción al precio total del vehículo que deseas comprar.</p>
+        <p>
+          El valor asignado a tu auto tras la revisión administrativa se aplicará como una reducción
+          al precio total del vehículo que deseas comprar.
+        </p>
       </div>
 
       <div style={{ padding: '0 2rem', marginBottom: '2rem' }}>
@@ -410,65 +442,78 @@ const IntercambioDeAutos = () => {
             <div className="form-card-glow">
               <h2>{isEditing ? 'Editar Solicitud' : 'Solicitar Evaluación de Auto'}</h2>
               <form className="vender-auto-form" onSubmit={handleSubmit}>
-                
                 <div className="form-group-row">
                   <div className="form-group">
                     <label>Marca</label>
-                    <input type="text" name="marca" value={formData.marca} onChange={handleInputChange} required placeholder="Ej. BMW" />
+                    <input
+                      type="text"
+                      name="marca"
+                      value={formData.marca}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Ej. BMW"
+                    />
                   </div>
                   <div className="form-group">
                     <label>Modelo</label>
-                    <input type="text" name="modelo" value={formData.modelo} onChange={handleInputChange} required placeholder="Ej. M4 Competition" />
+                    <input
+                      type="text"
+                      name="modelo"
+                      value={formData.modelo}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Ej. M4 Competition"
+                    />
                   </div>
                 </div>
 
                 <div className="form-group-row">
                   <div className="form-group">
                     <label>Año</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       inputMode="numeric"
-                      name="anio" 
-                      value={formData.anio} 
-                      onChange={handleInputChange} 
-                      required 
-                      placeholder="Ej. 2023" 
+                      name="anio"
+                      value={formData.anio}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Ej. 2023"
                     />
                   </div>
                   <div className="form-group">
                     <label>Kilometraje</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       inputMode="numeric"
-                      name="kilometraje" 
-                      value={formData.kilometraje} 
-                      onChange={handleInputChange} 
-                      required 
-                      placeholder="Ej. 15000" 
+                      name="kilometraje"
+                      value={formData.kilometraje}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Ej. 15000"
                     />
                   </div>
                 </div>
 
                 <div className="form-group">
                   <label>Precio esperado (CRC)</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     inputMode="numeric"
-                    name="precio" 
-                    value={formData.precio} 
-                    onChange={handleInputChange} 
-                    required 
-                    placeholder="Ej. 15000000" 
+                    name="precio"
+                    value={formData.precio}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Ej. 15000000"
                   />
                 </div>
 
                 {isAdminOrManager && (
                   <div className="form-group">
                     <label>Estado de la Solicitud</label>
-                    <select 
-                      name="estado" 
-                      value={formData.estado} 
-                      onChange={handleInputChange} 
+                    <select
+                      name="estado"
+                      value={formData.estado}
+                      onChange={handleInputChange}
                       className="form-control-admin"
                     >
                       <option value="Pendiente">Pendiente</option>
@@ -481,13 +526,26 @@ const IntercambioDeAutos = () => {
 
                 <div className="form-group">
                   <label>Descripción y Estado del Vehículo</label>
-                  <textarea name="descripcion" value={formData.descripcion} onChange={handleInputChange} required placeholder="Detalla las condiciones generales, historial de servicios..." rows="4"></textarea>
+                  <textarea
+                    name="descripcion"
+                    value={formData.descripcion}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Detalla las condiciones generales, historial de servicios..."
+                    rows="4"
+                  ></textarea>
                 </div>
 
                 <div className="form-group">
                   <label>Imágenes del vehículo</label>
                   <div className="file-upload-wrapper">
-                    <input type="file" id="imagen-upload" accept="image/*" onChange={handleImageChange} className="file-upload-input" />
+                    <input
+                      type="file"
+                      id="imagen-upload"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="file-upload-input"
+                    />
                     <div className="file-upload-custom">
                       {formData.imagen ? 'Imagen cargada con éxito' : 'Selecciona una imagen'}
                     </div>
@@ -501,35 +559,49 @@ const IntercambioDeAutos = () => {
 
                 <div className="form-actions">
                   {isEditing && (
-                    <button type="button" className="btn-cancel" onClick={() => { setIsEditing(false); setFormData(initialFormState); }}>
+                    <button
+                      type="button"
+                      className="btn-cancel"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setFormData(initialFormState);
+                      }}
+                    >
                       Cancelar
                     </button>
                   )}
                   <button type="submit" className="btn-submit" disabled={loading}>
-                    {loading ? 'Procesando...' : (isEditing ? 'Guardar Cambios' : 'Enviar para Avalúo')}
+                    {loading
+                      ? 'Procesando...'
+                      : isEditing
+                        ? 'Guardar Cambios'
+                        : 'Enviar para Avalúo'}
                   </button>
                 </div>
-
               </form>
             </div>
           </div>
-
         )}
 
         {/* Panel Derecho: Lista de Autos */}
         <div className="vender-auto-list-section">
-          <h2>{isAdminOrManager ? 'Gestión de Intercambios' : 'Mis Solicitudes'} ({vehiculos.length})</h2>
-          
+          <h2>
+            {isAdminOrManager ? 'Gestión de Intercambios' : 'Mis Solicitudes'} ({vehiculos.length})
+          </h2>
+
           {loading && vehiculos.length === 0 ? (
-             <div className="loading-req">Cargando solicitudes...</div>
+            <div className="loading-req">Cargando solicitudes...</div>
           ) : vehiculos.length === 0 ? (
             <div className="empty-state">
               <p>No tienes vehículos registrados para intercambio.</p>
-              <span>Completa el formulario para solicitar la reducción de valor de tu nueva compra mediante Trade-in.</span>
+              <span>
+                Completa el formulario para solicitar la reducción de valor de tu nueva compra
+                mediante Trade-in.
+              </span>
             </div>
           ) : (
             <div className="vehiculos-list">
-              {vehiculos.map(vehiculo => (
+              {vehiculos.map((vehiculo) => (
                 <div key={vehiculo.id} className="vehiculo-card">
                   <div className="vehiculo-card-image">
                     {vehiculo.imagen ? (
@@ -541,38 +613,65 @@ const IntercambioDeAutos = () => {
                       {vehiculo.estado}
                     </span>
                   </div>
-                  
+
                   <div className="vehiculo-card-content">
-                    <h3>{vehiculo.marca} {vehiculo.modelo} <span>{vehiculo.anio}</span></h3>
+                    <h3>
+                      {vehiculo.marca} {vehiculo.modelo} <span>{vehiculo.anio}</span>
+                    </h3>
                     <p className="vehiculo-price">₡{Number(vehiculo.precio).toLocaleString()}</p>
-                    
+
                     <div className="vehiculo-details">
-                      <span><strong>KM:</strong> {Number(vehiculo.kilometraje).toLocaleString()}</span>
+                      <span>
+                        <strong>KM:</strong> {Number(vehiculo.kilometraje).toLocaleString()}
+                      </span>
                     </div>
-                    
+
                     <p className="vehiculo-desc">{vehiculo.descripcion}</p>
-                    
+
                     {isAdminOrManager && usersMap[vehiculo.userId] && (
                       <div className="seller-info">
                         <h4>Datos del Cliente (Trade-in):</h4>
-                        <p><User size={14} /> {usersMap[vehiculo.userId].nombre}</p>
-                        <p><Mail size={14} /> {usersMap[vehiculo.userId].email || usersMap[vehiculo.userId].correo}</p>
-                        <p><Phone size={14} /> {usersMap[vehiculo.userId].telefono || 'Sin teléfono'}</p>
+                        <p>
+                          <User size={14} /> {usersMap[vehiculo.userId].nombre}
+                        </p>
+                        <p>
+                          <Mail size={14} />{' '}
+                          {usersMap[vehiculo.userId].email || usersMap[vehiculo.userId].correo}
+                        </p>
+                        <p>
+                          <Phone size={14} /> {usersMap[vehiculo.userId].telefono || 'Sin teléfono'}
+                        </p>
                       </div>
                     )}
-                    
+
                     <div className="vehiculo-actions">
                       {isAdminOrManager ? (
                         <>
-                          <button className="btn-approve" onClick={() => updateStatus(vehiculo.id, 'Aprobado')}>Aceptar</button>
-                          <button className="btn-reject" onClick={() => updateStatus(vehiculo.id, 'Rechazado')}>Rechazar</button>
-                          <button className="btn-respond" onClick={() => handleRespond(vehiculo)}>Responder</button>
+                          <button
+                            className="btn-approve"
+                            onClick={() => updateStatus(vehiculo.id, 'Aprobado')}
+                          >
+                            Aceptar
+                          </button>
+                          <button
+                            className="btn-reject"
+                            onClick={() => updateStatus(vehiculo.id, 'Rechazado')}
+                          >
+                            Rechazar
+                          </button>
+                          <button className="btn-respond" onClick={() => handleRespond(vehiculo)}>
+                            Responder
+                          </button>
                         </>
                       ) : (
                         String(vehiculo.userId) === String(userId) && (
                           <>
-                            <button className="btn-edit" onClick={() => handleEdit(vehiculo)}>Editar</button>
-                            <button className="btn-delete" onClick={() => confirmDelete(vehiculo)}>Eliminar</button>
+                            <button className="btn-edit" onClick={() => handleEdit(vehiculo)}>
+                              Editar
+                            </button>
+                            <button className="btn-delete" onClick={() => confirmDelete(vehiculo)}>
+                              Eliminar
+                            </button>
                           </>
                         )
                       )}
@@ -584,7 +683,6 @@ const IntercambioDeAutos = () => {
           )}
         </div>
       </div>
-
     </div>
   );
 };

@@ -43,7 +43,9 @@
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
-.checkbox-label:hover { opacity: 0.8; }
+.checkbox-label:hover {
+  opacity: 0.8;
+}
 
 .custom-checkbox {
   width: 18px;

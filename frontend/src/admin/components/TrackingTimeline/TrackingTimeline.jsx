@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Check, Ship, Clock, MapPin, ChevronDown, ChevronUp,
-  Package, Navigation, Anchor, Globe
+  Check,
+  Ship,
+  Clock,
+  MapPin,
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Navigation,
+  Anchor,
+  Globe,
 } from 'lucide-react';
 import './TrackingTimeline.css';
 
@@ -63,8 +71,7 @@ const TrackingTimeline = ({ tracking = {} }) => {
 
   const currentStep = tracking.importStatus || 0;
 
-  const toggleStep = (step) =>
-    setExpandedStep(prev => (prev === step ? null : step));
+  const toggleStep = (step) => setExpandedStep((prev) => (prev === step ? null : step));
 
   return (
     <div className="tracking-timeline-wrapper">
@@ -73,9 +80,7 @@ const TrackingTimeline = ({ tracking = {} }) => {
         <div className="timeline-vehicle-bar">
           <Package size={16} className="tl-bar-icon" />
           <span className="tl-vehicle-name">{tracking.vehicleName}</span>
-          {tracking.estimatedDate && (
-            <span className="tl-eta">ETA: {tracking.estimatedDate}</span>
-          )}
+          {tracking.estimatedDate && <span className="tl-eta">ETA: {tracking.estimatedDate}</span>}
         </div>
       )}
 
@@ -83,11 +88,11 @@ const TrackingTimeline = ({ tracking = {} }) => {
       <div className="timeline-track">
         {STAGES.map((stage, idx) => {
           const isCompleted = currentStep > stage.step;
-          const isActive    = currentStep === stage.step;
-          const isPending   = currentStep < stage.step;
-          const isExpanded  = expandedStep === stage.step;
-          const Icon        = stage.icon;
-          const AltIcon     = STEP_ICONS_ALT[idx];
+          const isActive = currentStep === stage.step;
+          const isPending = currentStep < stage.step;
+          const isExpanded = expandedStep === stage.step;
+          const Icon = stage.icon;
+          const AltIcon = STEP_ICONS_ALT[idx];
 
           return (
             <div key={stage.step} className="timeline-step-outer">
@@ -103,8 +108,8 @@ const TrackingTimeline = ({ tracking = {} }) => {
               <div
                 className={`timeline-node
                   ${isCompleted ? 'completed' : ''}
-                  ${isActive    ? 'active'    : ''}
-                  ${isPending   ? 'pending'   : ''}
+                  ${isActive ? 'active' : ''}
+                  ${isPending ? 'pending' : ''}
                 `}
                 style={{ '--stage-color': stage.color, '--stage-bg': stage.bg }}
                 onClick={() => toggleStep(stage.step)}
@@ -113,7 +118,9 @@ const TrackingTimeline = ({ tracking = {} }) => {
               >
                 {/* Icono del nodo */}
                 <div className="node-icon-ring">
-                  {isActive && <div className="node-pulse" style={{ '--stage-color': stage.color }} />}
+                  {isActive && (
+                    <div className="node-pulse" style={{ '--stage-color': stage.color }} />
+                  )}
                   <div className="node-icon-inner">
                     <Icon size={18} />
                   </div>
@@ -133,11 +140,14 @@ const TrackingTimeline = ({ tracking = {} }) => {
                 {/* Badge de estado */}
                 <div className="node-status-badge">
                   {isCompleted && <span className="badge-done">✓ Completado</span>}
-                  {isActive    && <span className="badge-active" style={{ color: stage.color }}>● En curso</span>}
-                  {isPending   && <span className="badge-pending">Pendiente</span>}
-                  {(isCompleted || isActive) && (
-                    isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+                  {isActive && (
+                    <span className="badge-active" style={{ color: stage.color }}>
+                      ● En curso
+                    </span>
                   )}
+                  {isPending && <span className="badge-pending">Pendiente</span>}
+                  {(isCompleted || isActive) &&
+                    (isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
                 </div>
               </div>
 
@@ -158,7 +168,16 @@ const TrackingTimeline = ({ tracking = {} }) => {
                         className={`tdp-check-item ${isCompleted || isActive ? 'done' : ''}`}
                         style={{ animationDelay: `${i * 0.07}s` }}
                       >
-                        <span className="tdp-check-dot" style={{ background: isCompleted ? stage.color : isActive ? stage.color : '#374151' }} />
+                        <span
+                          className="tdp-check-dot"
+                          style={{
+                            background: isCompleted
+                              ? stage.color
+                              : isActive
+                                ? stage.color
+                                : '#374151',
+                          }}
+                        />
                         {item}
                       </li>
                     ))}

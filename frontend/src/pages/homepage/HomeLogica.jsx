@@ -5,9 +5,10 @@ export const useHomeLogica = () => {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
-    api.get('/vehicles')
-      .then(res => setVehicles(res.data || []))
-      .catch(err => console.error("Error loading home vehicles:", err));
+    api
+      .get('/vehicles')
+      .then((res) => setVehicles(res.data || []))
+      .catch((err) => console.error('Error loading home vehicles:', err));
   }, []);
 
   const safeVehicles = Array.isArray(vehicles) ? vehicles : [];
@@ -21,6 +22,6 @@ export const useHomeLogica = () => {
     motorCatalogo,
     kilometrajeCatalogo,
     tipoCatalogo,
-    anioCatalogo
+    anioCatalogo,
   };
 };

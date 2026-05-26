@@ -5,7 +5,7 @@ import AnimatedInput from '../AnimatedInput/AnimatedInput';
 export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
   return (
     <form onSubmit={onSubmit} className="premium-form">
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
+      <div className="form-group" style={{ marginBottom: '1.5rem' }}>
         <AnimatedInput
           label="Correo Electrónico"
           type="email"
@@ -19,7 +19,7 @@ export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
         />
       </div>
 
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
+      <div className="form-group" style={{ marginBottom: '1.5rem' }}>
         <AnimatedInput
           label="Contraseña"
           type="password"
@@ -32,15 +32,13 @@ export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
           required
         />
         <div className="forgot-password-container">
-          <a href="/recuperar" className="forgot-password-link">¿Olvidaste tu contraseña?</a>
+          <a href="/recuperar" className="forgot-password-link">
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
       </div>
 
-      <button 
-        type="submit" 
-        className="login-submit-btn" 
-        disabled={loading}
-      >
+      <button type="submit" className="login-submit-btn" disabled={loading}>
         {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </button>
 

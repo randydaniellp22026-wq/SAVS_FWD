@@ -14,17 +14,17 @@ export const LoginVista = () => {
       {/* ... code above ... */}
       <section className="login-form-section">
         <div className="form-container">
-          <BorderBeam 
-            size={40} 
-            duration={12} 
-            colorFrom="rgba(234, 179, 8, 0)" 
-            colorTo="rgba(234, 179, 8, 1)" 
-            borderWidth={1} 
-            className="form-beam" 
+          <BorderBeam
+            size={40}
+            duration={12}
+            colorFrom="rgba(234, 179, 8, 0)"
+            colorTo="rgba(234, 179, 8, 1)"
+            borderWidth={1}
+            className="form-beam"
           />
           {/* ... header and form ... */}
-          
-          <LoginForm 
+
+          <LoginForm
             formData={formData}
             loading={loading}
             error={error}
@@ -37,7 +37,8 @@ export const LoginVista = () => {
           </div>
 
           <div className="legal-notice">
-            Al continuar, aceptas nuestros <a href="#!">Términos de Servicio</a> y <a href="#!">Acuerdos de Privacidad</a>.
+            Al continuar, aceptas nuestros <a href="#!">Términos de Servicio</a> y{' '}
+            <a href="#!">Acuerdos de Privacidad</a>.
           </div>
         </div>
       </section>

@@ -8,9 +8,31 @@
     "build": "npm run build --prefix frontend",
     "install:all": "npm install --prefix frontend && npm install --prefix backend",
     "db:setup": "npm run db:init --prefix backend && npm run db:seed --prefix backend",
-    "setup": "npm run install:all && npm run db:setup"
+    "setup": "npm run install:all && npm run db:setup",
+    "lint": "eslint frontend/src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint frontend/src --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write frontend/src/",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,md,json}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.34.1",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "^7.8.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2"
   }
 }

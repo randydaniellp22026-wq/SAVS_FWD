@@ -5,19 +5,19 @@ import './Breadcrumbs.css';
 
 /** Mapa de segmentos de ruta → etiqueta legible */
 const ROUTE_LABELS = {
-  admin:          'Admin',
-  users:          'Usuarios',
-  requests:       'Solicitudes',
-  tracking:       'Tracking',
-  reviews:        'Reseñas',
-  branches:       'Sedes',
+  admin: 'Admin',
+  users: 'Usuarios',
+  requests: 'Solicitudes',
+  tracking: 'Tracking',
+  reviews: 'Reseñas',
+  branches: 'Sedes',
   'create-vehicle': 'Inventario',
-  'trade-in':     'Trade-In',
-  marketing:      'Marketing',
-  perfil:         'Perfil',
-  inventory:      'Vehículos',
-  details:        'Detalle',
-  contact:        'Contacto',
+  'trade-in': 'Trade-In',
+  marketing: 'Marketing',
+  perfil: 'Perfil',
+  inventory: 'Vehículos',
+  details: 'Detalle',
+  contact: 'Contacto',
 };
 
 /**
@@ -32,7 +32,7 @@ const Breadcrumbs = () => {
 
   // Construir acumulado de paths
   const crumbs = segments.map((seg, i) => {
-    const path  = '/' + segments.slice(0, i + 1).join('/');
+    const path = '/' + segments.slice(0, i + 1).join('/');
     const label = ROUTE_LABELS[seg] || decodeURIComponent(seg);
     const isLast = i === segments.length - 1;
     return { path, label, isLast };

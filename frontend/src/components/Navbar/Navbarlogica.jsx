@@ -12,7 +12,7 @@ export const useNavbarLogica = () => {
   useEffect(() => {
     // Cerrar el menú si cambiamos de ruta
     setIsMenuOpen(false);
-    
+
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -67,8 +67,8 @@ export const useNavbarLogica = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  return { 
-    user, 
+  return {
+    user,
     isLoggedIn: !!user,
     handleUserClick,
     handleLogout,
@@ -78,6 +78,6 @@ export const useNavbarLogica = () => {
     onSearchSubmit,
     isMenuOpen,
     toggleMenu,
-    closeMenu
+    closeMenu,
   };
 };

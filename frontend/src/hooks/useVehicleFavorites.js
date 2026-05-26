@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 /**
  * Hook para gestionar los favoritos de un vehículo específico.
- * @param {string|number} vehicleId 
+ * @param {string|number} vehicleId
  */
 export const useVehicleFavorites = (vehicleId) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -18,10 +18,10 @@ export const useVehicleFavorites = (vehicleId) => {
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     if (favorites.includes(vehicleId)) {
-      favorites = favorites.filter(id => id !== vehicleId);
+      favorites = favorites.filter((id) => id !== vehicleId);
       setIsFavorite(false);
       toast('Eliminado de favoritos');
     } else {

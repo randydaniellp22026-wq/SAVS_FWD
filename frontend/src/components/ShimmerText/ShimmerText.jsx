@@ -1,10 +1,10 @@
 import React from 'react';
 import './ShimmerText.css';
 
-export default function ShimmerText({ 
-  text, 
-  className = "",
-  as: Component = "span",
+export default function ShimmerText({
+  text,
+  className = '',
+  as: Component = 'span',
   shimmerWidth, // Destructure to filter out
   ...props
 }) {

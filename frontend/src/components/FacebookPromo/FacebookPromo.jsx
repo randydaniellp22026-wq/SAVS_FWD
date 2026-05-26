@@ -13,35 +13,76 @@ import imgPromo6 from '../../img/Anuncios/Gemini_Generated_Image_c0m80oc0m80oc0m
 import imgPromo7 from '../../img/Anuncios/Gemini_Generated_Image_c0m80oc0m80oc0m8 (1).png';
 import imgPromo8 from '../../img/Anuncios/Gemini_Generated_Image_tyv7hytyv7hytyv7 (1).png';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || `http://${window.location.hostname}:5000`;
+const BACKEND_URL =
+  import.meta.env.VITE_API_URL?.replace('/api', '') || `http://${window.location.hostname}:5000`;
 
 export const FACEBOOK_PAGE_URL =
   'https://www.facebook.com/p/Importadora-De-Veh%C3%ADculos-SAVS-100083511271381/';
 
 // Textos variados; todos los clics van a la página de Facebook
 const FALLBACK_SLIDES = [
-  { image: imgPromo1, title: '¿Buscás tu Próximo Destino?', desc: 'Vehículos importados a precios irrepetibles. ¡Cotizá en Facebook!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo2, title: 'Importación Directa de Confianza', desc: 'Historial certificado y entrega rápida. ¡Escribinos por FB!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo3, title: 'Financiamiento a Tu Medida', desc: 'Aprobación ágil y tasas competitivas. ¡Consultá en Facebook!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo4, title: 'Revisión Certificada', desc: '150 puntos de control en cada unidad. ¡Más info en nuestra página!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo5, title: 'SUVs de Lujo', desc: 'Seguridad y confort para tu familia. ¡Seguinos en Facebook!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo6, title: 'Pick-ups de Fuerza', desc: 'Potencia para trabajo y ruta. ¡Cotizá por mensaje en FB!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo7, title: 'Híbridos y Eléctricos', desc: 'Eficiencia y tecnología importada. ¡Visitá Facebook hoy!', enlace: FACEBOOK_PAGE_URL },
-  { image: imgPromo8, title: 'Asesoría Personalizada', desc: 'Expertos SAVS te guían paso a paso. ¡Agendá por Facebook!', enlace: FACEBOOK_PAGE_URL }
+  {
+    image: imgPromo1,
+    title: '¿Buscás tu Próximo Destino?',
+    desc: 'Vehículos importados a precios irrepetibles. ¡Cotizá en Facebook!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo2,
+    title: 'Importación Directa de Confianza',
+    desc: 'Historial certificado y entrega rápida. ¡Escribinos por FB!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo3,
+    title: 'Financiamiento a Tu Medida',
+    desc: 'Aprobación ágil y tasas competitivas. ¡Consultá en Facebook!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo4,
+    title: 'Revisión Certificada',
+    desc: '150 puntos de control en cada unidad. ¡Más info en nuestra página!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo5,
+    title: 'SUVs de Lujo',
+    desc: 'Seguridad y confort para tu familia. ¡Seguinos en Facebook!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo6,
+    title: 'Pick-ups de Fuerza',
+    desc: 'Potencia para trabajo y ruta. ¡Cotizá por mensaje en FB!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo7,
+    title: 'Híbridos y Eléctricos',
+    desc: 'Eficiencia y tecnología importada. ¡Visitá Facebook hoy!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
+  {
+    image: imgPromo8,
+    title: 'Asesoría Personalizada',
+    desc: 'Expertos SAVS te guían paso a paso. ¡Agendá por Facebook!',
+    enlace: FACEBOOK_PAGE_URL,
+  },
 ];
 
 const FacebookPromo = ({
-  type        = 'horizontal',
-  className   = '',
-  images      = [],
-  image       = null,
-  title       = '¿Buscás el mejor trato?',
-  desc        = 'Llevate vehículos seleccionados a precios irrepetibles. Solo en nuestras redes.',
-  reverse     = false
+  type = 'horizontal',
+  className = '',
+  images = [],
+  image = null,
+  title = '¿Buscás el mejor trato?',
+  desc = 'Llevate vehículos seleccionados a precios irrepetibles. Solo en nuestras redes.',
+  reverse = false,
 }) => {
-  const [currentIdx, setCurrentIdx]   = useState(0);
-  const [slides, setSlides]           = useState([]);
-  const [loaded, setLoaded]           = useState(false);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [slides, setSlides] = useState([]);
+  const [loaded, setLoaded] = useState(false);
 
   // ── Carga los banners desde el servidor al montar el componente ──────────
   useEffect(() => {
@@ -50,11 +91,11 @@ const FacebookPromo = ({
         const res = await fetch(`${BACKEND_URL}/api/marketing/banners`);
         const data = await res.json();
         if (data.success && data.banners.length > 0) {
-          const loadedSlides = data.banners.map(b => ({
+          const loadedSlides = data.banners.map((b) => ({
             image: `${BACKEND_URL}${b.imagen}`,
             title: b.titulo,
             desc: b.descripcion,
-            enlace: FACEBOOK_PAGE_URL
+            enlace: FACEBOOK_PAGE_URL,
           }));
           setSlides(loadedSlides);
         }
@@ -69,24 +110,25 @@ const FacebookPromo = ({
 
   // ── Decidir qué datos mostrar ────────────────────────────────────────────
   // Prioridad: prop "images" > banners del servidor > prop "image" > imágenes por defecto estructuradas
-  const activeSlides = images.length > 0
-    ? images.map((img, idx) => ({
-        image: img,
-        title: Array.isArray(title) ? title[idx] || title[0] : title,
-        desc: Array.isArray(desc) ? desc[idx] || desc[0] : desc,
-        enlace: FACEBOOK_PAGE_URL
-      }))
-    : slides.length > 0
-      ? slides
-      : image
-        ? [{ image, title, desc, enlace: FACEBOOK_PAGE_URL }]
-        : FALLBACK_SLIDES;
+  const activeSlides =
+    images.length > 0
+      ? images.map((img, idx) => ({
+          image: img,
+          title: Array.isArray(title) ? title[idx] || title[0] : title,
+          desc: Array.isArray(desc) ? desc[idx] || desc[0] : desc,
+          enlace: FACEBOOK_PAGE_URL,
+        }))
+      : slides.length > 0
+        ? slides
+        : image
+          ? [{ image, title, desc, enlace: FACEBOOK_PAGE_URL }]
+          : FALLBACK_SLIDES;
 
   // ── Auto-avance del carrusel ─────────────────────────────────────────────
   useEffect(() => {
     if (activeSlides.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIdx(prev => (prev + 1) % activeSlides.length);
+      setCurrentIdx((prev) => (prev + 1) % activeSlides.length);
     }, 5500); // 5.5s para lectura cómoda
     return () => clearInterval(interval);
   }, [activeSlides.length]);
@@ -94,12 +136,12 @@ const FacebookPromo = ({
   // Controles de navegación manuales
   const handlePrev = (e) => {
     e.stopPropagation();
-    setCurrentIdx(prev => (prev === 0 ? activeSlides.length - 1 : prev - 1));
+    setCurrentIdx((prev) => (prev === 0 ? activeSlides.length - 1 : prev - 1));
   };
 
   const handleNext = (e) => {
     e.stopPropagation();
-    setCurrentIdx(prev => (prev === activeSlides.length - 1 ? 0 : prev + 1));
+    setCurrentIdx((prev) => (prev === activeSlides.length - 1 ? 0 : prev + 1));
   };
 
   const handleSlideClick = () => {
@@ -117,7 +159,7 @@ const FacebookPromo = ({
           className={`fb-carousel-img ${idx === currentIdx ? 'active' : ''}`}
         />
       ))}
-      
+
       {activeSlides.length > 1 && (
         <>
           <button className="fb-carousel-nav fb-prev" onClick={handlePrev} title="Anterior">
@@ -126,13 +168,16 @@ const FacebookPromo = ({
           <button className="fb-carousel-nav fb-next" onClick={handleNext} title="Siguiente">
             <ChevronRight size={20} />
           </button>
-          
+
           <div className="fb-carousel-indicators">
             {activeSlides.map((_, idx) => (
               <span
                 key={idx}
                 className={`fb-carousel-dot ${idx === currentIdx ? 'active' : ''}`}
-                onClick={e => { e.stopPropagation(); setCurrentIdx(idx); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentIdx(idx);
+                }}
               />
             ))}
           </div>
@@ -148,10 +193,7 @@ const FacebookPromo = ({
   // ── Variante tipo tarjeta (Catalog Card) ─────────────────────────────────
   if (type === 'card') {
     return (
-      <div 
-        className={`card vehicle-card fb-promo-card ${className}`} 
-        onClick={handleSlideClick}
-      >
+      <div className={`card vehicle-card fb-promo-card ${className}`} onClick={handleSlideClick}>
         <div className="fb-promo-content">
           {renderCarousel('card')}
           <div className="fb-promo-overlay">
@@ -168,9 +210,7 @@ const FacebookPromo = ({
                 <p className="fb-promo-desc">{currentSlide.desc}</p>
               </motion.div>
             </AnimatePresence>
-            <button className="btn btn-primary fb-promo-btn">
-              Ir a Facebook
-            </button>
+            <button className="btn btn-primary fb-promo-btn">Ir a Facebook</button>
           </div>
         </div>
       </div>
@@ -180,14 +220,11 @@ const FacebookPromo = ({
   // ── Variante vertical ────────────────────────────────────────────────────
   if (type === 'vertical') {
     return (
-      <div 
-        className={`fb-promo-vertical ${className}`} 
-        onClick={handleSlideClick}
-      >
+      <div className={`fb-promo-vertical ${className}`} onClick={handleSlideClick}>
         <div className="fb-promo-img-top">{renderCarousel('vertical')}</div>
         <div className="fb-promo-text-bottom">
           <span className="fb-badge">🔥 RECOMENDADO</span>
-          
+
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIdx}
@@ -201,8 +238,11 @@ const FacebookPromo = ({
               <p>{currentSlide.desc}</p>
             </motion.div>
           </AnimatePresence>
-          
-          <button className="btn btn-primary fb-promo-btn" style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: '#000' }}>
+
+          <button
+            className="btn btn-primary fb-promo-btn"
+            style={{ backgroundColor: '#eab308', borderColor: '#eab308', color: '#000' }}
+          >
             Ver en Facebook →
           </button>
         </div>
@@ -212,8 +252,8 @@ const FacebookPromo = ({
 
   // ── Variante horizontal (default) ────────────────────────────────────────
   return (
-    <div 
-      className={`fb-promo-banner fb-promo-horizontal ${reverse ? 'fb-reverse' : ''} ${className}`} 
+    <div
+      className={`fb-promo-banner fb-promo-horizontal ${reverse ? 'fb-reverse' : ''} ${className}`}
       onClick={() => handleSlideClick(currentSlide.enlace)}
     >
       <div className="fb-promo-banner-inner">
@@ -221,7 +261,7 @@ const FacebookPromo = ({
           <span className="fb-badge">
             <Share2 size={12} style={{ marginRight: '6px' }} /> ANUNCIO EXCLUSIVO
           </span>
-          
+
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIdx}
@@ -236,7 +276,7 @@ const FacebookPromo = ({
             </motion.div>
           </AnimatePresence>
 
-          <button 
+          <button
             className="btn btn-outline fb-promo-btn"
             style={{ backgroundColor: 'transparent' }}
             onClick={(e) => {
@@ -248,10 +288,8 @@ const FacebookPromo = ({
             <ArrowRight size={16} />
           </button>
         </div>
-        
-        <div className="fb-promo-img-wrapper">
-          {renderCarousel('horizontal')}
-        </div>
+
+        <div className="fb-promo-img-wrapper">{renderCarousel('horizontal')}</div>
       </div>
     </div>
   );

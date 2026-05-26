@@ -1,7 +1,15 @@
 import React, { useRef, useState } from 'react';
 import './ImageLens.css';
 
-const ImageLens = ({ src, alt, isActive, zoomFactor = 2, lensSize = 150, className = '', ...props }) => {
+const ImageLens = ({
+  src,
+  alt,
+  isActive,
+  zoomFactor = 2,
+  lensSize = 150,
+  className = '',
+  ...props
+}) => {
   const imgRef = useRef(null);
   const wrapperRef = useRef(null);
   const [lensConfig, setLensConfig] = useState(null);
@@ -9,11 +17,11 @@ const ImageLens = ({ src, alt, isActive, zoomFactor = 2, lensSize = 150, classNa
   const handleMouseMove = (e) => {
     if (!isActive) return;
     if (!imgRef.current || !wrapperRef.current) return;
-    
+
     // We base the coordinates rigorously strictly on the image's physical layout bounds
     const rect = imgRef.current.getBoundingClientRect();
     const wrapperRect = wrapperRef.current.getBoundingClientRect();
-    
+
     // Calculate cursor position relative to the image
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -35,13 +43,13 @@ const ImageLens = ({ src, alt, isActive, zoomFactor = 2, lensSize = 150, classNa
       wrapperY,
       width: rect.width,
       height: rect.height,
-      active: true
+      active: true,
     });
   };
 
   const handleMouseEnter = () => {
     if (isActive) {
-      setLensConfig((prev) => prev ? { ...prev, active: true } : null);
+      setLensConfig((prev) => (prev ? { ...prev, active: true } : null));
     }
   };
 
@@ -50,24 +58,17 @@ const ImageLens = ({ src, alt, isActive, zoomFactor = 2, lensSize = 150, classNa
   };
 
   return (
-    <div 
+    <div
       ref={wrapperRef}
       className={`img-lens-wrapper ${isActive ? 'is-active' : ''}`}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <img 
-        ref={imgRef}
-        src={src} 
-        alt={alt} 
-        className={className}
-        draggable={false}
-        {...props} 
-      />
-      
+      <img ref={imgRef} src={src} alt={alt} className={className} draggable={false} {...props} />
+
       {isActive && lensConfig && lensConfig.active && (
-        <div 
+        <div
           className="lens-overlay"
           style={{
             width: `${lensSize}px`,

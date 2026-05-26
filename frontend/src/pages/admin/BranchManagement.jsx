@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { 
-  MapPin, 
-  Phone, 
-  Clock, 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Map, 
-  Save, 
+import {
+  MapPin,
+  Phone,
+  Clock,
+  Plus,
+  Edit2,
+  Trash2,
+  Map,
+  Save,
   X,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 import { branchesService } from '../../admin/services';
 import AdminLoader from '../../components/admin/AdminLoader';
@@ -20,7 +20,7 @@ const darkSwal = {
   background: '#111',
   color: '#fff',
   confirmButtonColor: '#eab308',
-  cancelButtonColor: '#333'
+  cancelButtonColor: '#333',
 };
 
 const BranchManagement = () => {
@@ -34,7 +34,7 @@ const BranchManagement = () => {
     location: '',
     phone: '',
     schedule: '',
-    map_embed: ''
+    map_embed: '',
   });
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const BranchManagement = () => {
       const data = await branchesService.getAll();
       setBranches(data);
     } catch (error) {
-      console.error("Error fetching branches:", error);
+      console.error('Error fetching branches:', error);
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,7 @@ const BranchManagement = () => {
         location: '',
         phone: '',
         schedule: '',
-        map_embed: ''
+        map_embed: '',
       });
       setIsEditing(false);
     }
@@ -83,9 +83,14 @@ const BranchManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!currentBranch.name || !currentBranch.location) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'Nombre y ubicación son obligatorios.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: 'Nombre y ubicación son obligatorios.',
+      });
       return;
     }
 
@@ -101,12 +106,17 @@ const BranchManagement = () => {
         icon: 'success',
         title: isEditing ? 'Sede Actualizada' : 'Sede Creada',
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
       fetchBranches();
       closeModal();
     } catch (error) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo guardar la sede.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo guardar la sede.',
+      });
     }
   };
 
@@ -118,16 +128,27 @@ const BranchManagement = () => {
       text: 'Esta acción no se puede deshacer.',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     });
 
     if (result.isConfirmed) {
       try {
         await branchesService.remove(id);
-        Swal.fire({ ...darkSwal, icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
+        Swal.fire({
+          ...darkSwal,
+          icon: 'success',
+          title: 'Eliminado',
+          timer: 1000,
+          showConfirmButton: false,
+        });
         fetchBranches();
       } catch (error) {
-        Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: 'No se pudo eliminar la sede.' });
+        Swal.fire({
+          ...darkSwal,
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar la sede.',
+        });
       }
     }
   };
@@ -137,7 +158,9 @@ const BranchManagement = () => {
       <div className="admin-header-flex">
         <div>
           <h1 className="admin-title">Gestión de Sedes</h1>
-          <p className="admin-subtitle">Administra los puntos de venta, direcciones y mapas de la empresa.</p>
+          <p className="admin-subtitle">
+            Administra los puntos de venta, direcciones y mapas de la empresa.
+          </p>
         </div>
         <button className="btn-primary-gold" onClick={() => openModal()}>
           <Plus size={20} />
@@ -152,7 +175,7 @@ const BranchManagement = () => {
           <div className="empty-state">No hay sedes registradas.</div>
         ) : (
           <div className="branches-admin-grid">
-            {branches.map(branch => (
+            {branches.map((branch) => (
               <div key={branch.id} className="branch-admin-card">
                 <div className="branch-header">
                   <div className="branch-icon-label">
@@ -160,19 +183,33 @@ const BranchManagement = () => {
                     <h3>{branch.name}</h3>
                   </div>
                   <div className="branch-actions">
-                    <button className="btn-icon-sm edit" onClick={() => openModal(branch)} title="Editar">
+                    <button
+                      className="btn-icon-sm edit"
+                      onClick={() => openModal(branch)}
+                      title="Editar"
+                    >
                       <Edit2 size={16} />
                     </button>
-                    <button className="btn-icon-sm delete" onClick={() => handleDelete(branch.id)} title="Eliminar">
+                    <button
+                      className="btn-icon-sm delete"
+                      onClick={() => handleDelete(branch.id)}
+                      title="Eliminar"
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="branch-body">
-                  <p className="branch-loc"><strong>Ubicación:</strong> {branch.location}</p>
-                  <p className="branch-info"><Phone size={14} /> {branch.phone}</p>
-                  <p className="branch-info"><Clock size={14} /> {branch.schedule}</p>
+                  <p className="branch-loc">
+                    <strong>Ubicación:</strong> {branch.location}
+                  </p>
+                  <p className="branch-info">
+                    <Phone size={14} /> {branch.phone}
+                  </p>
+                  <p className="branch-info">
+                    <Clock size={14} /> {branch.schedule}
+                  </p>
                   {branch.map_embed && (
                     <div className="map-preview-tag">
                       <Map size={14} /> Mapa configurado
@@ -187,20 +224,22 @@ const BranchManagement = () => {
 
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content admin-modal" onClick={e => e.stopPropagation()}>
+          <div className="modal-content admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{isEditing ? 'Editar Sede' : 'Nueva Sede'}</h2>
-              <button className="close-btn" onClick={closeModal}><X size={24} /></button>
+              <button className="close-btn" onClick={closeModal}>
+                <X size={24} />
+              </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="admin-form">
               <div className="form-group">
                 <label>Nombre de la Sede</label>
-                <input 
-                  type="text" 
-                  name="name" 
-                  value={currentBranch.name} 
-                  onChange={handleInputChange} 
+                <input
+                  type="text"
+                  name="name"
+                  value={currentBranch.name}
+                  onChange={handleInputChange}
                   placeholder="Ej. Sede Central San José"
                   required
                 />
@@ -208,10 +247,10 @@ const BranchManagement = () => {
 
               <div className="form-group">
                 <label>Dirección Exacta</label>
-                <textarea 
-                  name="location" 
-                  value={currentBranch.location} 
-                  onChange={handleInputChange} 
+                <textarea
+                  name="location"
+                  value={currentBranch.location}
+                  onChange={handleInputChange}
                   placeholder="Provincia, Cantón, señas exactas..."
                   className="admin-textarea"
                   required
@@ -221,21 +260,21 @@ const BranchManagement = () => {
               <div className="form-row branch-form-row">
                 <div className="form-group flex-1">
                   <label>Teléfono</label>
-                  <input 
-                    type="text" 
-                    name="phone" 
-                    value={currentBranch.phone} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="phone"
+                    value={currentBranch.phone}
+                    onChange={handleInputChange}
                     placeholder="+506 ...."
                   />
                 </div>
                 <div className="form-group flex-1">
                   <label>Horario</label>
-                  <input 
-                    type="text" 
-                    name="schedule" 
-                    value={currentBranch.schedule} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="schedule"
+                    value={currentBranch.schedule}
+                    onChange={handleInputChange}
                     placeholder="L-V 8am-5pm"
                   />
                 </div>
@@ -243,11 +282,11 @@ const BranchManagement = () => {
 
               <div className="form-group">
                 <label>URL del Mapa (Google Maps Embed)</label>
-                <input 
-                  type="text" 
-                  name="map_embed" 
-                  value={currentBranch.map_embed} 
-                  onChange={handleInputChange} 
+                <input
+                  type="text"
+                  name="map_embed"
+                  value={currentBranch.map_embed}
+                  onChange={handleInputChange}
                   placeholder="https://www.google.com/maps/embed?..."
                 />
                 <small className="form-help-text">
@@ -256,7 +295,9 @@ const BranchManagement = () => {
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={closeModal}>Cancelar</button>
+                <button type="button" className="btn-secondary" onClick={closeModal}>
+                  Cancelar
+                </button>
                 <button type="submit" className="btn-primary-gold">
                   <Save size={18} />
                   <span>{isEditing ? 'Actualizar' : 'Crear Sede'}</span>

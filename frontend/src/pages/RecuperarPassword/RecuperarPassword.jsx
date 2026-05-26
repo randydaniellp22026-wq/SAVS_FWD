@@ -9,7 +9,7 @@ import './RecuperarPassword.css';
 const darkSwal = {
   background: '#141414',
   color: '#fff',
-  confirmButtonColor: '#eab308'
+  confirmButtonColor: '#eab308',
 };
 
 const RecuperarPassword = () => {
@@ -30,7 +30,7 @@ const RecuperarPassword = () => {
     try {
       // Usamos el endpoint configurado en la API centralizada
       const resp = await api.post('/auth/check-email', { email: email.trim() });
-      
+
       const user = resp.data;
       setUserFound(user);
       const tempCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -43,11 +43,16 @@ const RecuperarPassword = () => {
         ...darkSwal,
         icon: 'success',
         title: 'Código enviado',
-        text: `Hemos enviado un código de recuperación a ${email}`
+        text: `Hemos enviado un código de recuperación a ${email}`,
       });
       setStep(2);
     } catch (err) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: err.response?.data?.error || err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -59,7 +64,12 @@ const RecuperarPassword = () => {
     if (code.trim().toUpperCase() === generatedCode) {
       setStep(3);
     } else {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Código Incorrecto', text: 'El código ingresado no es válido.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Código Incorrecto',
+        text: 'El código ingresado no es válido.',
+      });
     }
   };
 
@@ -67,37 +77,47 @@ const RecuperarPassword = () => {
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      Swal.fire({ ...darkSwal, icon: 'warning', title: 'No coinciden', text: 'Las contraseñas deben ser iguales.' });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'warning',
+        title: 'No coinciden',
+        text: 'Las contraseñas deben ser iguales.',
+      });
       return;
     }
 
     // Validación de complejidad de contraseña (Tarea solicitada)
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (!passwordRegex.test(newPassword)) {
-      Swal.fire({ 
-        ...darkSwal, 
-        icon: 'error', 
-        title: 'Seguridad insuficiente', 
-        text: 'La nueva contraseña debe tener al menos 8 caracteres e incluir al menos una letra MAYÚSCULA y un NÚMERO.' 
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Seguridad insuficiente',
+        text: 'La nueva contraseña debe tener al menos 8 caracteres e incluir al menos una letra MAYÚSCULA y un NÚMERO.',
       });
       return;
     }
 
     setLoading(true);
     try {
-      await api.post('/auth/reset-password', { 
+      await api.post('/auth/reset-password', {
         userId: userFound.id,
-        newPassword: newPassword 
+        newPassword: newPassword,
       });
 
       Swal.fire({
         ...darkSwal,
         icon: 'success',
         title: 'Contraseña Actualizada',
-        text: 'Ya puedes iniciar sesión con tu nueva contraseña.'
+        text: 'Ya puedes iniciar sesión con tu nueva contraseña.',
       }).then(() => navigate('/login'));
     } catch (err) {
-      Swal.fire({ ...darkSwal, icon: 'error', title: 'Error', text: err.response?.data?.error || err.message });
+      Swal.fire({
+        ...darkSwal,
+        icon: 'error',
+        title: 'Error',
+        text: err.response?.data?.error || err.message,
+      });
     } finally {
       setLoading(false);
     }
@@ -110,17 +130,29 @@ const RecuperarPassword = () => {
         <div className="hero-content">
           <span className="hero-badge">SEGURIDAD AVANZADA</span>
           <h1>Recupera tu Acceso</h1>
-          <p>En Importadora SAVS nos tomamos en serio tu seguridad. Sigue los pasos para restablecer tu contraseña y volver al inventario.</p>
+          <p>
+            En Importadora SAVS nos tomamos en serio tu seguridad. Sigue los pasos para restablecer
+            tu contraseña y volver al inventario.
+          </p>
         </div>
       </div>
 
       <div className="recovery-form-section">
         <div className="recovery-container">
           <div className="recovery-header">
-            <button className="back-btn" onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}>
+            <button
+              className="back-btn"
+              onClick={() => (step > 1 ? setStep(step - 1) : navigate('/login'))}
+            >
               <ArrowLeft size={20} />
             </button>
-            <h2>{step === 1 ? '¿Olvidaste tu contraseña?' : step === 2 ? 'Verificación' : 'Nueva Contraseña'}</h2>
+            <h2>
+              {step === 1
+                ? '¿Olvidaste tu contraseña?'
+                : step === 2
+                  ? 'Verificación'
+                  : 'Nueva Contraseña'}
+            </h2>
             <p>
               {step === 1 && 'Ingresa tu correo para recibir un código de recuperación.'}
               {step === 2 && 'Ingresa el código de 6 caracteres que enviamos a tu bandeja.'}
@@ -142,9 +174,9 @@ const RecuperarPassword = () => {
                 <label>Correo Electrónico</label>
                 <div className="input-wrapper">
                   <Mail className="input-icon" size={18} />
-                  <input 
-                    type="email" 
-                    className="premium-input-icon" 
+                  <input
+                    type="email"
+                    className="premium-input-icon"
                     placeholder="ejemplo@correo.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -164,9 +196,9 @@ const RecuperarPassword = () => {
                 <label>Código de Verificación</label>
                 <div className="input-wrapper">
                   <ShieldCheck className="input-icon" size={18} />
-                  <input 
-                    type="text" 
-                    className="premium-input-icon" 
+                  <input
+                    type="text"
+                    className="premium-input-icon"
                     placeholder="ABC123"
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -178,7 +210,9 @@ const RecuperarPassword = () => {
               <button type="submit" className="recovery-btn">
                 Verificar Código <ArrowRight size={18} />
               </button>
-              <p className="resend-text">¿No recibiste nada? <span onClick={handleRequestCode}>Reenviar código</span></p>
+              <p className="resend-text">
+                ¿No recibiste nada? <span onClick={handleRequestCode}>Reenviar código</span>
+              </p>
             </form>
           )}
 
@@ -188,9 +222,9 @@ const RecuperarPassword = () => {
                 <label>Nueva Contraseña</label>
                 <div className="input-wrapper">
                   <Lock className="input-icon" size={18} />
-                  <input 
-                    type="password" 
-                    className="premium-input-icon" 
+                  <input
+                    type="password"
+                    className="premium-input-icon"
                     placeholder="••••••••"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -202,9 +236,9 @@ const RecuperarPassword = () => {
                 <label>Confirmar Contraseña</label>
                 <div className="input-wrapper">
                   <Lock className="input-icon" size={18} />
-                  <input 
-                    type="password" 
-                    className="premium-input-icon" 
+                  <input
+                    type="password"
+                    className="premium-input-icon"
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}

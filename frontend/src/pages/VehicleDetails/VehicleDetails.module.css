@@ -1,0 +1,108 @@
+/* VehicleDetails.module.css — Estilos modulares para la vista de detalle de vehículo */
+
+.notFound {
+  margin-top: 100px;
+  text-align: center;
+  color: #ffffff;
+}
+
+.technicalGrid {
+  margin-top: 4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.techItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.techLabel {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.techValue {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.promoContainer {
+  margin-top: 3rem;
+}
+
+.gallerySection {
+  margin: 6rem 0;
+  background-color: #080808;
+  position: relative;
+}
+
+.galleryHeader {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.galleryTitle {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.gallerySubtitle {
+  color: #9ca3af;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.summaryText {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  color: #d1d5db;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 3rem;
+}
+
+.autowiniFeatures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.featureCard {
+  background: rgba(15, 15, 15, 0.6);
+  padding: 2.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-5px);
+}
+
+.featureTitle {
+  color: #eab308;
+  margin-bottom: 1.2rem;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+.featureText {
+  color: #9ca3af;
+  line-height: 1.7;
+}

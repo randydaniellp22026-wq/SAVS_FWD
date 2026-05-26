@@ -1,161 +1,174 @@
-import React from "react";
-import { useRedireccionModeloAutoLogica } from "./RedireccionModeloAutoLogica";
+import React from 'react';
+import { useRedireccionModeloAutoLogica } from './RedireccionModeloAutoLogica';
 import { Calculator } from 'lucide-react';
-import { useNavigate, Link } from "react-router-dom";
-import "./DiseñoRedireccion.css";
+import { useNavigate, Link } from 'react-router-dom';
+import './DiseñoRedireccion.css';
 
 function RedireccionModeloAuto() {
-  const { autos, loading, filtros, handleFiltroChange, limpiarFiltros } = useRedireccionModeloAutoLogica();
+  const { autos, loading, filtros, handleFiltroChange, limpiarFiltros } =
+    useRedireccionModeloAutoLogica();
   const navigate = useNavigate();
 
   return (
+    <div className="pagina">
+      {/* HEADER */}
 
-<div className="pagina">
+      <header className="navbar">
+        <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          🚗 GESTIONADORA
+        </div>
 
-{/* HEADER */}
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <Link to="/">Inicio</Link>
+          <Link to="/inventory">Vehículos</Link>
+          <Link to="#" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Calculator size={18} /> Simular Crédito
+          </Link>
+          <Link to="/contact">Contacto</Link>
+        </nav>
 
-<header className="navbar">
+        <button className="loginBtn" onClick={() => navigate('/login')}>
+          Iniciar Sesión
+        </button>
+      </header>
 
-<div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>🚗 GESTIONADORA</div>
+      {/* TITULO */}
 
-<nav style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-<Link to="/">Inicio</Link>
-<Link to="/inventory">Vehículos</Link>
-<Link to="#" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-<Calculator size={18} /> Simular Crédito
-</Link>
-<Link to="/contact">Contacto</Link>
-</nav>
+      <section className="headerCatalogo">
+        <p className="subtitulo">CATÁLOGO EXCLUSIVO</p>
 
-<button className="loginBtn" onClick={() => navigate('/login')}>Iniciar Sesión</button>
+        <h1>Vehículos disponibles</h1>
 
-</header>
+        <p className="resultado">
+          Resultados encontrados: <b>{autos.length}</b>
+        </p>
+      </section>
 
+      {/* CONTENIDO */}
 
-{/* TITULO */}
+      <div className="contenido">
+        {/* FILTROS */}
 
-<section className="headerCatalogo">
+        <aside className="filtros">
+          <h3>Filtrar búsqueda</h3>
 
-<p className="subtitulo">CATÁLOGO EXCLUSIVO</p>
+          <select name="año" value={filtros.año} onChange={handleFiltroChange}>
+            <option value="">Cualquier Año</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+          </select>
 
-<h1>Vehículos disponibles</h1>
+          <input
+            type="text"
+            name="marca"
+            value={filtros.marca}
+            onChange={handleFiltroChange}
+            placeholder="Marca (ej. Toyota)"
+          />
 
-<p className="resultado">Resultados encontrados: <b>{autos.length}</b></p>
+          <input
+            type="text"
+            name="modelo"
+            value={filtros.modelo}
+            onChange={handleFiltroChange}
+            placeholder="Modelo (ej. Corolla)"
+          />
 
-</section>
+          <input
+            type="number"
+            name="precioMin"
+            value={filtros.precioMin}
+            onChange={handleFiltroChange}
+            placeholder="Precio mínimo"
+          />
 
+          <input
+            type="number"
+            name="precioMax"
+            value={filtros.precioMax}
+            onChange={handleFiltroChange}
+            placeholder="Precio máximo"
+          />
 
-{/* CONTENIDO */}
+          <select name="transmision" value={filtros.transmision} onChange={handleFiltroChange}>
+            <option value="">Cualquier Transmisión</option>
+            <option value="Automática">Automática</option>
+            <option value="Manual">Manual</option>
+            <option value="CVT">CVT</option>
+          </select>
 
-<div className="contenido">
+          <select name="combustible" value={filtros.combustible} onChange={handleFiltroChange}>
+            <option value="">Cualquier Combustible</option>
+            <option value="Gasolina">Gasolina</option>
+            <option value="Diésel">Diésel</option>
+            <option value="Eléctrico">Eléctrico</option>
+            <option value="Híbrido">Híbrido</option>
+          </select>
 
-{/* FILTROS */}
+          <button
+            className="btnFiltro"
+            onClick={limpiarFiltros}
+            style={{ background: '#6b7280', marginTop: '10px' }}
+          >
+            Limpiar filtros
+          </button>
+        </aside>
 
-<aside className="filtros">
+        {/* AUTOS */}
 
-<h3>Filtrar búsqueda</h3>
+        <section className="autos">
+          {loading ? (
+            <p style={{ textAlign: 'center', width: '100%' }}>Cargando vehículos...</p>
+          ) : autos.length === 0 ? (
+            <p style={{ textAlign: 'center', width: '100%' }}>No se encontraron vehículos.</p>
+          ) : (
+            autos.map((auto) => (
+              <div className="cardAuto" key={auto.id}>
+                <div className="imgContainer">
+                  {auto.tag && (
+                    <span className="badge" style={{ backgroundColor: auto.tagColor }}>
+                      {auto.tag}
+                    </span>
+                  )}
 
-<select name="año" value={filtros.año} onChange={handleFiltroChange}>
-<option value="">Cualquier Año</option>
-<option value="2024">2024</option>
-<option value="2023">2023</option>
-<option value="2022">2022</option>
-<option value="2021">2021</option>
-</select>
+                  <img src={auto.image} alt="auto" style={{ objectFit: 'cover' }} />
+                </div>
 
-<input type="text" name="marca" value={filtros.marca} onChange={handleFiltroChange} placeholder="Marca (ej. Toyota)" />
+                <div className="infoAuto">
+                  <h3>{auto.name}</h3>
 
-<input type="text" name="modelo" value={filtros.modelo} onChange={handleFiltroChange} placeholder="Modelo (ej. Corolla)"/>
+                  <p className="año">{auto.year}</p>
 
-<input type="number" name="precioMin" value={filtros.precioMin} onChange={handleFiltroChange} placeholder="Precio mínimo"/>
+                  <div className="datos">
+                    <span>{auto.mileage}</span>
 
-<input type="number" name="precioMax" value={filtros.precioMax} onChange={handleFiltroChange} placeholder="Precio máximo"/>
+                    <span>{auto.transmission}</span>
+                  </div>
 
-<select name="transmision" value={filtros.transmision} onChange={handleFiltroChange}>
-<option value="">Cualquier Transmisión</option>
-<option value="Automática">Automática</option>
-<option value="Manual">Manual</option>
-<option value="CVT">CVT</option>
-</select>
+                  <p className="estado">{auto.fuel}</p>
 
-<select name="combustible" value={filtros.combustible} onChange={handleFiltroChange}>
-<option value="">Cualquier Combustible</option>
-<option value="Gasolina">Gasolina</option>
-<option value="Diésel">Diésel</option>
-<option value="Eléctrico">Eléctrico</option>
-<option value="Híbrido">Híbrido</option>
-</select>
+                  <div className="precioRow">
+                    <h2>₡{auto.price.toLocaleString('es-CR')}</h2>
 
-<button className="btnFiltro" onClick={limpiarFiltros} style={{background: '#6b7280', marginTop: '10px'}}>Limpiar filtros</button>
+                    <button
+                      className="btnDetalles"
+                      onClick={() => navigate(`/vehicle/${auto.id}`, { state: { vehicle: auto } })}
+                    >
+                      Ver Detalles
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </section>
+      </div>
 
-</aside>
-
-
-{/* AUTOS */}
-
-<section className="autos">
-
-{loading ? (
-  <p style={{textAlign: 'center', width: '100%'}}>Cargando vehículos...</p>
-) : autos.length === 0 ? (
-  <p style={{textAlign: 'center', width: '100%'}}>No se encontraron vehículos.</p>
-) : (
-autos.map(auto => (
-
-<div className="cardAuto" key={auto.id}>
-
-<div className="imgContainer">
-
-{auto.tag && <span className="badge" style={{backgroundColor: auto.tagColor}}>{auto.tag}</span>}
-
-<img src={auto.image} alt="auto" style={{objectFit: 'cover'}}/>
-
-</div>
-
-<div className="infoAuto">
-
-<h3>{auto.name}</h3>
-
-<p className="año">{auto.year}</p>
-
-<div className="datos">
-
-<span>{auto.mileage}</span>
-
-<span>{auto.transmission}</span>
-
-</div>
-
-<p className="estado">{auto.fuel}</p>
-
-<div className="precioRow">
-
-<h2>₡{auto.price.toLocaleString('es-CR')}</h2>
-
-<button className="btnDetalles" onClick={() => navigate(`/vehicle/${auto.id}`, { state: { vehicle: auto } })}>
-Ver Detalles
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-)))}
-
-</section>
-
-</div>
-
-
-{/* FOOTER */}
-
-
-
-</div>
-)
-
+      {/* FOOTER */}
+    </div>
+  );
 }
 
-export default RedireccionModeloAuto
+export default RedireccionModeloAuto;

@@ -14,17 +14,17 @@ export const useCatalogoLogica = () => {
     total: 0,
     page: 1,
     limit: 12,
-    totalPages: 1
+    totalPages: 1,
   });
 
   const [expandedSection, setExpandedSection] = useState('technical');
   const [activeFilters, setActiveFilters] = useState({
-    transmission: '', 
-    fuel: '', 
-    marca: '', 
-    modelo: '', 
+    transmission: '',
+    fuel: '',
+    marca: '',
+    modelo: '',
     type: '',
-    minPrice: '', 
+    minPrice: '',
     maxPrice: '',
     minYear: '',
     maxYear: '',
@@ -36,14 +36,14 @@ export const useCatalogoLogica = () => {
     engine_size: '',
     tag: '',
     mileage: '',
-    search: new URLSearchParams(location.search).get('search') || ''
+    search: new URLSearchParams(location.search).get('search') || '',
   });
 
   // Función para cargar vehículos desde la API (Servidor)
   const fetchVehicles = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Mapeamos los filtros activos a los parámetros que espera el Backend
       const params = {
         page: pagination.page,
@@ -62,20 +62,20 @@ export const useCatalogoLogica = () => {
         passengers: activeFilters.passengers,
         steering: activeFilters.steering,
         engine_size: activeFilters.engine_size,
-        tag: activeFilters.tag
+        tag: activeFilters.tag,
       };
 
       // Tarea 2: Llamada real al servicio centralizado
       const response = await vehicleService.getAll(params);
-      
+
       setVehicles(response.data || []);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         total: response.pagination?.total || 0,
-        totalPages: response.pagination?.totalPages || 1
+        totalPages: response.pagination?.totalPages || 1,
       }));
     } catch (error) {
-      console.error("Error al cargar vehículos:", error);
+      console.error('Error al cargar vehículos:', error);
     } finally {
       setLoading(false);
     }
@@ -87,26 +87,41 @@ export const useCatalogoLogica = () => {
   }, [fetchVehicles]);
 
   // Manejadores de eventos
-  const toggleSection = (section) => setExpandedSection(expandedSection === section ? null : section);
+  const toggleSection = (section) =>
+    setExpandedSection(expandedSection === section ? null : section);
 
   const handleFilterChange = (name, value) => {
-    setActiveFilters(prev => ({ ...prev, [name]: value }));
-    setPagination(prev => ({ ...prev, page: 1 })); // Resetear a página 1 al filtrar
+    setActiveFilters((prev) => ({ ...prev, [name]: value }));
+    setPagination((prev) => ({ ...prev, page: 1 })); // Resetear a página 1 al filtrar
   };
 
   const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
+    setPagination((prev) => ({ ...prev, page: newPage }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetFilters = () => {
     setActiveFilters({
-      transmission: '', fuel: '', marca: '', modelo: '', type: '',
-      minPrice: '', maxPrice: '', minYear: '', maxYear: '', color: '',
-      doors: '', drive: '', passengers: '', steering: '', engine_size: '',
-      tag: '', mileage: '', search: ''
+      transmission: '',
+      fuel: '',
+      marca: '',
+      modelo: '',
+      type: '',
+      minPrice: '',
+      maxPrice: '',
+      minYear: '',
+      maxYear: '',
+      color: '',
+      doors: '',
+      drive: '',
+      passengers: '',
+      steering: '',
+      engine_size: '',
+      tag: '',
+      mileage: '',
+      search: '',
     });
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   return {
@@ -119,7 +134,6 @@ export const useCatalogoLogica = () => {
     handleFilterChange,
     handlePageChange,
     resetFilters,
-    searchQueryParam: activeFilters.search
+    searchQueryParam: activeFilters.search,
   };
 };
-

@@ -43,11 +43,7 @@ const AdminLayout = () => {
         </div>
 
         {isSidebarOpen && (
-          <div
-            className="sidebar-overlay"
-            onClick={closeSidebar}
-            role="presentation"
-          />
+          <div className="sidebar-overlay" onClick={closeSidebar} role="presentation" />
         )}
 
         <AdminSidebar isOpen={isSidebarOpen} closeSidebar={closeSidebar} />
@@ -69,4 +65,3 @@ const AdminLayout = () => {
 };
 
 export default AdminLayout;
-

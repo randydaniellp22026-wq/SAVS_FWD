@@ -18,7 +18,8 @@ function RegistroUsuarios() {
             Únete a <span className="gold-accent">The Destiny Vault</span>
           </h1>
           <p>
-            Crea tu cuenta y accede a nuestro catálogo exclusivo de vehículos de lujo con financiamiento personalizado.
+            Crea tu cuenta y accede a nuestro catálogo exclusivo de vehículos de lujo con
+            financiamiento personalizado.
           </p>
         </div>
       </div>
@@ -26,18 +27,18 @@ function RegistroUsuarios() {
       {/* Right: Form side */}
       <div className="ladoFormulario">
         <form className="formRegistro" onSubmit={handleSubmit}>
-          <BorderBeam 
-            size={40} 
-            duration={12} 
-            colorFrom="rgba(234, 179, 8, 0)" 
-            colorTo="rgba(234, 179, 8, 1)" 
-            borderWidth={1} 
-            className="form-beam" 
+          <BorderBeam
+            size={40}
+            duration={12}
+            colorFrom="rgba(234, 179, 8, 0)"
+            colorTo="rgba(234, 179, 8, 1)"
+            borderWidth={1}
+            className="form-beam"
           />
           <h2>Crear Cuenta</h2>
           <p className="subtitle">Completa tus datos para registrarte</p>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <AnimatedInput
               label="Nombre completo"
               id="nombre"
@@ -50,7 +51,7 @@ function RegistroUsuarios() {
             />
           </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <AnimatedInput
               label="Correo electrónico"
               id="correo"
@@ -63,7 +64,7 @@ function RegistroUsuarios() {
             />
           </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <AnimatedInput
               label="Teléfono"
               id="telefono"
@@ -76,7 +77,7 @@ function RegistroUsuarios() {
             />
           </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <AnimatedInput
               label="Contraseña"
               id="password"
@@ -89,7 +90,7 @@ function RegistroUsuarios() {
             />
           </div>
 
-          <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ marginBottom: '1.5rem' }}>
             <AnimatedInput
               label="Confirmar Contraseña"
               id="confirmPassword"
@@ -105,8 +106,7 @@ function RegistroUsuarios() {
           <button type="submit">Crear Cuenta</button>
 
           <p className="loginText">
-            ¿Ya tienes cuenta?{' '}
-            <span onClick={() => navigate('/login')}>Iniciar sesión</span>
+            ¿Ya tienes cuenta? <span onClick={() => navigate('/login')}>Iniciar sesión</span>
           </p>
         </form>
       </div>

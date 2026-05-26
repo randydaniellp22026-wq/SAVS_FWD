@@ -32,7 +32,7 @@
 /* Gradient overlays for smooth fading edges */
 .brands-container::before,
 .brands-container::after {
-  content: "";
+  content: '';
   height: 100%;
   width: 80px; /* Reducido de 150px para ver más logos */
   position: absolute;
@@ -69,8 +69,12 @@
 }
 
 @keyframes scroll-v3 {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-33.333333%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333333%);
+  }
 }
 
 .brand-item {
@@ -108,7 +112,8 @@
 .brand-item:nth-child(even):hover .brand-logo {
   transform: scale(1.15);
   /* Tono Dorado Premium */
-  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg) brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg)
+    brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
 }
 
 /* Ajuste específico para Genesis que tiene mucho espacio vacío lateral */
@@ -124,15 +129,14 @@
 /* Genesis Hover - Robust Scaling and illumination */
 .brand-genesis:nth-child(even):hover .brand-logo {
   transform: scale(1.6, 1.25);
-  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg) brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.5));
+  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg)
+    brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.5));
 }
 
 .brand-genesis:nth-child(odd):hover .brand-logo {
   transform: scale(1.6, 1.25);
   filter: brightness(0) drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
-
-
 
 /* Ajuste específico para Nissan que se ve pequeño */
 .brand-nissan {
@@ -146,7 +150,8 @@
 /* Nissan Hover - Combining specific scale with general illumination */
 .brand-nissan:nth-child(even):hover .brand-logo {
   transform: scale(1.55);
-  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg) brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
+  filter: brightness(0) saturate(100%) invert(84%) sepia(51%) saturate(543%) hue-rotate(352deg)
+    brightness(101%) contrast(104%) drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
 }
 
 .brand-nissan:nth-child(odd):hover .brand-logo {

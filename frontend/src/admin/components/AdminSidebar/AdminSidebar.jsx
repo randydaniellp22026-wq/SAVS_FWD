@@ -31,7 +31,11 @@ const AdminSidebar = ({ isOpen, closeSidebar }) => {
       aria-label="Navegación del panel administrativo"
     >
       <header className="admin-sidebar__header">
-        <NavLink to={ADMIN_ROUTES.dashboard} className="admin-sidebar__logo" onClick={handleNavigate}>
+        <NavLink
+          to={ADMIN_ROUTES.dashboard}
+          className="admin-sidebar__logo"
+          onClick={handleNavigate}
+        >
           SAVS<span>Admin</span>
         </NavLink>
       </header>
