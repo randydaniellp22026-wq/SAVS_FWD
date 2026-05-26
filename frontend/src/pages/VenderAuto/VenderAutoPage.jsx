@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import api from '../../services/api';
+import { tradeInService } from '../../services/api';
 import TradeInForm from '../../components/TradeIn/TradeInForm';
 import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
 import { handleApiError } from '../../utils/apiError';
@@ -35,8 +35,8 @@ const VenderAutoPage = () => {
   const loadMine = async (uid) => {
     setLoading(true);
     try {
-      const res = await api.get('/sale_requests/mine');
-      setVehiculos(res.data || []);
+      const data = await tradeInService.getMine();
+      setVehiculos(data || []);
     } catch (err) {
       handleApiError('VenderAutoPage.load', err, { toast: false });
     } finally {

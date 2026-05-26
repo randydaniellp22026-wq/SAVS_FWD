@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import { appointmentService } from '../../services/api';
 import { handleApiError } from '../../utils/apiError';
 import './AgendarCita.css';
 
@@ -24,8 +24,8 @@ const AgendarCita = () => {
 
   const loadCitas = async () => {
     try {
-      const res = await api.get('/appointments/mine');
-      setCitas(res.data || []);
+      const data = await appointmentService.getMine();
+      setCitas(data || []);
     } catch (err) {
       handleApiError('AgendarCita.load', err, { toast: false });
     }
@@ -45,7 +45,7 @@ const AgendarCita = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      await api.post('/appointments', form);
+      await appointmentService.create(form);
       toast.success('Cita agendada correctamente');
       setForm({ fecha: '', hora: '', tipo_servicio: TIPOS[0], notas: '' });
       loadCitas();
@@ -58,7 +58,7 @@ const AgendarCita = () => {
 
   const cancelar = async (id) => {
     try {
-      await api.patch(`/appointments/${id}/cancel`);
+      await appointmentService.cancel(id);
       toast.success('Cita cancelada');
       loadCitas();
     } catch (err) {

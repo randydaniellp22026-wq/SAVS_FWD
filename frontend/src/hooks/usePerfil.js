@@ -86,7 +86,7 @@ export const usePerfil = () => {
 
         const [contactRes, tradeInRes] = await Promise.all([
           api.get('/requests/mine'),
-          api.get('/sale_requests/mine'),
+          api.get('/trade-in'),
         ]);
 
         const filteredContacts = contactRes.data || [];

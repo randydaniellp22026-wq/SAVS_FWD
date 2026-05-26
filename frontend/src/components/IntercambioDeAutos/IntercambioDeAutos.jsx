@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone } from 'lucide-react';
-import api from '../../services/api';
+import api, { tradeInService } from '../../services/api';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import './IntercambioDeAutos.css';
 
@@ -13,7 +13,7 @@ const darkSwal = {
   confirmButtonColor: '#f5b400',
 };
 
-const API_URL = '/sale_requests';
+const API_URL = '/trade-in';
 
 const initialFormState = {
   id: null,
@@ -85,8 +85,8 @@ const IntercambioDeAutos = () => {
   const fetchAllVehicles = async () => {
     setLoading(true);
     try {
-      const response = await api.get(API_URL);
-      setVehiculos(formatVehicles(response.data));
+      const data = await tradeInService.getMine();
+      setVehiculos(formatVehicles(Array.isArray(data) ? data : data?.data || []));
     } catch (error) {
       console.error('Error fetching all vehicles:', error);
     } finally {
@@ -108,8 +108,8 @@ const IntercambioDeAutos = () => {
   const fetchUserVehicles = async (uid) => {
     setLoading(true);
     try {
-      const response = await api.get(`${API_URL}?userId=${uid}`);
-      setVehiculos(formatVehicles(response.data));
+      const data = await tradeInService.getMine();
+      setVehiculos(formatVehicles(Array.isArray(data) ? data : data?.data || []));
     } catch (error) {
       console.error('Error fetching user vehicles:', error);
     } finally {
@@ -222,8 +222,8 @@ const IntercambioDeAutos = () => {
     setLoading(true);
     try {
       if (isEditing) {
-        const response = await api.put(`${API_URL}/${cleanData.id}`, cleanData);
-        setVehiculos(vehiculos.map((v) => (v.id === response.data.id ? response.data : v)));
+        const updated = await tradeInService.update(cleanData.id, cleanData);
+        setVehiculos(vehiculos.map((v) => (v.id === updated.id ? updated : v)));
         Swal.fire({
           icon: 'success',
           title: '¡Actualizado!',
@@ -234,8 +234,8 @@ const IntercambioDeAutos = () => {
         });
         setIsEditing(false);
       } else {
-        const response = await api.post(API_URL, { ...cleanData, id: String(Date.now()) });
-        setVehiculos([response.data, ...vehiculos]);
+        const created = await tradeInService.create({ ...cleanData, id: String(Date.now()) });
+        setVehiculos([created, ...vehiculos]);
 
         toast.success('Solicitud enviada correctamente', {
           duration: 4000,
@@ -298,7 +298,7 @@ const IntercambioDeAutos = () => {
     const updatedVehiculo = { ...vehiculo, estado: nuevoEstado };
 
     try {
-      const response = await api.put(`${API_URL}/${id}`, updatedVehiculo);
+      await tradeInService.update(id, updatedVehiculo);
       setVehiculos(vehiculos.map((v) => (v.id === id ? updatedVehiculo : v)));
       Swal.fire({
         ...darkSwal,

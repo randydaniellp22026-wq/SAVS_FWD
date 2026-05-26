@@ -1,11 +1,25 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
+// Default: usamos API v1.
+// Si se requiere legacy, usar apiLegacy.
+const API_URL_V1 =
+  import.meta.env.VITE_API_URL_V1 || `http://${window.location.hostname}:5000/api/v1`;
+const API_URL_LEGACY =
+  import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
 
 // Configuración básica de Axios
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_V1,
   withCredentials: true, // Para enviar cookies si es necesario
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Cliente legacy (rutas /api/* de transición)
+export const apiLegacy = axios.create({
+  baseURL: API_URL_LEGACY,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -49,7 +63,12 @@ api.interceptors.response.use(
 
 // Nueva instancia axios sin content-type fijo (para multipart/form-data)
 const apiForm = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_V1,
+  withCredentials: true,
+});
+
+export const apiLegacyForm = axios.create({
+  baseURL: API_URL_LEGACY,
   withCredentials: true,
 });
 
@@ -124,18 +143,22 @@ export const authService = {
 };
 
 export const tradeInService = {
-  getMine: () => api.get('/sale_requests/mine').then((r) => r.data),
-  create: (data) => api.post('/sale_requests', data).then((r) => r.data),
-  update: (id, data) => api.put(`/sale_requests/${id}`, data).then((r) => r.data),
+  // v1: /trade-in
+  getMine: () => api.get('/trade-in').then((r) => r.data),
+  create: (data) => api.post('/trade-in', data).then((r) => r.data),
+  update: (id, data) => api.put(`/trade-in/${id}`, data).then((r) => r.data),
 };
 
 export const appointmentService = {
-  getMine: () => api.get('/appointments/mine').then((r) => r.data),
+  // v1: /appointments
+  getMine: () => api.get('/appointments').then((r) => r.data),
   create: (data) => api.post('/appointments', data).then((r) => r.data),
-  cancel: (id) => api.patch(`/appointments/${id}/cancel`).then((r) => r.data),
+  // Legacy cancel flow no existe en v1; mantenemos legacy como fallback.
+  cancel: (id) => apiLegacy.patch(`/appointments/${id}/cancel`).then((r) => r.data),
 };
 
 export const pointsService = {
+  // v1: /points (rutas migradas)
   getMine: () => api.get('/points/mine').then((r) => r.data),
   redeem: (cantidad, descripcion) =>
     api.post('/points/redeem', { cantidad, descripcion }).then((r) => r.data),
@@ -166,3 +189,4 @@ export const chatService = {
     return response.data;
   },
 };
+

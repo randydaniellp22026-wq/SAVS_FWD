@@ -23,7 +23,7 @@ const PerfilSeguimiento = ({ userInfo }) => {
       try {
         const [reqRes, tradeRes] = await Promise.all([
           api.get('/requests/mine'),
-          api.get('/sale_requests/mine'),
+          api.get('/trade-in'),
         ]);
         const contacts = (reqRes.data || []).map((r) => ({
           id: `c-${r.id}`,

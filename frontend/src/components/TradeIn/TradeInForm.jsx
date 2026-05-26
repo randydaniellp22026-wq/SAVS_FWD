@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import { tradeInService } from '../../services/api';
 import { handleApiError } from '../../utils/apiError';
 import '../IntercambioDeAutos/IntercambioDeAutos.css';
 
@@ -83,10 +83,10 @@ const TradeInForm = ({ userId, onSuccess, isEditing, editData, onCancelEdit }) =
     setLoading(true);
     try {
       if (isEditing && formData.id) {
-        await api.put(`/sale_requests/${formData.id}`, payload);
+        await tradeInService.update(formData.id, payload);
         toast.success('Solicitud actualizada');
       } else {
-        await api.post('/sale_requests', { ...payload, id: String(Date.now()) });
+        await tradeInService.create({ ...payload, id: String(Date.now()) });
         toast.success('Solicitud enviada correctamente', { icon: '📋' });
         Swal.fire({
           ...darkSwal,
