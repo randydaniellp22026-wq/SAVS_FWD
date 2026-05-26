@@ -31,6 +31,7 @@ import PromocionBadge from '../catalog/PromocionBadge';
 import { marketingService } from '../../services/api';
 import { motion } from 'framer-motion';
 import VehiclePDFButton from './VehiclePDFButton';
+import { CatalogSkeletonGrid } from '../ui/Skeleton';
 import './VehicleCatalog.css';
 
 // Glob para imágenes locales (fallback si no hay imagen en el servidor)
@@ -319,10 +320,7 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
 
         <main className={`catalog-main ${!showFilters ? 'full-width' : ''}`}>
           {loading ? (
-            <div className="loading-state">
-              <div className="loader"></div>
-              <p>Sincronizando con el inventario...</p>
-            </div>
+            <CatalogSkeletonGrid count={6} />
           ) : vehicles.length > 0 ? (
             <>
               <div className="catalog-grid">

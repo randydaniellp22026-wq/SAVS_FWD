@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { adminVehiclesService } from '../../admin/services';
@@ -38,7 +38,9 @@ const initialFormState = {
 const CreateVehicle = () => {
   const navigate = useNavigate();
   const [view, setView] = useState('list');
-  const [vehiculos, setVehiculos] = useState([]);
+  const { data: vehiclesData, isLoading: listLoading, refetch } = useVehiclesAdminQuery();
+  const { createMutation, updateMutation, deleteMutation } = useVehicleMutation();
+  const vehiculos = vehiclesData?.data || [];
   const [currentVehicle, setCurrentVehicle] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
 
@@ -116,30 +118,23 @@ const CreateVehicle = () => {
 
   // Tarea 2 y 4: Enviar datos reales y validar en servidor
   const handleFormSubmit = async (data) => {
-    setLoading(true);
+    setSubmitting(true);
     try {
       const isEditing = !!data.id;
-      
-      // Creamos un FormData para poder enviar la imagen real (Multer lo requiere)
       const formData = new FormData();
-      
-      // Agregamos todos los campos al FormData
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         if (key === 'image' && data[key] instanceof File) {
           formData.append('image', data[key]);
         } else if (key !== 'image') {
           formData.append(key, data[key]);
         }
       });
-
-      // Aseguramos marca y modelo si el nombre viene completo
       if (data.name && !data.marca) {
         const parts = data.name.split(' ');
         formData.append('marca', parts[0]);
         formData.append('modelo', parts.slice(1).join(' '));
       }
 
-      let response;
       if (isEditing) {
         response = await adminVehiclesService.update(data.id, formData);
         Swal.fire({ icon: 'success', title: '¡Actualizado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
@@ -147,20 +142,18 @@ const CreateVehicle = () => {
         response = await adminVehiclesService.create(formData);
         Swal.fire({ icon: 'success', title: '¡Publicado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
       }
-
-      fetchVehicles(); // Recargar lista
+      refetch();
       setView('list');
     } catch (error) {
-      console.error("Error saving vehicle:", error);
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'Error al guardar', 
-        text: error.response?.data?.error || 'Verifica los datos e intenta de nuevo.', 
-        background: '#141414', 
-        color: '#fff' 
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: error.response?.data?.error || 'Verifica los datos e intenta de nuevo.',
+        background: '#141414',
+        color: '#fff',
       });
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -180,8 +173,8 @@ const CreateVehicle = () => {
           </div>
           
           <div className="header-actions">
-            <button onClick={fetchVehicles} className="btn-refresh" title="Sincronizar">
-              <RefreshCcw size={18} className={loading ? 'spin' : ''} />
+            <button onClick={() => refetch()} className="btn-refresh" title="Sincronizar">
+              <RefreshCcw size={18} className={listLoading ? 'spin' : ''} />
             </button>
             {view === 'list' ? (
               <button onClick={handleAddNew} className="btn-primary-admin">
@@ -198,7 +191,7 @@ const CreateVehicle = () => {
 
       <div className="admin-page-content">
         <AnimatePresence mode="wait">
-          {loading && view === 'list' ? (
+          {listLoading && view === 'list' ? (
             <AdminLoader message="Actualizando inventario..." />
           ) : view === 'list' ? (
             <motion.div
@@ -225,7 +218,7 @@ const CreateVehicle = () => {
                 initialData={currentVehicle} 
                 onSubmit={handleFormSubmit}
                 onCancel={() => setView('list')}
-                loading={loading}
+                loading={submitting}
               />
             </motion.div>
           )}

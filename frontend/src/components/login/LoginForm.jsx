@@ -5,7 +5,7 @@ import AnimatedInput from '../AnimatedInput/AnimatedInput';
 export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
   return (
     <form onSubmit={onSubmit} className="premium-form">
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
+      <div className="form-group">
         <AnimatedInput
           label="Correo Electrónico"
           type="email"
@@ -19,7 +19,7 @@ export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
         />
       </div>
 
-      <div className="form-group" style={{ marginBottom: "1.5rem" }}>
+      <div className="form-group">
         <AnimatedInput
           label="Contraseña"
           type="password"

@@ -232,9 +232,9 @@ const TrackingManagement = () => {
           </select>
         </div>
       `,
-      showCancelButton:   true,
-      confirmButtonText:  'Guardar',
-      cancelButtonText:   'Cancelar',
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
       confirmButtonColor: '#eab308',
       background: '#141414',
       color: '#fff',
@@ -257,7 +257,8 @@ const TrackingManagement = () => {
           confirmButtonColor: '#eab308', background: '#141414',
           color: '#fff', timer: 2000, showConfirmButton: false,
         });
-        fetchUsers();
+        invalidateUsers();
+        refetch();
         setExpanded(null);
       } catch {
         Swal.fire('Error', 'No se pudo guardar en el servidor.', 'error');
@@ -277,8 +278,6 @@ const TrackingManagement = () => {
   /* ══════════════════ RENDER ══════════════════ */
   return (
     <div className="admin-container tracking-mgmt">
-
-      {/* ── Header ── */}
       <header className="tracking-header">
         <div className="tracking-title-row">
           <div className="tracking-icon-wrapper"><Ship size={28} /></div>

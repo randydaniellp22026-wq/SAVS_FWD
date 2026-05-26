@@ -53,7 +53,13 @@ exports.getById = async (req, res) => {
  */
 exports.create = async (req, res) => {
     try {
-        const data = await Request.create(req.body);
+        const payload = {
+            ...req.body,
+            id: req.body.id || `req_${Date.now()}`,
+            status: req.body.status || 'pending',
+            date: req.body.date || new Date().toISOString(),
+        };
+        const data = await Request.create(payload);
         res.status(201).json(data);
     } catch (error) {
         res.status(500).json({ error: error.message });

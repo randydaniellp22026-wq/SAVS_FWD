@@ -12,31 +12,20 @@ import {
   User,
   LayoutDashboard,
   Heart,
-  Search,
   Ship,
   Settings,
   BadgeCheck,
-  Check,
-  Clock,
-  MapPin,
-  Mail,
-  Phone,
-  Plus,
-  Edit2,
-  LogOut,
-  Car,
   FileText,
-  CheckCircle,
-  XCircle,
-  Send
+  LogOut,
 } from 'lucide-react';
-
-const darkSwal = {
-  background: '#0a0a0a',
-  color: '#fff',
-  confirmButtonColor: '#eab308',
-  cancelButtonColor: '#333'
-};
+import { CatalogSkeletonGrid } from '../ui/Skeleton';
+import { usePerfilLogic } from './usePerfilLogic';
+import PersonalDataSection from './sections/PersonalDataSection';
+import LoyaltyProgramSection from './sections/LoyaltyProgramSection';
+import PurchaseHistorySection from './sections/PurchaseHistorySection';
+import AccountSettingsSection from './sections/AccountSettingsSection';
+import styles from './sections/PerfilSections.module.css';
+import './PerfilUsuarios.css';
 
 function PerfilUsuarios() {
   const navigate = useNavigate();
@@ -633,37 +622,39 @@ function PerfilUsuarios() {
 
   return (
     <div className="perfil-container">
-      {/* 1. Navbar superior */}
-      <nav className="perfil-navbar">
+      <nav className="perfil-navbar" aria-label="Navegación del perfil">
         <div className="navbar-logo">
-          <span className="logo-text">DESTINY<span className="gold">VAULT</span></span>
+          <span className="logo-text">
+            DESTINY<span className="gold">VAULT</span>
+          </span>
         </div>
         <ul className="navbar-links">
-          <li onClick={() => navigate('/')}>Inicio</li>
-          <li onClick={() => navigate('/inventory')}>Vehículos</li>
-          <li onClick={() => navigate('/contact')}>Servicios</li>
-          <li className="active-link" onClick={() => setActiveTab('Dashboard')}>Perfil</li>
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/')}>Inicio</button></li>
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/inventory')}>Vehículos</button></li>
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/contact')}>Servicios</button></li>
+          <li className="active-link">Perfil</li>
         </ul>
         <div className="navbar-icons">
-          <button className="icon-btn"><Bell size={20} /></button>
-          <button className="icon-btn active-icon"><User size={20} /></button>
+          <button type="button" className="icon-btn" aria-label="Notificaciones"><Bell size={20} /></button>
+          <button type="button" className="icon-btn active-icon" aria-label="Perfil activo"><User size={20} /></button>
         </div>
       </nav>
 
       <div className="perfil-body">
-        {/* 2. Sidebar */}
-        <aside className="perfil-sidebar">
+        <aside className="perfil-sidebar" aria-label="Menú del perfil">
           <div className="sidebar-profile">
-            <div 
-              className="profile-img-container" 
+            <div
+              className={`profile-img-container ${styles.profileImgContainer}`}
               onClick={handleEditAvatar}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}
+              onKeyDown={(e) => e.key === 'Enter' && handleEditAvatar()}
+              role="button"
+              tabIndex={0}
               title="Clic para cambiar foto de perfil"
             >
               {userInfo.image ? (
-                <img src={userInfo.image} alt={userInfo.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={userInfo.image} alt={userInfo.name} className={styles.profileImg} />
               ) : (
-                <User size={48} color="#a0a0a0" />
+                <User size={48} color="#a0a0a0" aria-hidden="true" />
               )}
             </div>
             <h3>{userInfo.name}</h3>
@@ -705,15 +696,16 @@ function PerfilUsuarios() {
           </ul>
         </aside>
 
-        {/* 3. Sección principal */}
         <main className="perfil-main">
           <header className="main-header">
             <div className="header-info">
               <h1>
                 {userInfo.name}
-                <BadgeCheck className="verified-badge" size={28} />
+                <BadgeCheck className="verified-badge" size={28} aria-hidden="true" />
               </h1>
-              <p className="subtitle">{userInfo.role} • {userInfo.location}</p>
+              <p className="subtitle">
+                {userInfo.role} • {userInfo.location}
+              </p>
             </div>
           </header>
 
@@ -846,192 +838,17 @@ function PerfilUsuarios() {
 
               {/* Nuevas Peticiones Tab */}
               {activeTab === 'Peticiones' && (
-                <section className="requests-user-section">
-                  <h2>Estado de mis Peticiones</h2>
-                  {userRequests.length === 0 ? (
-                    <div style={{ background: '#111', padding: '2rem', borderRadius: '12px', color: '#9ca3af', textAlign: 'center' }}>
-                      No tienes peticiones activas. Ve a la sección de contacto para enviar una.
-                    </div>
-                  ) : (
-                    <div className="user-requests-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {userRequests.map(req => {
-                        const isApproved = req.status === 'accepted' || req.status === 'Aprobado';
-                        const isRejected = req.status === 'rejected' || req.status === 'Rechazado';
-                        const isReplied = req.status === 'replied' || (req.reply && req.status === 'pending');
-                        
-                        let badgeText = 'Pendiente';
-                        let badgeColor = '#eab308';
-                        let bgBadge = 'rgba(234,179,8,0.2)';
-
-                        if (isApproved) {
-                          badgeText = 'Aprobada';
-                          badgeColor = '#10b981';
-                          bgBadge = 'rgba(16,185,129,0.2)';
-                        } else if (isRejected) {
-                          badgeText = 'Rechazada';
-                          badgeColor = '#ef4444';
-                          bgBadge = 'rgba(239,68,68,0.2)';
-                        } else if (isReplied) {
-                          badgeText = 'Respondida';
-                          badgeColor = '#3b82f6';
-                          bgBadge = 'rgba(59,130,246,0.2)';
-                        }
-
-                        return (
-                          <div key={`${req.type}-${req.id}`} style={{ background: '#111', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px', position: 'relative', overflow: 'hidden' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                              <div>
-                                <span style={{ fontSize: '0.65rem', color: '#eab308', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '2px', display: 'block', marginBottom: '6px' }}>
-                                  {req.type === 'tradein' ? 'Venta de Auto (Trade-in)' : 'Consulta General'}
-                                </span>
-                                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: '700' }}>{req.subject}</h3>
-                              </div>
-                              <span style={{ 
-                                padding: '6px 14px', 
-                                borderRadius: '12px', 
-                                fontSize: '0.75rem', 
-                                fontWeight: '700',
-                                backgroundColor: bgBadge,
-                                color: badgeColor,
-                                textTransform: 'uppercase',
-                                letterSpacing: '1px'
-                               }}>
-                                 {badgeText}
-                              </span>
-                            </div>
-                            
-                            <p style={{ margin: '0 0 1.2rem 0', color: '#9ca3af', fontStyle: 'italic', fontSize: '0.9rem', lineHeight: '1.6' }}>
-                              "{req.message}"
-                            </p>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                                <Clock size={14} />
-                                <span style={{ fontSize: '0.8rem' }}>{new Date(req.date).toLocaleDateString()}</span>
-                              </div>
-
-                              {req.reply && (
-                                <button
-                                  onClick={() => {
-                                    Swal.fire({
-                                      title: 'Respuesta de Administración',
-                                      text: req.reply,
-                                      icon: 'info',
-                                      confirmButtonText: 'Entendido',
-                                      confirmButtonColor: '#eab308',
-                                      background: '#141414',
-                                      color: '#fff'
-                                    });
-                                  }}
-                                  style={{ 
-                                    background: 'none', 
-                                    border: 'none', 
-                                    color: '#eab308', 
-                                    fontSize: '0.85rem', 
-                                    fontWeight: '600', 
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    padding: '6px 12px',
-                                    borderRadius: '8px',
-                                    backgroundColor: 'rgba(234,179,8,0.1)'
-                                  }}
-                                >
-                                  <Send size={14} /> Ver Respuesta
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
+                <PurchaseHistorySection userRequests={userRequests} />
               )}
-
-              {/* 8. Configuración */}
               {activeTab === 'Configuración' && (
-                <section className="settings-section">
-                  <h2>Ajustes de la Cuenta</h2>
-                  <div className="settings-grid">
-                    <div className="settings-card">
-                      <h3>Seguridad</h3>
-                      <button className="btn-settings outline" onClick={() => Swal.fire({ ...darkSwal, title: 'Cambiar Contraseña', input: 'password', inputPlaceholder: 'Nueva contraseña' })}>Cambiar Contraseña</button>
-                    </div>
-                    <div className="settings-card">
-                      <h3>Preferencias</h3>
-                      <div className="toggle-group">
-                        <label className="toggle-label">
-                          <input type="checkbox" defaultChecked className="toggle-checkbox" /> Notificaciones por Email
-                        </label>
-                        <label className="toggle-label">
-                          <input type="checkbox" defaultChecked className="toggle-checkbox" /> Alertas SMS
-                        </label>
-                      </div>
-                      <select className="settings-select" defaultValue="cr">
-                        <option value="cr">Moneda: Colones (₡)</option>
-                        <option value="us">Moneda: Dólares ($)</option>
-                      </select>
-                    </div>
-                    <div className="settings-card danger-zone">
-                      <h3 className="danger-text">Zona de Peligro</h3>
-                      <p className="danger-desc">Estas acciones no se pueden deshacer.</p>
-                      <button className="btn-danger" onClick={handleLogout}>Cerrar Sesión</button>
-                      <button className="btn-danger outline" onClick={() => Swal.fire({ ...darkSwal, icon: 'error', title: '¿Eliminar cuenta?', text: 'Se borrarán de forma permanente todos tus datos, favoritos y autos.', showCancelButton: true, confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar', confirmButtonColor: '#e63946' })}>Eliminar Cuenta</button>
-                    </div>
-                  </div>
-                </section>
+                <AccountSettingsSection
+                  onChangePassword={handleChangePassword}
+                  onLogout={handleLogout}
+                />
               )}
             </div>
-
             <div className="right-column">
-              {/* 5. Información del usuario */}
-              <section className="user-info-section">
-                <h2>Información Personal</h2>
-                <div className="info-list">
-                  <div className="info-item">
-                    <div className="icon-wrapper">
-                      <Mail className="info-icon" size={20} />
-                    </div>
-                    <div className="info-text">
-                      <label>Email</label>
-                      <p>{userInfo.email}</p>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="icon-wrapper">
-                      <Phone className="info-icon" size={20} />
-                    </div>
-                    <div className="info-text">
-                      <label>Teléfono</label>
-                      <p>{userInfo.phone}</p>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="icon-wrapper">
-                      <MapPin className="info-icon" size={20} />
-                    </div>
-                    <div className="info-text">
-                      <label>Ubicación</label>
-                      <p>{userInfo.location}</p>
-                    </div>
-                  </div>
-                  <div className="info-item">
-                    <div className="icon-wrapper">
-                      <MapPin className="info-icon" size={20} />
-                    </div>
-                    <div className="info-text">
-                      <label>Dirección exacta</label>
-                      <p>{userInfo.preciseAddress}</p>
-                    </div>
-                  </div>
-                </div>
-                <button className="edit-profile-btn" onClick={handleEditProfile}>
-                  <Edit2 size={18} />
-                  <span>Editar perfil</span>
-                </button>
-              </section>
+              <PersonalDataSection userInfo={userInfo} onEditProfile={handleEditProfile} />
             </div>
           </div>
         </main>

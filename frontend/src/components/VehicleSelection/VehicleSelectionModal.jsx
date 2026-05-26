@@ -29,13 +29,22 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       api.get('/vehicles')
         .then(res => {
-          // El backend envuelve los resultados en "data" (junto con pagination)
           const vehicleArray = res.data.data || res.data || [];
           setAllVehicles(Array.isArray(vehicleArray) ? vehicleArray : []);
         })
         .catch(err => console.error("Error loading vehicles for selection:", err));
     }
   }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // When category changes, filter models
   useEffect(() => {
@@ -84,8 +93,18 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="vehicle-selection-overlay">
-      <div className="vehicle-selection-modal">
+    <div
+      className="vehicle-selection-overlay"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="vehicle-selection-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="vehicle-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="vehicle-selection-close" onClick={onClose} aria-label="Cerrar">
           <X size={32} />
         </button>
@@ -96,22 +115,25 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
               <button className="vehicle-selection-back" onClick={onClose} aria-label="Volver">
                 <ArrowLeft size={20} /> Volver
               </button>
-              <h2 className="vehicle-selection-title">Seleccioná el tipo de vehículo</h2>
+              <h2 id="vehicle-modal-title" className="vehicle-selection-title">Selecioná el tipo de vehículo</h2>
               
-              <div className="category-grid">
+              <div className="category-grid" role="list">
                 {categoriesData.map((cat) => {
                   const Icon = cat.icon;
                   return (
-                    <div 
-                      key={cat.id} 
+                    <button
+                      key={cat.id}
+                      role="listitem"
                       className={`category-card ${selectedCategory === cat.id ? 'selected' : ''}`}
                       onClick={() => handleCategorySelect(cat.id)}
+                      aria-pressed={selectedCategory === cat.id}
+                      aria-label={`Seleccionar tipo: ${cat.label}`}
                     >
-                      <div className="category-icon-wrapper">
+                      <div className="category-icon-wrapper" aria-hidden="true">
                         <Icon size={70} strokeWidth={1} />
                       </div>
                       <span className="category-name">{cat.label}</span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -123,11 +145,11 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
               <button className="vehicle-selection-back" onClick={handleGoBack} aria-label="Volver">
                 <ArrowLeft size={20} /> Volver
               </button>
-              <h2 className="vehicle-selection-title">Seleccioná el vehículo de interés</h2>
+              <h2 id="vehicle-modal-title" className="vehicle-selection-title">Selecioná el vehículo de interés</h2>
               
               <div className="models-carousel-wrapper">
-                <button className="carousel-nav-btn" onClick={() => scrollCarousel('left')}>
-                  <ChevronLeft size={48} />
+                <button className="carousel-nav-btn" onClick={() => scrollCarousel('left')} aria-label="Anterior">
+                  <ChevronLeft size={48} aria-hidden="true" />
                 </button>
                 
                 <div className="models-grid" ref={carouselRef}>
@@ -153,8 +175,8 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                   ))}
                 </div>
 
-                <button className="carousel-nav-btn" onClick={() => scrollCarousel('right')}>
-                  <ChevronRight size={48} />
+                <button className="carousel-nav-btn" onClick={() => scrollCarousel('right')} aria-label="Siguiente">
+                  <ChevronRight size={48} aria-hidden="true" />
                 </button>
               </div>
             </>

@@ -1,0 +1,42 @@
+name: Smoke tests (staging)
+
+on:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: |
+            The-destiny-vault-/frontend/package-lock.json
+            The-destiny-vault-/backend/package-lock.json
+
+      - name: Install backend
+        working-directory: The-destiny-vault-/backend
+        run: npm ci
+
+      - name: Install frontend
+        working-directory: The-destiny-vault-/frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: The-destiny-vault-/frontend
+        run: npx playwright install chromium --with-deps
+
+      - name: Run smoke tests
+        working-directory: The-destiny-vault-/frontend
+        env:
+          CI: true
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+          PLAYWRIGHT_BASE_URL: ${{ vars.STAGING_URL || 'http://localhost:5173' }}
+          PLAYWRIGHT_API_URL: ${{ vars.STAGING_API_URL || 'http://localhost:5000' }}
+        run: npm run test:e2e

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   UserPlus, 
@@ -19,9 +19,9 @@ import AdminLoader from '../../components/admin/AdminLoader';
 import './UserManagement.css';
 
 const UserManagement = () => {
-  const [users, setUsers] = useState([]);
+  const { data: users = [], isLoading } = useUsersQuery();
+  const invalidateUsers = useInvalidateUsers();
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   
   const currentUser = getStoredAdminUser();
   const isGerente = currentUser.rol === 'gerente';
@@ -107,7 +107,7 @@ const UserManagement = () => {
         try {
           await usersService.remove(user.id);
           Swal.fire('Eliminado', 'El usuario ha sido removido.', 'success');
-          fetchUsers();
+          invalidateUsers();
         } catch (error) {
           Swal.fire('Error', 'Ocurrió un fallo al intentar eliminar.', 'error');
         }
@@ -151,7 +151,7 @@ const UserManagement = () => {
             background: '#141414',
             color: '#fff'
           });
-          fetchUsers();
+          invalidateUsers();
         } catch (error) {
           Swal.fire('Error', 'No se pudo procesar el cambio de rango.', 'error');
         }
@@ -197,8 +197,8 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan="5"><AdminLoader message="Obteniendo lista de usuarios..." height="200px" /></td></tr>
+            {isLoading ? (
+              <tr><td colSpan="5"><CatalogSkeletonGrid count={3} /></td></tr>
             ) : filteredUsers.map(user => (
               <tr key={user.id}>
                 <td data-label="Usuario">
