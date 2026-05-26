@@ -104,11 +104,15 @@
   gap: 1.25rem; /* Ajuste: enlaces más juntos */
   font-weight: 600;
   color: #e2e8f0;
-  font-size: 1.0rem; /* Un poco más pequeño para ahorrar espacio */
+  font-size: 1rem; /* Un poco más pequeño para ahorrar espacio */
   align-items: center;
   margin: 0 2rem; /* Separación con logo y buscador */
 }
-@media (min-width: 1024px) { .navbar-links { display: flex; } }
+@media (min-width: 1024px) {
+  .navbar-links {
+    display: flex;
+  }
+}
 
 .navbar-links a,
 .navbar-links button {
@@ -159,7 +163,11 @@
   border: 1px solid rgba(234, 179, 8, 0.2);
   transition: all var(--transition-fast);
 }
-@media (min-width: 768px) { .search-bar { display: flex; } }
+@media (min-width: 768px) {
+  .search-bar {
+    display: flex;
+  }
+}
 
 .search-bar:focus-within {
   border-color: var(--color-primary);
@@ -167,7 +175,10 @@
   box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15);
 }
 
-.search-icon { color: #6b7280; margin-right: 0.5rem; }
+.search-icon {
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
 
 .search-input {
   border: none;
@@ -177,7 +188,9 @@
   color: #ffffff;
   font-size: 0.875rem;
 }
-.search-input::placeholder { color: #6b7280; }
+.search-input::placeholder {
+  color: #6b7280;
+}
 
 .session-manager {
   display: flex;
@@ -265,14 +278,18 @@
   background: rgba(13, 13, 13, 0.95);
   border: 1px solid rgba(234, 179, 8, 0.3);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(234, 179, 8, 0.1);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(234, 179, 8, 0.1);
   padding: 0.5rem 0;
   display: flex;
   flex-direction: column;
   opacity: 0;
   transform: translateY(-15px);
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(12px);
   z-index: 1001;
 }
@@ -306,7 +323,10 @@
   gap: 0.75rem;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: background 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    padding-left 0.2s ease;
   background: none;
   border: none;
   width: 100%;
@@ -439,7 +459,7 @@
   .navbar-links {
     display: none !important;
   }
-  
+
   .hamburger-btn {
     display: flex;
     align-items: center;
@@ -461,7 +481,7 @@
   .search-bar {
     display: none !important;
   }
-  
+
   .session-label {
     display: none; /* Hide name on mobile to save space */
   }
@@ -479,7 +499,7 @@
   .navbar-container {
     padding: 0 1rem !important;
   }
-  
+
   .logo-icon-savs {
     width: 40px;
     height: 40px;

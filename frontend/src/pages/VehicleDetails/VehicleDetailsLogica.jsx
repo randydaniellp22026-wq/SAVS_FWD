@@ -12,6 +12,6 @@ export const useVehicleDetailsLogica = (vehicle) => {
   };
 
   return {
-    getMonthlyPayment
+    getMonthlyPayment,
   };
 };

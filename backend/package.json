@@ -20,7 +20,24 @@
     "testEnvironment": "node",
     "testMatch": [
       "**/__tests__/**/*.test.js"
-    ]
+    ],
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "middlewares/authMiddleware.js",
+      "middlewares/requestContext.js",
+      "utils/asyncHandler.js",
+      "utils/httpError.js",
+      "utils/logger.js",
+      "utils/reportExport.js",
+      "utils/facebookUrl.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70
+      }
+    }
   },
   "keywords": [],
   "author": "",

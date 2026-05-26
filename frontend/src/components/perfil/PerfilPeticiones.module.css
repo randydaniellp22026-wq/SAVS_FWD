@@ -1,0 +1,104 @@
+/* PerfilPeticiones.module.css — Estilos para las peticiones de usuario */
+
+.emptyContainer {
+  background: #111;
+  padding: 2rem;
+  border-radius: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.requestCard {
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.5rem;
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.typeText {
+  font-size: 0.65rem;
+  color: var(--color-primary, #eab308);
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.subjectText {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.statusBadge {
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.messageText {
+  margin: 0 0 1.2rem 0;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.footerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1rem;
+}
+
+.dateWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+}
+
+.dateText {
+  font-size: 0.8rem;
+}
+
+.replyBtn {
+  background: none;
+  border: none;
+  color: #eab308;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background-color: rgba(234, 179, 8, 0.1);
+  transition: all 0.3s ease;
+}
+
+.replyBtn:hover {
+  background-color: rgba(234, 179, 8, 0.2);
+}

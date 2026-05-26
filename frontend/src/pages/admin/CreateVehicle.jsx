@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { adminVehiclesService } from '../../admin/services';
-import { 
-  CarFront, 
-  Plus, 
-  RefreshCcw, 
-  ArrowLeft,
-  ChevronRight
-} from 'lucide-react';
+import { CarFront, Plus, RefreshCcw, ArrowLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Componentes Modulares
@@ -32,7 +26,7 @@ const initialFormState = {
   image: null, // Guardaremos el archivo real para Multer
   summary: '',
   doors: '5',
-  passengers: '5'
+  passengers: '5',
 };
 
 const CreateVehicle = () => {
@@ -55,13 +49,13 @@ const CreateVehicle = () => {
       const response = await adminVehiclesService.getAll({ limit: 100 });
       setVehiculos(response.data || []);
     } catch (error) {
-      console.error("Error fetching vehicles:", error);
+      console.error('Error fetching vehicles:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error de conexión',
         text: 'No se pudieron cargar los vehículos desde el servidor.',
         background: '#1a1a1a',
-        color: '#fff'
+        color: '#fff',
       });
     } finally {
       setLoading(false);
@@ -89,20 +83,20 @@ const CreateVehicle = () => {
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
       background: '#141414',
-      color: '#fff'
+      color: '#fff',
     });
 
     if (result.isConfirmed) {
       try {
         await adminVehiclesService.delete(vehicle.id);
-        setVehiculos(prev => prev.filter(v => v.id !== vehicle.id));
+        setVehiculos((prev) => prev.filter((v) => v.id !== vehicle.id));
         Swal.fire({
           icon: 'success',
           title: 'Eliminado',
           background: '#141414',
           color: '#fff',
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } catch (error) {
         Swal.fire({
@@ -110,7 +104,7 @@ const CreateVehicle = () => {
           title: 'Error al eliminar',
           text: error.response?.data?.error || 'No se pudo completar la operación.',
           background: '#141414',
-          color: '#fff'
+          color: '#fff',
         });
       }
     }
@@ -137,10 +131,24 @@ const CreateVehicle = () => {
 
       if (isEditing) {
         response = await adminVehiclesService.update(data.id, formData);
-        Swal.fire({ icon: 'success', title: '¡Actualizado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
+        Swal.fire({
+          icon: 'success',
+          title: '¡Actualizado!',
+          background: '#141414',
+          color: '#fff',
+          timer: 1500,
+          showConfirmButton: false,
+        });
       } else {
         response = await adminVehiclesService.create(formData);
-        Swal.fire({ icon: 'success', title: '¡Publicado!', background: '#141414', color: '#fff', timer: 1500, showConfirmButton: false });
+        Swal.fire({
+          icon: 'success',
+          title: '¡Publicado!',
+          background: '#141414',
+          color: '#fff',
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
       refetch();
       setView('list');
@@ -161,17 +169,21 @@ const CreateVehicle = () => {
     <div className="admin-inventory-page">
       <div className="admin-page-header">
         <div className="breadcrumb">
-          <span onClick={() => navigate('/admin')} className="crumb-link">Dashboard</span>
+          <span onClick={() => navigate('/admin')} className="crumb-link">
+            Dashboard
+          </span>
           <ChevronRight size={14} />
           <span className="crumb-active">Inventario</span>
         </div>
-        
+
         <div className="header-main-row">
           <div className="header-titles">
-            <h1>Gestión de Inventario <CarFront size={28} className="icon-gold" /></h1>
+            <h1>
+              Gestión de Inventario <CarFront size={28} className="icon-gold" />
+            </h1>
             <p>Añade, edita y supervisa el stock de vehículos disponibles en el catálogo.</p>
           </div>
-          
+
           <div className="header-actions">
             <button onClick={() => refetch()} className="btn-refresh" title="Sincronizar">
               <RefreshCcw size={18} className={listLoading ? 'spin' : ''} />
@@ -200,9 +212,9 @@ const CreateVehicle = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
             >
-              <VehicleList 
-                vehicles={vehiculos} 
-                onEdit={handleEdit} 
+              <VehicleList
+                vehicles={vehiculos}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 onAddNew={handleAddNew}
               />
@@ -214,8 +226,8 @@ const CreateVehicle = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
             >
-              <VehicleForm 
-                initialData={currentVehicle} 
+              <VehicleForm
+                initialData={currentVehicle}
                 onSubmit={handleFormSubmit}
                 onCancel={() => setView('list')}
                 loading={submitting}

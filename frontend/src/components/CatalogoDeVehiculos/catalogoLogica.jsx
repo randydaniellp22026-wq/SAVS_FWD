@@ -33,14 +33,14 @@ export const useCatalogoLogica = () => {
     engine_size: '',
     tag: '',
     mileage: '',
-    search: new URLSearchParams(location.search).get('search') || ''
+    search: new URLSearchParams(location.search).get('search') || '',
   });
 
   // Función para cargar vehículos desde la API (Servidor)
   const fetchVehicles = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Mapeamos los filtros activos a los parámetros que espera el Backend
       const params = {
         page: pagination.page,
@@ -59,7 +59,7 @@ export const useCatalogoLogica = () => {
         passengers: activeFilters.passengers,
         steering: activeFilters.steering,
         engine_size: activeFilters.engine_size,
-        tag: activeFilters.tag
+        tag: activeFilters.tag,
       };
 
   const { data, isLoading, isFetching } = useVehiclesCatalogQuery(queryParams);
@@ -87,10 +87,24 @@ export const useCatalogoLogica = () => {
 
   const resetFilters = () => {
     setActiveFilters({
-      transmission: '', fuel: '', marca: '', modelo: '', type: '',
-      minPrice: '', maxPrice: '', minYear: '', maxYear: '', color: '',
-      doors: '', drive: '', passengers: '', steering: '', engine_size: '',
-      tag: '', mileage: '', search: ''
+      transmission: '',
+      fuel: '',
+      marca: '',
+      modelo: '',
+      type: '',
+      minPrice: '',
+      maxPrice: '',
+      minYear: '',
+      maxYear: '',
+      color: '',
+      doors: '',
+      drive: '',
+      passengers: '',
+      steering: '',
+      engine_size: '',
+      tag: '',
+      mileage: '',
+      search: '',
     });
     setPagination((prev) => ({ ...prev, page: 1 }));
   };
@@ -108,4 +122,3 @@ export const useCatalogoLogica = () => {
     searchQueryParam: activeFilters.search,
   };
 };
-

@@ -5,9 +5,12 @@ import { handleApiError } from '../../utils/apiError';
 
 const mapEstado = (estado) => {
   const e = (estado || '').toLowerCase();
-  if (e.includes('aproba')) return { key: 'completado', label: 'Completado', icon: CheckCircle, color: '#10b981' };
-  if (e.includes('rechaz')) return { key: 'completado', label: 'Rechazado', icon: CheckCircle, color: '#ef4444' };
-  if (e.includes('revis')) return { key: 'proceso', label: 'En proceso', icon: Loader, color: '#3b82f6' };
+  if (e.includes('aproba'))
+    return { key: 'completado', label: 'Completado', icon: CheckCircle, color: '#10b981' };
+  if (e.includes('rechaz'))
+    return { key: 'completado', label: 'Rechazado', icon: CheckCircle, color: '#ef4444' };
+  if (e.includes('revis'))
+    return { key: 'proceso', label: 'En proceso', icon: Loader, color: '#3b82f6' };
   return { key: 'pendiente', label: 'Pendiente', icon: Clock, color: '#eab308' };
 };
 
@@ -20,7 +23,7 @@ const PerfilSeguimiento = ({ userInfo }) => {
       try {
         const [reqRes, tradeRes] = await Promise.all([
           api.get('/requests/mine'),
-          api.get('/sale_requests/mine')
+          api.get('/trade-in'),
         ]);
         const contacts = (reqRes.data || []).map((r) => ({
           id: `c-${r.id}`,
@@ -28,7 +31,7 @@ const PerfilSeguimiento = ({ userInfo }) => {
           detalle: r.message,
           estado: r.status,
           fecha: r.date || r.createdAt,
-          tipo: 'contacto'
+          tipo: 'contacto',
         }));
         const trades = (tradeRes.data || []).map((t) => ({
           id: `t-${t.id}`,
@@ -36,7 +39,7 @@ const PerfilSeguimiento = ({ userInfo }) => {
           detalle: t.descripcion,
           estado: t.estado,
           fecha: t.createdAt,
-          tipo: 'trade-in'
+          tipo: 'trade-in',
         }));
         setItems([...trades, ...contacts].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)));
       } catch (err) {
@@ -55,7 +58,10 @@ const PerfilSeguimiento = ({ userInfo }) => {
       <h2>Seguimiento de solicitudes</h2>
       {userInfo?.tracking && (
         <div className="import-tracking-mini">
-          <p><strong>Importación:</strong> {userInfo.tracking.vehicleName || '—'} — {userInfo.tracking.statusText}</p>
+          <p>
+            <strong>Importación:</strong> {userInfo.tracking.vehicleName || '—'} —{' '}
+            {userInfo.tracking.statusText}
+          </p>
         </div>
       )}
       {loading ? (
@@ -74,7 +80,9 @@ const PerfilSeguimiento = ({ userInfo }) => {
                   <span className="seguimiento-tipo">{item.tipo}</span>
                   <h4>{item.titulo}</h4>
                   <p>{item.detalle}</p>
-                  <span className="seguimiento-estado" style={{ color: st.color }}>{st.label}</span>
+                  <span className="seguimiento-estado" style={{ color: st.color }}>
+                    {st.label}
+                  </span>
                 </div>
                 <time>{item.fecha ? new Date(item.fecha).toLocaleDateString() : '—'}</time>
               </div>

@@ -21,7 +21,7 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   const [fadeState, setFadeState] = useState('fade-in');
   const [models, setModels] = useState([]);
   const [allVehicles, setAllVehicles] = useState([]);
-  
+
   const carouselRef = useRef(null);
 
   // Fetch all vehicles once when the modal opens
@@ -32,7 +32,7 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
           const vehicleArray = res.data.data || res.data || [];
           setAllVehicles(Array.isArray(vehicleArray) ? vehicleArray : []);
         })
-        .catch(err => console.error("Error loading vehicles for selection:", err));
+        .catch((err) => console.error('Error loading vehicles for selection:', err));
     }
   }, [isOpen]);
 
@@ -49,7 +49,7 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   // When category changes, filter models
   useEffect(() => {
     if (selectedCategory && allVehicles.length > 0) {
-      const filtered = allVehicles.filter(v => 
+      const filtered = allVehicles.filter((v) =>
         v.type.toLowerCase().includes(selectedCategory.toLowerCase())
       );
       // Fallback to slicing some vehicles if category is empty
@@ -151,26 +151,26 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                 <button className="carousel-nav-btn" onClick={() => scrollCarousel('left')} aria-label="Anterior">
                   <ChevronLeft size={48} aria-hidden="true" />
                 </button>
-                
+
                 <div className="models-grid" ref={carouselRef}>
                   {models.map((vehicle) => (
-                    <div 
-                      key={vehicle.id} 
+                    <div
+                      key={vehicle.id}
                       className={`model-card ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
                       onClick={() => handleVehicleSelect(vehicle)}
                     >
-                      <div className={`model-radio ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}></div>
+                      <div
+                        className={`model-radio ${selectedVehicle?.id === vehicle.id ? 'selected' : ''}`}
+                      ></div>
                       <div className="model-image-wrapper">
-                        <img 
-                          src={vehicle.image} 
-                          alt={vehicle.name} 
-                          className="model-image" 
+                        <img
+                          src={vehicle.image}
+                          alt={vehicle.name}
+                          className="model-image"
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <span className="model-name">
-                        {vehicle.name}
-                      </span>
+                      <span className="model-name">{vehicle.name}</span>
                     </div>
                   ))}
                 </div>

@@ -30,15 +30,25 @@
   font-size: 1.1rem;
 }
 
-.footer-icon { color: var(--color-primary); }
+.footer-icon {
+  color: var(--color-primary);
+}
 
-.footer-text { color: #6b7280; font-size: 0.875rem; }
+.footer-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
 
-.social-icons { display: flex; gap: 1.25rem; }
+.social-icons {
+  display: flex;
+  gap: 1.25rem;
+}
 
 .social-link {
   color: #6b7280;
-  transition: color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .social-link:hover {

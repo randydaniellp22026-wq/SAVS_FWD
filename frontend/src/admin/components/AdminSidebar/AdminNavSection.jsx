@@ -15,11 +15,7 @@ const AdminNavSection = ({ sectionKey, title, items, onNavigate, startIndex = 0 
       <ul className="admin-nav-section__list">
         {items.map((item, i) => (
           <li key={item.to}>
-            <AdminNavItem
-              item={item}
-              onNavigate={onNavigate}
-              index={startIndex + i}
-            />
+            <AdminNavItem item={item} onNavigate={onNavigate} index={startIndex + i} />
           </li>
         ))}
       </ul>

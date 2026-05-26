@@ -32,7 +32,8 @@
   width: 120px;
   margin-bottom: 20px;
   /* Make the logo golden using filters if it is black natively */
-  filter: brightness(0) saturate(100%) invert(67%) sepia(54%) saturate(733%) hue-rotate(1deg) brightness(101%) contrast(98%);
+  filter: brightness(0) saturate(100%) invert(67%) sepia(54%) saturate(733%) hue-rotate(1deg)
+    brightness(101%) contrast(98%);
 }
 
 .footer-brand-name {
@@ -129,7 +130,7 @@
 .footer-car-img {
   max-width: 100%;
   height: auto;
-  filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.8));
+  filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.8));
 }
 
 /* Footer Bottom */
@@ -176,7 +177,9 @@
     width: 100%;
     order: -1; /* Mover imagen arriba o abajo según prefieras, aquí la dejo arriba del todo */
   }
-  .footer-col-left, .footer-col-mid, .footer-col-right {
+  .footer-col-left,
+  .footer-col-mid,
+  .footer-col-right {
     min-width: 100%;
     align-items: center;
   }
@@ -195,7 +198,7 @@
     text-align: center;
     padding-bottom: 30px;
   }
-  
+
   .footer-savs {
     padding: 40px 15px 20px;
   }

@@ -14,7 +14,7 @@ export const useNavbarStatus = () => {
 
   useEffect(() => {
     setIsMenuOpen(false);
-    
+
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -46,7 +46,7 @@ export const useNavbarStatus = () => {
       // Llamar al backend para limpiar la cookie httpOnly del JWT
       await fetch('http://localhost:5000/api/auth/logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       });
     } catch (err) {
       console.error('Error al cerrar sesión en el servidor:', err);
@@ -58,8 +58,8 @@ export const useNavbarStatus = () => {
     navigate('/login');
   };
 
-  return { 
-    user, 
+  return {
+    user,
     isLoggedIn: !!user,
     handleUserClick,
     handleLogout,
@@ -68,6 +68,6 @@ export const useNavbarStatus = () => {
     onSearchSubmit,
     isMenuOpen,
     toggleMenu: () => setIsMenuOpen(!isMenuOpen),
-    closeMenu: () => setIsMenuOpen(false)
+    closeMenu: () => setIsMenuOpen(false),
   };
 };

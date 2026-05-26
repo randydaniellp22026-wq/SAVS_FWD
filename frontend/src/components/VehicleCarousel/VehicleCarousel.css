@@ -1,7 +1,7 @@
 .fc-carousel-container {
   position: relative;
   width: 100%;
-  height: 80vh; 
+  height: 80vh;
   min-height: 500px;
   max-height: 900px;
   background-color: #080808;
@@ -40,7 +40,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.6));
   border-radius: 12px;
   transition: all 0.7s cubic-bezier(0.3, 0, 0.2, 1);
 }
@@ -60,7 +60,10 @@
   cursor: pointer;
   filter: brightness(0.6);
 }
-.fc-slide-prev:hover { opacity: 0.7; filter: brightness(0.8); }
+.fc-slide-prev:hover {
+  opacity: 0.7;
+  filter: brightness(0.8);
+}
 
 .fc-slide-next {
   transform: translateX(65%) scale(0.65);
@@ -70,7 +73,10 @@
   cursor: pointer;
   filter: brightness(0.6);
 }
-.fc-slide-next:hover { opacity: 0.7; filter: brightness(0.8); }
+.fc-slide-next:hover {
+  opacity: 0.7;
+  filter: brightness(0.8);
+}
 
 .fc-slide-hidden-left {
   transform: translateX(-100%) scale(0.4);
@@ -96,7 +102,10 @@
 
 .fc-slide-overlay-dark {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-color: rgba(8, 8, 8, 0.4);
   z-index: 2;
 }
@@ -107,14 +116,25 @@
   left: 0;
   width: 100%;
   height: 70%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 40%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.6) 40%,
+    transparent 100%
+  );
   z-index: 4;
   pointer-events: none;
 }
 
 @keyframes fadeInText {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fc-slide-content {
@@ -266,7 +286,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.3s, transform 0.2s;
+  transition:
+    color 0.3s,
+    transform 0.2s;
   border: none;
   cursor: pointer;
   padding: 4px;

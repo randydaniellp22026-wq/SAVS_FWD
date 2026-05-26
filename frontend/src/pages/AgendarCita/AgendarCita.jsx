@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import { appointmentService } from '../../services/api';
 import { handleApiError } from '../../utils/apiError';
 import './AgendarCita.css';
 
@@ -24,8 +24,8 @@ const AgendarCita = () => {
 
   const loadCitas = async () => {
     try {
-      const res = await api.get('/appointments/mine');
-      setCitas(res.data || []);
+      const data = await appointmentService.getMine();
+      setCitas(data || []);
     } catch (err) {
       handleApiError('AgendarCita.load', err, { toast: false });
     }
@@ -45,7 +45,7 @@ const AgendarCita = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      await api.post('/appointments', form);
+      await appointmentService.create(form);
       toast.success('Cita agendada correctamente');
       setForm({ fecha: '', hora: '', tipo_servicio: TIPOS[0], notas: '' });
       loadCitas();
@@ -58,7 +58,7 @@ const AgendarCita = () => {
 
   const cancelar = async (id) => {
     try {
-      await api.patch(`/appointments/${id}/cancel`);
+      await appointmentService.cancel(id);
       toast.success('Cita cancelada');
       loadCitas();
     } catch (err) {
@@ -66,7 +66,8 @@ const AgendarCita = () => {
     }
   };
 
-  const estadoLabel = (e) => ({ pendiente: 'Pendiente', confirmada: 'Confirmada', cancelada: 'Cancelada' }[e] || e);
+  const estadoLabel = (e) =>
+    ({ pendiente: 'Pendiente', confirmada: 'Confirmada', cancelada: 'Cancelada' })[e] || e;
 
   return (
     <div className="agendar-cita-page">
@@ -79,24 +80,43 @@ const AgendarCita = () => {
         <form className="agendar-form" onSubmit={handleSubmit}>
           <label>
             Fecha
-            <input type="date" value={form.fecha} min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
+            <input
+              type="date"
+              value={form.fecha}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => setForm({ ...form, fecha: e.target.value })}
+            />
             {errors.fecha && <span className="field-error">{errors.fecha}</span>}
           </label>
           <label>
             Hora
-            <input type="time" value={form.hora} onChange={(e) => setForm({ ...form, hora: e.target.value })} />
+            <input
+              type="time"
+              value={form.hora}
+              onChange={(e) => setForm({ ...form, hora: e.target.value })}
+            />
             {errors.hora && <span className="field-error">{errors.hora}</span>}
           </label>
           <label>
             Tipo de servicio
-            <select value={form.tipo_servicio} onChange={(e) => setForm({ ...form, tipo_servicio: e.target.value })}>
-              {TIPOS.map((t) => <option key={t} value={t}>{t}</option>)}
+            <select
+              value={form.tipo_servicio}
+              onChange={(e) => setForm({ ...form, tipo_servicio: e.target.value })}
+            >
+              {TIPOS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
             </select>
           </label>
           <label>
             Notas (opcional)
-            <textarea value={form.notas} rows={3} onChange={(e) => setForm({ ...form, notas: e.target.value })} />
+            <textarea
+              value={form.notas}
+              rows={3}
+              onChange={(e) => setForm({ ...form, notas: e.target.value })}
+            />
           </label>
           <button type="submit" className="btn-agendar" disabled={loading}>
             {loading ? 'Agendando...' : 'Confirmar cita'}
@@ -112,11 +132,15 @@ const AgendarCita = () => {
               <div key={c.id} className={`cita-card estado-${c.estado}`}>
                 <div>
                   <strong>{c.tipo_servicio}</strong>
-                  <p>{c.fecha} — {c.hora}</p>
+                  <p>
+                    {c.fecha} — {c.hora}
+                  </p>
                   <span className="cita-estado">{estadoLabel(c.estado)}</span>
                 </div>
                 {c.estado !== 'cancelada' && (
-                  <button type="button" onClick={() => cancelar(c.id)}>Cancelar</button>
+                  <button type="button" onClick={() => cancelar(c.id)}>
+                    Cancelar
+                  </button>
                 )}
               </div>
             ))

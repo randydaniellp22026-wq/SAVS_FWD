@@ -5,39 +5,40 @@ import './BentoFeatures.css';
 const DEALERSHIP_ITEMS = [
   {
     icon: Zap,
-    title: "Importación Rápida",
-    description: "Procesos logísticos optimizados para entregarte tu vehículo en tiempo récord.",
-    color: "#eab308",
+    title: 'Importación Rápida',
+    description: 'Procesos logísticos optimizados para entregarte tu vehículo en tiempo récord.',
+    color: '#eab308',
   },
   {
     icon: ShieldCheck,
-    title: "Transparencia Total",
-    description: "Cero costos ocultos. Todas las facturas de subasta y aduanas a la vista.",
-    color: "#eab308",
+    title: 'Transparencia Total',
+    description: 'Cero costos ocultos. Todas las facturas de subasta y aduanas a la vista.',
+    color: '#eab308',
   },
   {
     icon: Globe,
-    title: "Acceso Global",
-    description: "Compramos en EE.UU. y Corea a través de IAAI, Copart y Autowini.",
-    color: "#eab308",
+    title: 'Acceso Global',
+    description: 'Compramos en EE.UU. y Corea a través de IAAI, Copart y Autowini.',
+    color: '#eab308',
   },
   {
     icon: Landmark,
-    title: "Financiamiento",
-    description: "Alianzas estratégicas con los principales bancos locales para facilitar tu crédito.",
-    color: "#eab308",
+    title: 'Financiamiento',
+    description:
+      'Alianzas estratégicas con los principales bancos locales para facilitar tu crédito.',
+    color: '#eab308',
   },
   {
     icon: FileCheck2,
-    title: "Garantía CARFAX",
-    description: "Solo importamos vehículos con historial limpio, millaje real y sin daños graves.",
-    color: "#eab308",
+    title: 'Garantía CARFAX',
+    description: 'Solo importamos vehículos con historial limpio, millaje real y sin daños graves.',
+    color: '#eab308',
   },
   {
     icon: Key,
-    title: "Llave en Mano",
-    description: "Nos encargamos de todo: subasta, aduanas, RTV y marchamo. Tú solo conduces.",
-    color: "#eab308",
+    title: 'Llave en Mano',
+    description: 'Nos encargamos de todo: subasta, aduanas, RTV y marchamo. Tú solo conduces.',
+    color: '#eab308',
   },
 ];
 
@@ -53,18 +54,18 @@ function Card({ item, dimmed, onHoverStart, onHoverEnd }) {
   const handleMouseMove = (e) => {
     const el = cardRef.current;
     if (!el) return;
-    
+
     const rect = el.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     // Normalized coordinates (0 to 1)
     const normX = x / rect.width;
     const normY = y / rect.height;
-    
-    const rx = (0.5 - normY) * (TILT_MAX * 2); 
+
+    const rx = (0.5 - normY) * (TILT_MAX * 2);
     const ry = (normX - 0.5) * (TILT_MAX * 2);
-    
+
     setTilt({ rx, ry });
     setMousePos({ x: normX * 100, y: normY * 100 });
   };
@@ -96,31 +97,31 @@ function Card({ item, dimmed, onHoverStart, onHoverEnd }) {
         opacity: opacity,
         '--item-color': item.color,
         '--mouse-x': `${mousePos.x}%`,
-        '--mouse-y': `${mousePos.y}%`
+        '--mouse-y': `${mousePos.y}%`,
       }}
     >
-      <div 
+      <div
         className="card-bg-static"
         style={{
-          background: `radial-gradient(ellipse at 20% 20%, ${item.color}14, transparent 65%)`
-        }} 
+          background: `radial-gradient(ellipse at 20% 20%, ${item.color}14, transparent 65%)`,
+        }}
       />
-      
-      <div 
-        className="card-hover-glow" 
+
+      <div
+        className="card-hover-glow"
         style={{
           opacity: isHovered ? 1 : 0,
-          background: `radial-gradient(circle at var(--mouse-x) var(--mouse-y), ${item.color}2e, transparent 65%)`
-        }} 
+          background: `radial-gradient(circle at var(--mouse-x) var(--mouse-y), ${item.color}2e, transparent 65%)`,
+        }}
       />
-      
+
       <div className="card-shimmer-sweep" />
-      
-      <div 
-        className="card-icon-badge" 
+
+      <div
+        className="card-icon-badge"
         style={{
           background: `${item.color}18`,
-          boxShadow: `inset 0 0 0 1px ${item.color}30`
+          boxShadow: `inset 0 0 0 1px ${item.color}30`,
         }}
       >
         <Icon size={17} strokeWidth={1.9} color={item.color} />
@@ -131,20 +132,20 @@ function Card({ item, dimmed, onHoverStart, onHoverEnd }) {
         <p>{item.description}</p>
       </div>
 
-      <div 
-        className="card-bottom-accent" 
+      <div
+        className="card-bottom-accent"
         style={{
-          background: `linear-gradient(to right, ${item.color}80, transparent)`
+          background: `linear-gradient(to right, ${item.color}80, transparent)`,
         }}
       />
     </div>
   );
 }
 
-export default function BentoFeatures({ 
+export default function BentoFeatures({
   items = DEALERSHIP_ITEMS,
-  eyebrow = "Servicios",
-  heading = "Tu Comodidad a un Nuevo Nivel"
+  eyebrow = 'Servicios',
+  heading = 'Tu Comodidad a un Nuevo Nivel',
 }) {
   const [hoveredTitle, setHoveredTitle] = useState(null);
 

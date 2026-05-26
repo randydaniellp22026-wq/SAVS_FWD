@@ -501,7 +501,6 @@ textarea.form-control {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-
 .name-wrapper {
   display: flex;
   align-items: center;
@@ -544,18 +543,18 @@ textarea.form-control {
   .reviews-header h1 {
     font-size: 2.5rem;
   }
-  
+
   .reviews-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .filters-container {
     overflow-x: auto;
     white-space: nowrap;
     padding-bottom: 10px;
     justify-content: flex-start;
   }
-  
+
   .modal-content {
     width: 95%;
     padding: 30px 20px;

@@ -38,13 +38,22 @@
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Bajamos a 280px para que no cause overflow en móviles normales */
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(280px, 1fr)
+  ); /* Bajamos a 280px para que no cause overflow en móviles normales */
   gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
-  .catalog-header { flex-direction: column; gap: 0.5rem; align-items: flex-start; }
-  .catalog-header .section-title { font-size: 1.8rem; }
+  .catalog-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .catalog-header .section-title {
+    font-size: 1.8rem;
+  }
 }
 
 @media (max-width: 480px) {

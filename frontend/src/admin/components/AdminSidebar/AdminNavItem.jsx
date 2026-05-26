@@ -23,7 +23,9 @@ const AdminNavItem = ({ item, onNavigate, index = 0 }) => {
         aria-label={item.description ? `${item.label}: ${item.description}` : item.label}
         onClick={onNavigate}
         className={({ isActive }) =>
-          ['admin-nav-item', isActive ? 'admin-nav-item--active' : 'admin-nav-item--inactive'].join(' ')
+          ['admin-nav-item', isActive ? 'admin-nav-item--active' : 'admin-nav-item--inactive'].join(
+            ' '
+          )
         }
       >
         <span className="admin-nav-item__icon" aria-hidden="true">
@@ -31,9 +33,7 @@ const AdminNavItem = ({ item, onNavigate, index = 0 }) => {
         </span>
         <span className="admin-nav-item__content">
           <span className="admin-nav-item__label">{item.label}</span>
-          {item.description && (
-            <span className="admin-nav-item__desc">{item.description}</span>
-          )}
+          {item.description && <span className="admin-nav-item__desc">{item.description}</span>}
         </span>
         <ChevronRight size={14} className="admin-nav-item__arrow" aria-hidden="true" />
       </NavLink>

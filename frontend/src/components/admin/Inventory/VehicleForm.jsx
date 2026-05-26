@@ -132,7 +132,11 @@ const VehicleForm = ({ initialData, onSubmit, onCancel, loading }) => {
       <div className="form-header">
         <div className="header-info">
           <h2>{formData.id ? 'Editar Vehículo' : 'Añadir Nuevo Vehículo'}</h2>
-          <p>{formData.id ? `ID: ${formData.id}` : 'Completa los campos para publicar en el catálogo'}</p>
+          <p>
+            {formData.id
+              ? `ID: ${formData.id}`
+              : 'Completa los campos para publicar en el catálogo'}
+          </p>
         </div>
         {!formData.id && (
           <div className="headerActions">

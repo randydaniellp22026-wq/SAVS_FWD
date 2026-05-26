@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Eye, 
+import {
+  Search,
+  Edit,
+  Trash2,
+  Filter,
+  Eye,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
-  Plus
+  Plus,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -16,8 +16,10 @@ const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTag, setFilterTag] = useState('Todos');
 
-  const filteredVehicles = vehicles.filter(v => {
-    const matchesSearch = (v.name || v.modelo || '').toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredVehicles = vehicles.filter((v) => {
+    const matchesSearch = (v.name || v.modelo || '')
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesFilter = filterTag === 'Todos' || v.tag === filterTag;
     return matchesSearch && matchesFilter;
   });
@@ -27,14 +29,14 @@ const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
       <div className="list-controls">
         <div className="search-box">
           <Search size={18} />
-          <input 
-            type="text" 
-            placeholder="Buscar vehículo por nombre o marca..." 
+          <input
+            type="text"
+            placeholder="Buscar vehículo por nombre o marca..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <div className="filter-actions">
           <div className="filter-group">
             <Filter size={16} />
@@ -66,7 +68,7 @@ const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
           <tbody>
             {filteredVehicles.length > 0 ? (
               filteredVehicles.map((v, idx) => (
-                <motion.tr 
+                <motion.tr
                   key={v.id || idx}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -87,9 +89,7 @@ const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
                     </span>
                   </td>
                   <td>
-                    <span className="v-price">
-                      ₡{Number(v.price || v.precio).toLocaleString()}
-                    </span>
+                    <span className="v-price">₡{Number(v.price || v.precio).toLocaleString()}</span>
                   </td>
                   <td>
                     <div className="v-meta">
@@ -103,7 +103,11 @@ const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
                       <button onClick={() => onEdit(v)} title="Editar" className="act-btn edit">
                         <Edit size={16} />
                       </button>
-                      <button onClick={() => onDelete(v)} title="Eliminar" className="act-btn delete">
+                      <button
+                        onClick={() => onDelete(v)}
+                        title="Eliminar"
+                        className="act-btn delete"
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>

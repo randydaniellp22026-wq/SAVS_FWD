@@ -1,0 +1,19 @@
+/* AppRoutes.module.css — Estilos para el fallback de rutas y la página 404 */
+
+.notFoundContainer {
+  text-align: center;
+  padding: 100px 20px;
+  color: #ffffff;
+  min-height: 60vh;
+}
+
+.notFoundTitle {
+  color: var(--color-primary, #eab308);
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.notFoundDescription {
+  margin-top: 1rem;
+  color: var(--color-text-muted, #a1a1aa);
+}

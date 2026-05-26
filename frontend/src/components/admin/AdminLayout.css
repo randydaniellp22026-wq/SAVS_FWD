@@ -27,7 +27,9 @@
   color: #fff;
 }
 
-.admin-logo-mobile span { color: #eab308; }
+.admin-logo-mobile span {
+  color: #eab308;
+}
 
 .menu-toggle {
   background: none;
@@ -53,8 +55,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .admin-main-content {
@@ -71,8 +77,14 @@
 
 /* Transiciones de página suaves */
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .admin-page-container > div {
@@ -86,7 +98,13 @@
 }
 
 @media (max-width: 768px) {
-  .mobile-admin-header { display: flex; }
-  .admin-main-content { padding-top: 60px; }
-  .admin-page-container { padding: 1.5rem; }
+  .mobile-admin-header {
+    display: flex;
+  }
+  .admin-main-content {
+    padding-top: 60px;
+  }
+  .admin-page-container {
+    padding: 1.5rem;
+  }
 }

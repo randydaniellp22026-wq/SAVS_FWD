@@ -32,15 +32,13 @@ export const LoginForm = ({ formData, loading, error, onChange, onSubmit }) => {
           required
         />
         <div className="forgot-password-container">
-          <a href="/recuperar" className="forgot-password-link">¿Olvidaste tu contraseña?</a>
+          <a href="/recuperar" className="forgot-password-link">
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
       </div>
 
-      <button 
-        type="submit" 
-        className="login-submit-btn" 
-        disabled={loading}
-      >
+      <button type="submit" className="login-submit-btn" disabled={loading}>
         {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </button>
 

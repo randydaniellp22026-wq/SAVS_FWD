@@ -30,7 +30,10 @@ const PerfilPuntos = () => {
       return;
     }
     try {
-      const res = await api.post('/points/redeem', { cantidad: 100, descripcion: 'Descuento en mantenimiento' });
+      const res = await api.post('/points/redeem', {
+        cantidad: 100,
+        descripcion: 'Descuento en mantenimiento',
+      });
       setSaldo(res.data.saldo);
       setHistorial(res.data.historial);
       toast.success('Canje realizado');
@@ -49,7 +52,9 @@ const PerfilPuntos = () => {
           <span className="puntos-label">Saldo actual</span>
           <h2 className="puntos-saldo">{saldo.toLocaleString()} pts</h2>
         </div>
-        <button type="button" className="btn-canjear" onClick={canjearEjemplo}>Canjear 100 pts (demo)</button>
+        <button type="button" className="btn-canjear" onClick={canjearEjemplo}>
+          Canjear 100 pts (demo)
+        </button>
       </div>
 
       <h3>Historial de movimientos</h3>
@@ -59,13 +64,18 @@ const PerfilPuntos = () => {
         <ul className="puntos-historial">
           {historial.map((h) => (
             <li key={h.id} className={`puntos-item ${h.tipo}`}>
-              {h.tipo === 'ganado' ? <TrendingUp size={18} color="#10b981" /> : <TrendingDown size={18} color="#ef4444" />}
+              {h.tipo === 'ganado' ? (
+                <TrendingUp size={18} color="#10b981" />
+              ) : (
+                <TrendingDown size={18} color="#ef4444" />
+              )}
               <div>
                 <strong>{h.descripcion}</strong>
                 <span>{new Date(h.fecha).toLocaleDateString()}</span>
               </div>
               <span className={`puntos-cantidad ${h.tipo}`}>
-                {h.tipo === 'ganado' ? '+' : '-'}{h.cantidad}
+                {h.tipo === 'ganado' ? '+' : '-'}
+                {h.cantidad}
               </span>
             </li>
           ))}

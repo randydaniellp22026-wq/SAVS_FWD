@@ -9,6 +9,19 @@ router.use('/appointments', require('./appointments'));
 router.use('/promotions', require('./promotions'));
 router.use('/reports', require('./reports'));
 
-router.get('/health', (req, res) => res.json({ ok: true, version: 'v1' }));
+// Rutas migradas al estándar v1
+router.use('/auth', require('../auth'));
+router.use('/users', require('../users'));
+router.use('/vehicles', require('../vehicles'));
+router.use('/reviews', require('../reviews'));
+router.use('/requests', require('../requests'));
+router.use('/sale_requests', require('../saleRequests'));
+router.use('/branches', require('../branches'));
+router.use('/technical_glossary', require('../technicalGlossary'));
+router.use('/settings', require('../settings'));
+router.use('/chatbot', require('../chatbot'));
+router.use('/points', require('../points'));
+
+router.get('/health', (req, res) => res.json({ status: 'ok', version: 'v1' }));
 
 module.exports = router;

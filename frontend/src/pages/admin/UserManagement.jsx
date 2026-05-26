@@ -10,7 +10,7 @@ import {
   Mail,
   Phone,
   MapPin,
-  Shield
+  Shield,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { usersService } from '../../admin/services';
@@ -32,7 +32,7 @@ const UserManagement = () => {
       const data = await usersService.getAll();
       setUsers(data);
     } catch (error) {
-      console.error("Error loading users:", error);
+      console.error('Error loading users:', error);
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,11 @@ const UserManagement = () => {
 
   const handleEditUser = (user) => {
     if (user.rol?.nombre === 'gerente' && !isGerente) {
-      return Swal.fire('Acceso Denegado', 'No tienes permisos para modificar a un Gerente.', 'warning');
+      return Swal.fire(
+        'Acceso Denegado',
+        'No tienes permisos para modificar a un Gerente.',
+        'warning'
+      );
     }
 
     Swal.fire({
@@ -68,8 +72,8 @@ const UserManagement = () => {
           email: document.getElementById('swal-email').value,
           telefono: document.getElementById('swal-phone').value,
           ubicacion: document.getElementById('swal-location').value,
-        }
-      }
+        };
+      },
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -85,11 +89,19 @@ const UserManagement = () => {
 
   const handleDeleteUser = (user) => {
     if (user.id === currentUser.id) {
-       return Swal.fire('Acción Prohibida', 'No puedes eliminar tu propia cuenta desde aquí.', 'error');
+      return Swal.fire(
+        'Acción Prohibida',
+        'No puedes eliminar tu propia cuenta desde aquí.',
+        'error'
+      );
     }
-    
+
     if (user.rol?.nombre === 'gerente' && currentUser.rol !== 'gerente') {
-       return Swal.fire('Acceso Denegado', 'No tienes permisos para eliminar a un Gerente.', 'warning');
+      return Swal.fire(
+        'Acceso Denegado',
+        'No tienes permisos para eliminar a un Gerente.',
+        'warning'
+      );
     }
 
     Swal.fire({
@@ -101,7 +113,7 @@ const UserManagement = () => {
       cancelButtonColor: '#333',
       confirmButtonText: 'Sí, eliminar',
       background: '#141414',
-      color: '#fff'
+      color: '#fff',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -117,13 +129,13 @@ const UserManagement = () => {
 
   const handleToggleAdmin = async (user) => {
     if (!isGerente) return;
-    
+
     const isPromoting = user.rol?.nombre !== 'admin';
     const newRole = isPromoting ? 'admin' : 'Cliente';
     const newRolId = isPromoting ? 1 : 3;
-    
+
     const title = isPromoting ? '¡Ascenso de Rango!' : 'Cambio de Responsabilidades';
-    const text = isPromoting 
+    const text = isPromoting
       ? `Estás a punto de promover a ${user.nombre} como Administrador. Este nuevo colaborador tendrá acceso total a la gestión de SAVS.`
       : `¿Deseas retirar los permisos de Administrador a ${user.nombre}? Volverá al rango de Cliente.`;
 
@@ -137,19 +149,21 @@ const UserManagement = () => {
       confirmButtonText: isPromoting ? 'Sí, ¡Promover!' : 'Sí, Quitar Rango',
       background: '#141414',
       color: '#fff',
-      backdrop: `rgba(234, 179, 8, 0.1)`
+      backdrop: `rgba(234, 179, 8, 0.1)`,
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await usersService.update(user.id, { rolId: newRolId, rol: newRole });
           Swal.fire({
             title: isPromoting ? '¡Promovido!' : 'Actualizado',
-            text: isPromoting ? `${user.nombre} ahora es parte del equipo administrativo.` : 'Permisos actualizados correctamente.',
+            text: isPromoting
+              ? `${user.nombre} ahora es parte del equipo administrativo.`
+              : 'Permisos actualizados correctamente.',
             icon: 'success',
             timer: 2000,
             showConfirmButton: false,
             background: '#141414',
-            color: '#fff'
+            color: '#fff',
           });
           invalidateUsers();
         } catch (error) {
@@ -159,9 +173,10 @@ const UserManagement = () => {
     });
   };
 
-  const filteredUsers = users.filter(u => 
-    (u.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (u.email || u.correo || '').toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    (u) =>
+      (u.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.email || u.correo || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -176,9 +191,9 @@ const UserManagement = () => {
       <div className="mgmt-actions">
         <div className="search-bar">
           <Search size={20} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre o email..." 
+          <input
+            type="text"
+            placeholder="Buscar por nombre o email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -206,52 +221,77 @@ const UserManagement = () => {
                     <div className="user-avatar-small">
                       {user.image ? <img src={user.image} alt="" /> : user.nombre.charAt(0)}
                     </div>
-                    <div className="user-info">
-                      <span className="user-name">{user.nombre}</span>
-                      <span className="user-id">ID: {user.id}</span>
+                  </td>
+                  <td data-label="Contacto">
+                    <div className="contact-cell">
+                      <div className="contact-item">
+                        <Mail size={14} /> {user.email || user.correo}
+                      </div>
+                      <div className="contact-item">
+                        <Phone size={14} /> {user.telefono || 'Sin tel.'}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td data-label="Contacto">
-                  <div className="contact-cell">
-                    <div className="contact-item"><Mail size={14} /> {user.email || user.correo}</div>
-                    <div className="contact-item"><Phone size={14} /> {user.telefono || 'Sin tel.'}</div>
-                  </div>
-                </td>
-                <td data-label="Ubicación">
-                  <div className="location-cell">
-                    <MapPin size={14} /> {user.ubicacion || 'Costa Rica'}
-                  </div>
-                </td>
-                <td data-label="Rol / Rango">
-                  <span className={`role-badge ${(user.rol?.nombre || 'cliente').toLowerCase()}`}>
-                    {user.rol?.nombre === 'admin' ? <Shield size={14} /> : user.rol?.nombre === 'gerente' ? <ShieldAlert size={14} /> : <UserCheck size={14} />}
-                    {user.rol?.nombre || 'Cliente'}
-                  </span>
-                </td>
-                <td data-label="Acciones">
-                  <div className="actions-cell">
-                    {(isGerente || user.rol?.nombre !== 'gerente') && (
-                      <button className="action-btn" onClick={() => handleEditUser(user)} title="Editar"><Edit3 size={18} /></button>
-                    )}
-                    
-                    {isGerente && user.id !== currentUser.id && user.rol?.nombre !== 'gerente' && (
-                      <button 
-                        className={`action-btn ${user.rol?.nombre === 'admin' ? 'demote' : 'promote-shine'}`} 
-                        onClick={() => handleToggleAdmin(user)}
-                        title={user.rol?.nombre === 'admin' ? "Quitar Admin" : "Promover a Administrador"}
-                      >
-                        <UserPlus size={18} />
-                      </button>
-                    )}
+                  </td>
+                  <td data-label="Ubicación">
+                    <div className="location-cell">
+                      <MapPin size={14} /> {user.ubicacion || 'Costa Rica'}
+                    </div>
+                  </td>
+                  <td data-label="Rol / Rango">
+                    <span className={`role-badge ${(user.rol?.nombre || 'cliente').toLowerCase()}`}>
+                      {user.rol?.nombre === 'admin' ? (
+                        <Shield size={14} />
+                      ) : user.rol?.nombre === 'gerente' ? (
+                        <ShieldAlert size={14} />
+                      ) : (
+                        <UserCheck size={14} />
+                      )}
+                      {user.rol?.nombre || 'Cliente'}
+                    </span>
+                  </td>
+                  <td data-label="Acciones">
+                    <div className="actions-cell">
+                      {(isGerente || user.rol?.nombre !== 'gerente') && (
+                        <button
+                          className="action-btn"
+                          onClick={() => handleEditUser(user)}
+                          title="Editar"
+                        >
+                          <Edit3 size={18} />
+                        </button>
+                      )}
 
-                    {(isGerente || (user.rol?.nombre !== 'gerente' && user.id !== currentUser.id)) && (
-                      <button className="action-btn delete" onClick={() => handleDeleteUser(user)} title="Eliminar"><Trash2 size={18} /></button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {isGerente &&
+                        user.id !== currentUser.id &&
+                        user.rol?.nombre !== 'gerente' && (
+                          <button
+                            className={`action-btn ${user.rol?.nombre === 'admin' ? 'demote' : 'promote-shine'}`}
+                            onClick={() => handleToggleAdmin(user)}
+                            title={
+                              user.rol?.nombre === 'admin'
+                                ? 'Quitar Admin'
+                                : 'Promover a Administrador'
+                            }
+                          >
+                            <UserPlus size={18} />
+                          </button>
+                        )}
+
+                      {(isGerente ||
+                        (user.rol?.nombre !== 'gerente' && user.id !== currentUser.id)) && (
+                        <button
+                          className="action-btn delete"
+                          onClick={() => handleDeleteUser(user)}
+                          title="Eliminar"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

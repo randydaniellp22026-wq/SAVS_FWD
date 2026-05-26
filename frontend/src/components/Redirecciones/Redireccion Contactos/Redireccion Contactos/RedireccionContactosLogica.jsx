@@ -6,7 +6,7 @@ import api from '../../../../services/api';
 const darkSwal = {
   background: '#0a0a0a',
   color: '#fff',
-  confirmButtonColor: '#eab308'
+  confirmButtonColor: '#eab308',
 };
 
 export const useRedireccionContactosLogica = () => {
@@ -18,7 +18,7 @@ export const useRedireccionContactosLogica = () => {
     user_email: '',
     user_phone: '',
     subject: initialVehicle ? 'Cotización de vehículo' : 'Asesoría de crédito',
-    message: ''
+    message: '',
   });
 
   // No pre-llenamos el mensaje para que el formulario se vea limpio
@@ -30,7 +30,7 @@ export const useRedireccionContactosLogica = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const sendEmail = (e) => {
@@ -46,7 +46,7 @@ export const useRedireccionContactosLogica = () => {
         text: 'Debes iniciar sesión para enviar una solicitud de contacto.',
         confirmButtonText: 'Ir al Login',
         showCancelButton: true,
-        cancelButtonText: 'Cancelar'
+        cancelButtonText: 'Cancelar',
       }).then((result) => {
         if (result.isConfirmed) {
           window.location.href = '/login';
@@ -64,7 +64,7 @@ export const useRedireccionContactosLogica = () => {
         icon: 'error',
         title: 'Campos obligatorios',
         text: 'Por favor, ingresa tu nombre, correo y teléfono.',
-        confirmButtonColor: '#eab308'
+        confirmButtonColor: '#eab308',
       });
       return;
     }
@@ -75,7 +75,7 @@ export const useRedireccionContactosLogica = () => {
         icon: 'warning',
         title: 'Mensaje demasiado corto',
         text: 'Por favor, describe tu consulta con al menos 10 caracteres.',
-        confirmButtonColor: '#eab308'
+        confirmButtonColor: '#eab308',
       });
       return;
     }
@@ -88,7 +88,7 @@ export const useRedireccionContactosLogica = () => {
         icon: 'error',
         title: 'Correo inválido',
         text: 'Por favor, ingresa un formato de correo electrónico válido.',
-        confirmButtonColor: '#eab308'
+        confirmButtonColor: '#eab308',
       });
       return;
     }
@@ -101,14 +101,14 @@ export const useRedireccionContactosLogica = () => {
         icon: 'error',
         title: 'Teléfono inválido',
         text: 'Asegúrate de incluir el código de país con un espacio, ej: +506 72617462.',
-        confirmButtonColor: '#eab308'
+        confirmButtonColor: '#eab308',
       });
       return;
     }
-    
+
     // Si viene de un vehículo, construimos el mensaje especial
     let finalMessage = message;
-    
+
     if (initialVehicle) {
       const vehicleUrl = `${window.location.origin}/details/${initialVehicle.id}`;
       finalMessage = `Hola mi nombre es ${user_name}, estoy interesado en este modelo: ${vehicleUrl}. Mi contacto es ${user_phone}.`;
@@ -120,7 +120,7 @@ export const useRedireccionContactosLogica = () => {
         icon: 'warning',
         title: 'Mensaje vacío',
         text: 'Por favor escribe tu consulta.',
-        confirmButtonColor: '#eab308'
+        confirmButtonColor: '#eab308',
       });
       return;
     }
@@ -133,29 +133,30 @@ export const useRedireccionContactosLogica = () => {
       subject: formData.subject,
       message: finalMessage,
       status: 'pending', // 'pending', 'accepted', 'rejected', 'replied'
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
     };
 
     setLoading(true);
 
-    api.post('/requests', requestPayload)
-      .then(res => {
+    api
+      .post('/requests', requestPayload)
+      .then((res) => {
         Swal.fire({
           ...darkSwal,
           icon: 'success',
           title: '¡Solicitud Enviada!',
           text: 'Nuestro equipo evaluará tu consulta y te responderá pronto.',
-          confirmButtonColor: '#10b981'
+          confirmButtonColor: '#10b981',
         });
-        setFormData(prev => ({ ...prev, message: '' })); // Limpiamos mensaje
+        setFormData((prev) => ({ ...prev, message: '' })); // Limpiamos mensaje
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
         Swal.fire({
           ...darkSwal,
           icon: 'error',
           title: 'Error',
-          text: 'No pudimos procesar tu solicitud en este momento. Inténtalo más tarde.'
+          text: 'No pudimos procesar tu solicitud en este momento. Inténtalo más tarde.',
         });
       })
       .finally(() => {
@@ -168,6 +169,6 @@ export const useRedireccionContactosLogica = () => {
     setFormData,
     loading,
     handleChange,
-    sendEmail
+    sendEmail,
   };
 };

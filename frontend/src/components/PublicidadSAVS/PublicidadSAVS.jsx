@@ -6,10 +6,10 @@ import flyer3 from '../../img/image copy 2.png';
 import flyer4 from '../../img/image copy 3.png';
 
 const flyers = [
-  { img: flyer1, subtitle: "PASO 1", title: "Elegís el carro" },
-  { img: flyer2, subtitle: "PASO 2", title: "Lo compramos" },
-  { img: flyer3, subtitle: "PASO 3", title: "Lo enviamos a C.R." },
-  { img: flyer4, subtitle: "PASO 4", title: "Te lo entregamos" }
+  { img: flyer1, subtitle: 'PASO 1', title: 'Elegís el carro' },
+  { img: flyer2, subtitle: 'PASO 2', title: 'Lo compramos' },
+  { img: flyer3, subtitle: 'PASO 3', title: 'Lo enviamos a C.R.' },
+  { img: flyer4, subtitle: 'PASO 4', title: 'Te lo entregamos' },
 ];
 
 const PublicidadSAVS = () => {
@@ -27,7 +27,12 @@ const PublicidadSAVS = () => {
         {flyers.map((item, i) => (
           <div className="savs-card-nba" key={i}>
             <div className="savs-card-img-wrapper">
-              <img src={item.img} alt={item.title} className="savs-card-img" referrerPolicy="no-referrer" />
+              <img
+                src={item.img}
+                alt={item.title}
+                className="savs-card-img"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div className="savs-card-info">
               <span className="savs-card-subtitle">{item.subtitle}</span>

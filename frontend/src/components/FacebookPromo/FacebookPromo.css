@@ -5,7 +5,9 @@
   cursor: pointer;
   overflow: hidden;
   border: 1px solid rgba(234, 179, 8, 0.2) !important;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s ease;
   min-height: 400px;
   background: rgba(10, 10, 10, 0.95);
   border-radius: 20px;
@@ -28,7 +30,12 @@
 .fb-promo-overlay {
   position: relative;
   z-index: 2;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.98) 0%, rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0.2) 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(0, 0, 0, 0.5) 60%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
   height: 100%;
   padding: 2.2rem;
   display: flex;
@@ -98,7 +105,10 @@
   border: 1px solid rgba(234, 179, 8, 0.15);
   border-radius: 24px;
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
   margin: 3.5rem 0;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
@@ -200,7 +210,10 @@
   border: 1px solid rgba(234, 179, 8, 0.15);
   border-radius: 24px;
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -309,7 +322,9 @@
   object-fit: cover;
   object-position: center;
   opacity: 0;
-  transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1), transform 8s ease;
+  transition:
+    opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 8s ease;
   transform: scale(1.02);
 }
 
@@ -332,13 +347,13 @@
 }
 
 .fb-promo-banner .fb-carousel-img {
-  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 45%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 45%);
 }
 
 .fb-reverse .fb-promo-banner .fb-carousel-img {
-  mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
-  -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
+  mask-image: linear-gradient(to left, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 45%);
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 45%);
 }
 
 /* ── Botones de Navegación Manual (Glassmorphic Arrows) ── */
@@ -455,49 +470,54 @@
     flex-direction: column;
     min-height: auto;
   }
-  
+
   .fb-promo-img-wrapper {
     max-width: 100%;
     height: 280px;
     min-height: 280px;
     order: 1; /* Imagen arriba */
   }
-  
+
   .fb-promo-text {
     padding: 2.5rem 2rem;
     align-items: center;
     text-align: center;
     order: 2; /* Texto abajo */
   }
-  
+
   .fb-promo-text p {
     margin: 0 auto 2rem;
   }
-  
+
   .fb-promo-banner .fb-carousel-indicators {
     left: 50%;
     right: auto;
     transform: translateX(-50%);
     bottom: 20px;
   }
-  
+
   .fb-promo-banner .fb-carousel-img {
-    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 15%, black 45%);
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.4) 15%, black 45%);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 15%,
+      black 45%
+    );
   }
-  
+
   .fb-carousel-nav {
     opacity: 0.8; /* Mostrar flechas siempre en móvil para mejor accesibilidad táctil */
   }
-  
+
   .home-large-ad .fb-promo-text {
     padding: 3rem 2rem;
   }
-  
+
   .home-large-ad h2 {
     font-size: 2.2rem;
   }
-  
+
   .home-large-ad p {
     font-size: 1.1rem;
   }
