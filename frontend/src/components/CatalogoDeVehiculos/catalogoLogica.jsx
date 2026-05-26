@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useVehiclesCatalogQuery } from '../../hooks/queries/useVehiclesQuery';
 
@@ -36,31 +36,28 @@ export const useCatalogoLogica = () => {
     search: new URLSearchParams(location.search).get('search') || '',
   });
 
-  // Función para cargar vehículos desde la API (Servidor)
-  const fetchVehicles = useCallback(async () => {
-    try {
-      setLoading(true);
-
-      // Mapeamos los filtros activos a los parámetros que espera el Backend
-      const params = {
-        page: pagination.page,
-        limit: pagination.limit,
-        search: activeFilters.search,
-        type: activeFilters.type,
-        fuel: activeFilters.fuel,
-        transmission: activeFilters.transmission,
-        minPrice: activeFilters.minPrice,
-        maxPrice: activeFilters.maxPrice,
-        minYear: activeFilters.minYear,
-        maxYear: activeFilters.maxYear,
-        color: activeFilters.color,
-        doors: activeFilters.doors,
-        drive: activeFilters.drive,
-        passengers: activeFilters.passengers,
-        steering: activeFilters.steering,
-        engine_size: activeFilters.engine_size,
-        tag: activeFilters.tag,
-      };
+  const queryParams = useMemo(
+    () => ({
+      page: pagination.page,
+      limit: pagination.limit,
+      search: activeFilters.search,
+      type: activeFilters.type,
+      fuel: activeFilters.fuel,
+      transmission: activeFilters.transmission,
+      minPrice: activeFilters.minPrice,
+      maxPrice: activeFilters.maxPrice,
+      minYear: activeFilters.minYear,
+      maxYear: activeFilters.maxYear,
+      color: activeFilters.color,
+      doors: activeFilters.doors,
+      drive: activeFilters.drive,
+      passengers: activeFilters.passengers,
+      steering: activeFilters.steering,
+      engine_size: activeFilters.engine_size,
+      tag: activeFilters.tag,
+    }),
+    [pagination.page, pagination.limit, activeFilters]
+  );
 
   const { data, isLoading, isFetching } = useVehiclesCatalogQuery(queryParams);
 

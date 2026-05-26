@@ -53,9 +53,10 @@ const NavbarDiseño = () => {
             <ShimmerText className="logo-text-main" text="SAVS" as="span" shimmerWidth={100} />
             <span className="logo-text-sub">IMPORTADORA</span>
           </div>
+        </div>
 
-          {/* Navigation Links */}
-          <ul className="navbar-links">
+        {/* Navigation Links */}
+        <ul className="navbar-links">
             <li>
               <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>
                 Inicio
@@ -229,17 +230,7 @@ const NavbarDiseño = () => {
             </button>
           </div>
 
-          {/* Hamburger Menu Toggle */}
-          <button
-            className="hamburger-btn"
-            onClick={toggleMenu}
-            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-menu-drawer"
-          >
-            {isMenuOpen ? <X size={28} aria-hidden="true" /> : <Menu size={28} aria-hidden="true" />}
-          </button>
-        </div>
+      </div>
 
       {/* Mobile Menu Drawer */}
       <div
@@ -281,7 +272,8 @@ const NavbarDiseño = () => {
 
         {/* Backdrop */}
         {isMenuOpen && <div className="mobile-menu-overlay" onClick={closeMenu}></div>}
-      </nav>
+      </div>
+    </nav>
       <VehicleSelectionModal
         isOpen={isVehicleModalOpen}
         onClose={() => setIsVehicleModalOpen(false)}

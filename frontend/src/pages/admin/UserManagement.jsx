@@ -213,14 +213,20 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr><td colSpan="5"><CatalogSkeletonGrid count={3} /></td></tr>
-            ) : filteredUsers.map(user => (
-              <tr key={user.id}>
+              <tr>
+                <td colSpan="5">
+                  <CatalogSkeletonGrid count={3} />
+                </td>
+              </tr>
+            ) : (
+              filteredUsers.map((user) => (
+                <tr key={user.id}>
                 <td data-label="Usuario">
                   <div className="user-cell">
                     <div className="user-avatar-small">
                       {user.image ? <img src={user.image} alt="" /> : user.nombre.charAt(0)}
                     </div>
+                  </div>
                   </td>
                   <td data-label="Contacto">
                     <div className="contact-cell">
