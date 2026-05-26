@@ -24,6 +24,26 @@ import PerfilUserInfo from '../perfil/PerfilUserInfo';
 import PerfilPuntos from './PerfilPuntos';
 import PerfilSeguimiento from './PerfilSeguimiento';
 
+import {
+  Bell,
+  User,
+  LayoutDashboard,
+  Heart,
+  Ship,
+  Settings,
+  BadgeCheck,
+  FileText,
+  LogOut,
+} from 'lucide-react';
+import { CatalogSkeletonGrid } from '../ui/Skeleton';
+import { usePerfilLogic } from './usePerfilLogic';
+import PersonalDataSection from './sections/PersonalDataSection';
+import LoyaltyProgramSection from './sections/LoyaltyProgramSection';
+import PurchaseHistorySection from './sections/PurchaseHistorySection';
+import AccountSettingsSection from './sections/AccountSettingsSection';
+import styles from './sections/PerfilSections.module.css';
+import './PerfilUsuarios.css';
+
 function PerfilUsuarios() {
   const {
     activeTab,
@@ -48,22 +68,92 @@ function PerfilUsuarios() {
 
   return (
     <div className="perfil-container">
-      {/* Barra de navegación superior del perfil */}
-      <PerfilNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <nav className="perfil-navbar" aria-label="Navegación del perfil">
+        <div className="navbar-logo">
+          <span className="logo-text">
+            DESTINY<span className="gold">VAULT</span>
+          </span>
+        </div>
+        <ul className="navbar-links">
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/')}>Inicio</button></li>
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/inventory')}>Vehículos</button></li>
+          <li><button type="button" className="nav-link-btn" onClick={() => navigate('/contact')}>Servicios</button></li>
+          <li className="active-link">Perfil</li>
+        </ul>
+        <div className="navbar-icons">
+          <button type="button" className="icon-btn" aria-label="Notificaciones"><Bell size={20} /></button>
+          <button type="button" className="icon-btn active-icon" aria-label="Perfil activo"><User size={20} /></button>
+        </div>
+      </nav>
 
       <div className="perfil-body">
-        {/* Barra lateral con información rápida del usuario y menú de pestañas */}
-        <PerfilSidebar
-          userInfo={userInfo}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          handleEditAvatar={handleEditAvatar}
-          handleLogout={handleLogout}
-        />
+        <aside className="perfil-sidebar" aria-label="Menú del perfil">
+          <div className="sidebar-profile">
+            <div
+              className={`profile-img-container ${styles.profileImgContainer}`}
+              onClick={handleEditAvatar}
+              onKeyDown={(e) => e.key === 'Enter' && handleEditAvatar()}
+              role="button"
+              tabIndex={0}
+              title="Clic para cambiar foto de perfil"
+            >
+              {userInfo.image ? (
+                <img src={userInfo.image} alt={userInfo.name} className={styles.profileImg} />
+              ) : (
+                <User size={48} color="#a0a0a0" aria-hidden="true" />
+              )}
+            </div>
+            <h3>{userInfo.name}</h3>
+            <span className="profile-role">{userInfo.role}</span>
+          </div>
+          <ul className="sidebar-menu">
+            <li className={activeTab === 'Dashboard' ? 'active' : ''} onClick={() => setActiveTab('Dashboard')}>
+              <LayoutDashboard size={20} />
+              <span>Dashboard</span>
+            </li>
+            <li className={activeTab === 'Favoritos' ? 'active' : ''} onClick={() => setActiveTab('Favoritos')}>
+              <Heart size={20} fill={activeTab === 'Favoritos' ? '#f5b400' : 'none'} color={activeTab === 'Favoritos' ? '#f5b400' : 'currentColor'} />
+              <span>Favoritos</span>
+            </li>
+            <li className={activeTab === 'Seguimiento' ? 'active' : ''} onClick={() => setActiveTab('Seguimiento')}>
+              <Clock size={20} />
+              <span>Seguimiento</span>
+            </li>
+            <li className={activeTab === 'Puntos' ? 'active' : ''} onClick={() => setActiveTab('Puntos')}>
+              <BadgeCheck size={20} />
+              <span>Puntos</span>
+            </li>
+            <li className={activeTab === 'Peticiones' ? 'active' : ''} onClick={() => setActiveTab('Peticiones')}>
+              <FileText size={20} />
+              <span>Estado de Peticiones</span>
+            </li>
+            <li className={activeTab === 'Estado' ? 'active' : ''} onClick={() => setActiveTab('Estado')}>
+              <Ship size={20} />
+              <span>Estado de importación</span>
+            </li>
+            <li className={activeTab === 'Configuración' ? 'active' : ''} onClick={() => setActiveTab('Configuración')}>
+              <Settings size={20} />
+              <span>Configuración</span>
+            </li>
+            <li className="logout-menu-item" onClick={handleLogout}>
+              <LogOut size={20} />
+              <span>Cerrar Sesión</span>
+            </li>
+          </ul>
+        </aside>
 
-        {/* Sección principal del contenido según la pestaña activa */}
-        <main className="perfil-main" id="main-content">
-          <PerfilHeader userInfo={userInfo} />
+        <main className="perfil-main">
+          <header className="main-header">
+            <div className="header-info">
+              <h1>
+                {userInfo.name}
+                <BadgeCheck className="verified-badge" size={28} aria-hidden="true" />
+              </h1>
+              <p className="subtitle">
+                {userInfo.role} • {userInfo.location}
+              </p>
+            </div>
+          </header>
 
           <div className="content-grid">
             <div className="left-column">
@@ -86,27 +176,23 @@ function PerfilUsuarios() {
                 />
               )}
 
-              {/* Vista de Solicitudes/Seguimiento */}
-              {activeTab === 'Seguimiento' && <PerfilSeguimiento userInfo={userInfo} />}
+              {activeTab === 'Puntos' && (
+                <PerfilPuntos />
+              )}
 
-              {/* Vista de Puntos de Lealtad */}
-              {activeTab === 'Puntos' && <PerfilPuntos />}
-
-              {/* Vista del Estado de Peticiones y Respuestas */}
-              {activeTab === 'Peticiones' && <PerfilPeticiones userRequests={userRequests} />}
-
-              {/* Ajustes de Configuración de la Cuenta */}
+              {/* Nuevas Peticiones Tab */}
+              {activeTab === 'Peticiones' && (
+                <PurchaseHistorySection userRequests={userRequests} />
+              )}
               {activeTab === 'Configuración' && (
-                <PerfilSettings
-                  handleChangePassword={handleChangePassword}
-                  handleLogout={handleLogout}
+                <AccountSettingsSection
+                  onChangePassword={handleChangePassword}
+                  onLogout={handleLogout}
                 />
               )}
             </div>
-
-            {/* Columna Derecha con Información Personal Completa */}
             <div className="right-column">
-              <PerfilUserInfo userInfo={userInfo} handleEditProfile={handleEditProfile} />
+              <PersonalDataSection userInfo={userInfo} onEditProfile={handleEditProfile} />
             </div>
           </div>
         </main>

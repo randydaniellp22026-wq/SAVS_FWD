@@ -167,49 +167,96 @@ const Chatbot = () => {
     generateAIResponse(option.value, [...messages, userMsg]);
   };
 
-  return (
-    <div className={`chatbot-wrapper ${isOpen ? 'is-open' : ''}`}>
-      <button className="chatbot-toggle" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-        {!isOpen && <span className="notification-badge">AI</span>}
-      </button>
-
-      <div className="chatbot-window">
-        <div className="chatbot-header">
-          <div className="bot-info">
-            <div className="bot-avatar">
-              <Bot size={20} color="#000" />
-            </div>
-            <div>
-              <h4>SAVS AI Assistant</h4>
-              <span className="online-status">IA SAVS (Impulsada por Groq)</span>
-            </div>
-          </div>
-          <div className="header-actions">
-            <button className="action-btn" onClick={() => setMessages([])}>
-              <RefreshCw size={16} />
+    return (
+        <div className={`chatbot-wrapper ${isOpen ? 'is-open' : ''}`}>
+            <button
+                className="chatbot-toggle"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
+                aria-controls="chatbot-window"
+                aria-label={isOpen ? 'Cerrar asistente virtual' : 'Abrir asistente virtual SAVS'}
+            >
+                {isOpen ? <X size={24} aria-hidden="true" /> : <MessageSquare size={24} aria-hidden="true" />}
+                {!isOpen && <span className="notification-badge" aria-hidden="true">AI</span>}
             </button>
-            <button className="action-btn" onClick={() => setIsOpen(false)}>
-              <X size={18} />
-            </button>
-          </div>
-        </div>
 
-        {/* Input de archivo oculto */}
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-          onChange={handleImageSelect}
-          style={{ display: 'none' }}
-        />
+            <div
+                id="chatbot-window"
+                className="chatbot-window"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Asistente virtual SAVS AI"
+            >
+                <div className="chatbot-header">
+                    <div className="bot-info">
+                        <div className="bot-avatar"><Bot size={20} color="#000" aria-hidden="true" /></div>
+                        <div>
+                            <h4>SAVS AI Assistant</h4>
+                            <span className="online-status">IA SAVS (Impulsada por Groq)</span>
+                        </div>
+                    </div>
+                    <div className="header-actions">
+                        <button className="action-btn" onClick={() => setMessages([])} aria-label="Limpiar conversación"><RefreshCw size={16} aria-hidden="true" /></button>
+                        <button className="action-btn" onClick={() => setIsOpen(false)} aria-label="Cerrar chat"><X size={18} aria-hidden="true" /></button>
+                    </div>
+                </div>
 
-        <div className="messages-container">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`message-row ${msg.type}`}>
-              {msg.type === 'bot' && (
-                <div className="avatar-small">
-                  <Bot size={14} color="#eab308" />
+                {/* Input de archivo oculto */}
+                <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    onChange={handleImageSelect}
+                    className="chat-file-input-hidden"
+                    aria-hidden="true"
+                    tabIndex={-1}
+                />
+
+                <div className="messages-container" aria-live="polite" aria-label="Mensajes del chat" role="log">
+                    {messages.map((msg) => (
+                        <div key={msg.id} className={`message-row ${msg.type}`}>
+                            {msg.type === 'bot' && <div className="avatar-small"><Bot size={14} color="#eab308" /></div>}
+                            <div className="message-content">
+                                {msg.image && (
+                                    <div className="chat-msg-image">
+                                        <img src={msg.image} alt="Adjunto" />
+                                    </div>
+                                )}
+                                <div className="text-wrapper">
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                                </div>
+                                {msg.internalLink && (
+                                    <button 
+                                        className="internal-link-btn" 
+                                        onClick={() => window.location.href = msg.internalLink.url}
+                                    >
+                                        <ExternalLink size={14} /> {msg.internalLink.label}
+                                    </button>
+                                )}
+                                {msg.whatsapp && (
+                                    <a href={msg.whatsapp} target="_blank" rel="noreferrer" className="whatsapp-call-btn">
+                                        <ExternalLink size={14} /> Contactar Asesor
+                                    </a>
+                                )}
+                                {msg.options && (
+                                    <div className="options-container">
+                                        {msg.options.map((opt, idx) => (
+                                            <button key={idx} className="option-btn" onClick={() => handleOptionClick(opt)}>{opt.label}</button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                    {isTyping && (
+                        <div className="message-row bot typing">
+                            <div className="avatar-small"><Bot size={14} color="#eab308" /></div>
+                            <div className="message-content typing-indicator">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                    )}
+                    <div ref={messagesEndRef} />
                 </div>
               )}
               <div className="message-content">

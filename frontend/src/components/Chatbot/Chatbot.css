@@ -535,3 +535,8 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+/* Ocultar el input file nativo — accesible via aria-hidden + tabIndex=-1 */
+.chat-file-input-hidden {
+  display: none;
+}

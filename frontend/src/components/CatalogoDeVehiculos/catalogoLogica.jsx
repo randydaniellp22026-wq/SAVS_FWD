@@ -1,15 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { vehicleService } from '../../services/api';
+import { useVehiclesCatalogQuery } from '../../hooks/queries/useVehiclesQuery';
 
 /**
- * Hook personalizado para manejar la lógica del catálogo conectada al Backend.
- * Implementa Tarea 2 (Integración) y Tarea 3 (Filtros dinámicos).
+ * Hook del catálogo con React Query — sin refetch innecesario al navegar.
  */
 export const useCatalogoLogica = () => {
   const location = useLocation();
-  const [vehicles, setVehicles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [expandedSection, setExpandedSection] = useState('technical');
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -17,7 +15,6 @@ export const useCatalogoLogica = () => {
     totalPages: 1,
   });
 
-  const [expandedSection, setExpandedSection] = useState('technical');
   const [activeFilters, setActiveFilters] = useState({
     transmission: '',
     fuel: '',
@@ -65,34 +62,22 @@ export const useCatalogoLogica = () => {
         tag: activeFilters.tag,
       };
 
-      // Tarea 2: Llamada real al servicio centralizado
-      const response = await vehicleService.getAll(params);
+  const { data, isLoading, isFetching } = useVehiclesCatalogQuery(queryParams);
 
-      setVehicles(response.data || []);
-      setPagination((prev) => ({
-        ...prev,
-        total: response.pagination?.total || 0,
-        totalPages: response.pagination?.totalPages || 1,
-      }));
-    } catch (error) {
-      console.error('Error al cargar vehículos:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, activeFilters]);
+  const vehicles = data?.data || [];
+  const resolvedPagination = {
+    total: data?.pagination?.total ?? pagination.total,
+    page: pagination.page,
+    limit: pagination.limit,
+    totalPages: data?.pagination?.totalPages ?? pagination.totalPages,
+  };
 
-  // Efecto para recargar cuando cambian los filtros o la página
-  useEffect(() => {
-    fetchVehicles();
-  }, [fetchVehicles]);
-
-  // Manejadores de eventos
   const toggleSection = (section) =>
     setExpandedSection(expandedSection === section ? null : section);
 
   const handleFilterChange = (name, value) => {
     setActiveFilters((prev) => ({ ...prev, [name]: value }));
-    setPagination((prev) => ({ ...prev, page: 1 })); // Resetear a página 1 al filtrar
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   const handlePageChange = (newPage) => {
@@ -127,9 +112,9 @@ export const useCatalogoLogica = () => {
   return {
     expandedSection,
     activeFilters,
-    loading,
-    vehicles, // Ahora vienen del servidor
-    pagination,
+    loading: isLoading || isFetching,
+    vehicles,
+    pagination: resolvedPagination,
     toggleSection,
     handleFilterChange,
     handlePageChange,

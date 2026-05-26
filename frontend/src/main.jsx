@@ -5,7 +5,6 @@ import './index.css';
 import App from './App.jsx';
 import ErrorBoundary from './components/core/ErrorBoundary.jsx';
 
-// Validadores Globales de Input
 document.addEventListener('keydown', (e) => {
   const target = e.target;
   if (!target || (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA')) return;
@@ -20,18 +19,10 @@ document.addEventListener('keydown', (e) => {
         target.id.toLowerCase().includes('phone'))) ||
     (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
 
-  // 1. Evitar "-" en todos los lados, EXCEPTO en números de teléfono.
-  if (e.key === '-') {
-    if (!isPhone) {
-      e.preventDefault();
-    }
-  }
+  if (e.key === '-' && !isPhone) e.preventDefault();
 
-  // 2. En campos tipo número: evitar números negativos o notación exponencial (e, E, +, -)
-  if (target.type === 'number') {
-    if (['e', 'E', '+', '-'].includes(e.key)) {
-      e.preventDefault();
-    }
+  if (target.type === 'number' && ['e', 'E', '+', '-'].includes(e.key)) {
+    e.preventDefault();
   }
 });
 
@@ -50,17 +41,9 @@ document.addEventListener('paste', (e) => {
     (target.placeholder && target.placeholder.toLowerCase().includes('teléfono'));
 
   const pastedData = (e.clipboardData || window.clipboardData).getData('text');
-
-  // Si no es un campo telefónico y lo pegado contiene un guion (-), bloqueamos preventivamente.
-  if (!isPhone && pastedData.includes('-')) {
+  if (!isPhone && pastedData.includes('-')) e.preventDefault();
+  if (target.type === 'number' && ['e', 'E', '+', '-'].some((c) => pastedData.includes(c))) {
     e.preventDefault();
-  }
-
-  // Si es un text/num field y lo pegado contiene caracteres matemáticos exponenciales.
-  if (target.type === 'number') {
-    if (['e', 'E', '+', '-'].some((char) => pastedData.includes(char))) {
-      e.preventDefault();
-    }
   }
 });
 

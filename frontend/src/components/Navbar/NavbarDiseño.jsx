@@ -42,17 +42,16 @@ const NavbarDiseño = () => {
 
   return (
     <>
-      <nav className="navbar">
-        <div className="container navbar-container">
-          {/* Logo Section */}
-          <div className="navbar-logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-            <div className="logo-icon-savs">
-              <img src={savsLogo} alt="SAVS" className="savs-logo-img" />
-            </div>
-            <div className="logo-text-container">
-              <ShimmerText className="logo-text-main" text="SAVS" as="span" shimmerWidth={100} />
-              <span className="logo-text-sub">IMPORTADORA</span>
-            </div>
+    <nav className="navbar">
+      <div className="container navbar-container">
+        {/* Logo Section */}
+        <div className="navbar-logo" onClick={() => navigate('/')} role="button" tabIndex={0} aria-label="Ir a inicio" onKeyDown={(e) => e.key === 'Enter' && navigate('/')}>
+          <div className="logo-icon-savs">
+            <img src={savsLogo} alt="SAVS" className="savs-logo-img" />
+          </div>
+          <div className="logo-text-container">
+            <ShimmerText className="logo-text-main" text="SAVS" as="span" shimmerWidth={100} />
+            <span className="logo-text-sub">IMPORTADORA</span>
           </div>
 
           {/* Navigation Links */}
@@ -229,73 +228,54 @@ const NavbarDiseño = () => {
               {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
+
+          {/* Hamburger Menu Toggle */}
+          <button
+            className="hamburger-btn"
+            onClick={toggleMenu}
+            aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu-drawer"
+          >
+            {isMenuOpen ? <X size={28} aria-hidden="true" /> : <Menu size={28} aria-hidden="true" />}
+          </button>
         </div>
 
-        {/* Mobile Menu Drawer */}
-        <div className={`mobile-menu-drawer ${isMenuOpen ? 'open' : ''}`}>
-          <div className="mobile-menu-content">
-            <ul className="mobile-links">
-              <li onClick={closeMenu}>
-                <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Inicio
-                </NavLink>
-              </li>
-              <li onClick={closeMenu}>
-                <NavLink to="/inventory" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Vehículos
-                </NavLink>
-              </li>
-              <li onClick={closeMenu}>
-                <NavLink to="/vender-auto" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Trade In
-                </NavLink>
-              </li>
-              <li>
-                <button
-                  onClick={() => {
-                    setIsVehicleModalOpen(true);
-                    closeMenu();
-                  }}
-                  className={current === '/simulate-credit' ? 'active' : ''}
-                >
-                  Calcular Financiamiento
-                </button>
-              </li>
-              <li onClick={closeMenu}>
-                <NavLink
-                  to="/agendar-cita"
-                  className={({ isActive }) => (isActive ? 'active' : '')}
-                >
-                  Agendar cita
-                </NavLink>
-              </li>
-              <li onClick={closeMenu}>
-                <NavLink to="/contact" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Contacto
-                </NavLink>
-              </li>
-              <li onClick={closeMenu}>
-                <NavLink to="/reseñas" className={({ isActive }) => (isActive ? 'active' : '')}>
-                  Reseñas
-                </NavLink>
-              </li>
-              {(user?.rol === 'admin' || user?.rol === 'gerente') && (
-                <li onClick={closeMenu}>
-                  <NavLink
-                    to="/admin"
-                    className={({ isActive }) => (isActive ? 'active' : '')}
-                    style={{ color: '#eab308' }}
-                  >
-                    Gestión SAVS
-                  </NavLink>
-                </li>
-              )}
-            </ul>
-
-            <div className="mobile-footer">
-              <img src={savsLogo} alt="SAVS" className="mobile-menu-logo" />
-              <p>© 2024 Importadora SAVS. Todos los derechos reservados.</p>
-            </div>
+      {/* Mobile Menu Drawer */}
+      <div
+        id="mobile-menu-drawer"
+        className={`mobile-menu-drawer ${isMenuOpen ? 'open' : ''}`}
+        aria-hidden={!isMenuOpen}
+        role="dialog"
+        aria-label="Menú de navegación móvil"
+      >
+        <div className="mobile-menu-content">
+          <ul className="mobile-links">
+            <li onClick={closeMenu}><NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''}>Inicio</NavLink></li>
+            <li onClick={closeMenu}><NavLink to="/inventory" className={({ isActive }) => isActive ? 'active' : ''}>Vehículos</NavLink></li>
+            <li onClick={closeMenu}><NavLink to="/vender-auto" className={({ isActive }) => isActive ? 'active' : ''}>Trade In</NavLink></li>
+            <li>
+              <button 
+                onClick={() => {
+                  setIsVehicleModalOpen(true);
+                  closeMenu();
+                }}
+                className={current === '/simulate-credit' ? 'active' : ''} 
+              >
+                Calcular Financiamiento
+              </button>
+            </li>
+            <li onClick={closeMenu}><NavLink to="/agendar-cita" className={({ isActive }) => isActive ? 'active' : ''}>Agendar cita</NavLink></li>
+            <li onClick={closeMenu}><NavLink to="/contact" className={({ isActive }) => isActive ? 'active' : ''}>Contacto</NavLink></li>
+            <li onClick={closeMenu}><NavLink to="/reseñas" className={({ isActive }) => isActive ? 'active' : ''}>Reseñas</NavLink></li>
+          {(user?.rol === 'admin' || user?.rol === 'gerente') && (
+            <li onClick={closeMenu}><NavLink to="/admin" className={({ isActive }) => isActive ? 'active' : ''} style={{ color: '#eab308' }}>Gestión SAVS</NavLink></li>
+          )}
+          </ul>
+          
+          <div className="mobile-footer">
+            <img src={savsLogo} alt="SAVS" className="mobile-menu-logo" />
+            <p>© 2024 Importadora SAVS. Todos los derechos reservados.</p>
           </div>
         </div>
 

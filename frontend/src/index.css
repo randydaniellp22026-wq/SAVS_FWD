@@ -160,7 +160,6 @@ h6 {
   text-align: center !important;
 }
 
-/* ===== ACCESIBILIDAD (ARIA / WCAG) ===== */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -169,31 +168,11 @@ h6 {
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
 }
 
-.sr-only-focusable {
-  position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  background-color: var(--color-primary, #eab308);
-  color: #000;
-  font-weight: 700;
-  padding: 10px 20px;
-  border-radius: 8px;
-  z-index: 100000;
-}
-
-.sr-only-focusable:focus,
-.sr-only-focusable:active {
-  left: 20px;
-  top: 20px;
-  width: auto;
-  height: auto;
-  overflow: visible;
-  outline: 3px solid #fff;
-  outline-offset: 2px;
+/* ===== UTILITIES ===== */
+.page-loader {
+  padding: 2rem;
 }

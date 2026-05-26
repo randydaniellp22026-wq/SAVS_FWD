@@ -32,6 +32,8 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import { useAdminDashboardQuery } from '../../hooks/queries/useAdminDashboardQuery';
+import { CatalogSkeletonGrid } from '../../components/ui/Skeleton';
 import './Admin.css';
 
 const COLORS = ['#eab308', '#3b82f6', '#10b981', '#ef4444', '#a855f7', '#6366f1'];
@@ -104,8 +106,8 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, [refetch]);
 
-  if (loading && stats.vehicles === 0) {
-    return <AdminLoader message="Sincronizando con el servidor central..." />;
+  if (isLoading && stats.vehicles === 0) {
+    return <CatalogSkeletonGrid count={4} />;
   }
 
   return (
@@ -130,7 +132,7 @@ const AdminDashboard = () => {
           </div>
           <h3 className="stat-label">Inventario Total</h3>
           <div className="stat-value-container">
-            <span className="stat-number">{loading ? '...' : stats.vehicles}</span>
+            <span className="stat-number">{isLoading ? '...' : stats.vehicles}</span>
             <span className="stat-unit">Unidades</span>
           </div>
         </div>
@@ -143,7 +145,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Usuarios Registrados</h3>
-          <span className="stat-number">{loading ? '...' : stats.users}</span>
+          <span className="stat-number">{isLoading ? '...' : stats.users}</span>
         </div>
 
         {/* Card: Solicitudes */}
@@ -154,7 +156,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Solicitudes Pendientes</h3>
-          <span className="stat-number">{loading ? '...' : stats.requests}</span>
+          <span className="stat-number">{isLoading ? '...' : stats.requests}</span>
         </div>
 
         {/* Card: Trade-in */}
@@ -165,11 +167,11 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Trade-in (Auto Pago)</h3>
-          <span className="stat-number">{loading ? '...' : stats.tradeIn}</span>
+          <span className="stat-number">{isLoading ? '...' : stats.tradeIn}</span>
         </div>
       </div>
 
-      {!loading && (
+      {!isLoading && (
         <div className="charts-grid">
           {/* Gráfico 1: Distribución de Combustible */}
           <div className="chart-card">

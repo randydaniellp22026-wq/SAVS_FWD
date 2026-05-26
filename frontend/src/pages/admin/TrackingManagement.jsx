@@ -289,7 +289,8 @@ const TrackingManagement = () => {
           timer: 2000,
           showConfirmButton: false,
         });
-        fetchUsers();
+        invalidateUsers();
+        refetch();
         setExpanded(null);
       } catch {
         Swal.fire('Error', 'No se pudo guardar en el servidor.', 'error');
@@ -317,7 +318,6 @@ const TrackingManagement = () => {
   /* ══════════════════ RENDER ══════════════════ */
   return (
     <div className="admin-container tracking-mgmt">
-      {/* ── Header ── */}
       <header className="tracking-header">
         <div className="tracking-title-row">
           <div className="tracking-icon-wrapper">
