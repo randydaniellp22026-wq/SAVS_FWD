@@ -29,7 +29,7 @@ import { Magnetic } from '../core/Magnetic';
 import FacebookPromo from '../FacebookPromo/FacebookPromo';
 import PromocionBadge from '../catalog/PromocionBadge';
 import { marketingService } from '../../services/api';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import VehiclePDFButton from './VehiclePDFButton';
 import { CatalogSkeletonGrid } from '../ui/Skeleton';
 import './VehicleCatalog.css';

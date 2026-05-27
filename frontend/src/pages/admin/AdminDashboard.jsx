@@ -106,7 +106,7 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, [refetch]);
 
-  if (isLoading && stats.vehicles === 0) {
+  if (loading && stats.vehicles === 0) {
     return <CatalogSkeletonGrid count={4} />;
   }
 
@@ -132,7 +132,7 @@ const AdminDashboard = () => {
           </div>
           <h3 className="stat-label">Inventario Total</h3>
           <div className="stat-value-container">
-            <span className="stat-number">{isLoading ? '...' : stats.vehicles}</span>
+            <span className="stat-number">{loading ? '...' : stats.vehicles}</span>
             <span className="stat-unit">Unidades</span>
           </div>
         </div>
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Usuarios Registrados</h3>
-          <span className="stat-number">{isLoading ? '...' : stats.users}</span>
+          <span className="stat-number">{loading ? '...' : stats.users}</span>
         </div>
 
         {/* Card: Solicitudes */}
@@ -156,7 +156,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Solicitudes Pendientes</h3>
-          <span className="stat-number">{isLoading ? '...' : stats.requests}</span>
+          <span className="stat-number">{loading ? '...' : stats.requests}</span>
         </div>
 
         {/* Card: Trade-in */}
@@ -167,11 +167,11 @@ const AdminDashboard = () => {
             </div>
           </div>
           <h3 className="stat-label">Trade-in (Auto Pago)</h3>
-          <span className="stat-number">{isLoading ? '...' : stats.tradeIn}</span>
+          <span className="stat-number">{loading ? '...' : stats.tradeIn}</span>
         </div>
       </div>
 
-      {!isLoading && (
+      {!loading && (
         <div className="charts-grid">
           {/* Gráfico 1: Distribución de Combustible */}
           <div className="chart-card">

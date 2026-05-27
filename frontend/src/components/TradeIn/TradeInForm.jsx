@@ -199,13 +199,18 @@ const TradeInForm = ({ userId, onSuccess, isEditing, editData, onCancelEdit }) =
 
       <div className="form-group">
         <label>Imagen del vehículo</label>
-        <input
-          type="file"
-          id="imagen-upload"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="file-upload-input"
-        />
+        <div className="file-upload-wrapper">
+          <input
+            type="file"
+            id="imagen-upload"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="file-upload-input"
+          />
+          <div className="file-upload-custom">
+            {formData.imagen ? 'Cambiar imagen...' : 'Seleccionar imagen...'}
+          </div>
+        </div>
         {errors.imagen && <span className="field-error">{errors.imagen}</span>}
         {formData.imagen && (
           <div className="image-preview">

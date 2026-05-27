@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { adminVehiclesService } from '../../admin/services';
 import { CarFront, Plus, RefreshCcw, ArrowLeft, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Componentes Modulares
 import VehicleList from '../../components/admin/Inventory/VehicleList';
