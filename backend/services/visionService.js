@@ -503,7 +503,7 @@ async function analyzeVehicleImage(base64Data, mimeType, originalName = '') {
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.2-90b-vision-preview',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         messages: [
           {
             role: 'system',
@@ -574,7 +574,9 @@ async function analyzeVehicleImage(base64Data, mimeType, originalName = '') {
 const BANNER_PROMPT = `
 Eres el mejor copywriter de marketing automotriz de IMPORTADORA SAVS en Costa Rica. Escribes como un creativo de agencia: titulares que detienen el scroll y descripciones que generan deseo inmediato de comprar o cotizar.
 
-Analiza la fotografia del vehiculo y crea un anuncio para banner web que VENDA emocionalmente, no que solo describa.
+Analiza la fotografia y PRIMERO determina si la imagen tiene relacion con vehiculos (si muestra un carro, un motor, un volante, llantas, logos de autos, etc).
+Si la imagen NO tiene nada que ver con vehiculos (ej. una persona, paisaje, banda de musica, memes), establece "isCarRelated" en false y genera un titulo y descripcion advirtiendo del error.
+Si la imagen SI tiene que ver con vehiculos, establece "isCarRelated" en true y crea un anuncio para banner web que VENDA emocionalmente, no que solo describa.
 
 ESTILO CREATIVO (obligatorio):
 - Usa lenguaje vibrante, cercano y costarricense (vos, vení, llevátelo, cotizá).
@@ -596,6 +598,8 @@ REGLAS TÉCNICAS:
 - Respuesta UNICAMENTE JSON valido, sin markdown ni explicaciones.
 
 {
+  "isCarRelated": true/false,
+  "reasoning": "...",
   "titulo": "...",
   "descripcion": "..."
 }
@@ -618,7 +622,7 @@ async function generateBannerCopy(base64Data, mimeType, originalName = '') {
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.2-90b-vision-preview',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         messages: [
           {
             role: 'system',
@@ -667,15 +671,26 @@ async function generateBannerCopy(base64Data, mimeType, originalName = '') {
       }
     }
 
+    if (parsed.isCarRelated === false) {
+      throw new Error('La imagen no parece ser de un vehículo válido para anuncios. Por favor sube otra imagen.');
+    }
+
     return {
       titulo: parsed.titulo || 'Sin título',
       descripcion: parsed.descripcion || '',
     };
   } catch (error) {
     console.warn(
-      '⚠️ Error en generateBannerCopy (Vision API). Usando fallback inteligente:',
+      '⚠️ Error en generateBannerCopy (Vision API).',
       error.message
     );
+    
+    // Si la IA detectó explícitamente que no es un auto, o si ya habíamos lanzado ese error, propagarlo al frontend.
+    if (error.message === 'La imagen no parece ser de un vehículo válido para anuncios. Por favor sube otra imagen.') {
+      throw error;
+    }
+
+    // Para cualquier otro error (falla de API, timeout, json inválido), usar fallback
     return generateFallbackCopy(originalName);
   }
 }

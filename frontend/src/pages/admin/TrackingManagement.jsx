@@ -27,6 +27,8 @@ import Swal from 'sweetalert2';
 import { usersService } from '../../admin/services';
 import AdminLoader from '../../components/admin/AdminLoader';
 import TrackingTimeline from '../../admin/components/TrackingTimeline/TrackingTimeline';
+import TrackingEditModal from '../../admin/components/TrackingTimeline/TrackingEditModal';
+import { useVehiclesAdminQuery } from '../../hooks/queries/useVehiclesQuery';
 import './Admin.css';
 
 /* ─── Constantes ─── */
@@ -89,6 +91,11 @@ const TrackingManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { data: vehiclesData } = useVehiclesAdminQuery();
+  const availableVehicles = vehiclesData?.data || [];
 
   /* ── Filtros y búsqueda ── */
   const [search, setSearch] = useState('');
@@ -215,87 +222,34 @@ const TrackingManagement = () => {
   const withoutTracking = users.length - withTracking;
   const inCustoms = users.filter((u) => u.tracking?.importStatus === 3).length;
 
-  /* ─── Modal de edición (SweetAlert2) ─── */
+  /* ─── Modal de edición ─── */
   const handleEditTracking = (user) => {
-    const t = user.tracking || {};
-    Swal.fire({
-      title: `Tracking: ${user.nombre}`,
-      html: `
-        <div style="text-align:left;color:#fff;overflow:hidden;">
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Nombre del Vehículo</label>
-          <input id="t-vehicle" class="swal2-input" value="${t.vehicleName || ''}"
-            style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;">
+    setEditingUser(user);
+  };
 
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Etapa de Importación</label>
-          <select id="t-status" class="swal2-input"
-            style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;background:#222;color:#fff;">
-            <option value="1" ${t.importStatus === 1 ? 'selected' : ''}>1. Compra Realizada</option>
-            <option value="2" ${t.importStatus === 2 ? 'selected' : ''}>2. En Tránsito</option>
-            <option value="3" ${t.importStatus === 3 ? 'selected' : ''}>3. En Aduanas</option>
-            <option value="4" ${t.importStatus === 4 ? 'selected' : ''}>4. Entrega Final</option>
-          </select>
-
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Fecha Estimada de Arribo</label>
-          <input id="t-date" class="swal2-input" value="${t.estimatedDate || ''}"
-            placeholder="Ej: 2026-06-15"
-            style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;">
-
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Ubicación Actual</label>
-          <input id="t-location" class="swal2-input" value="${t.location || ''}"
-            placeholder="Ej: Puerto de Moín, Limón"
-            style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;">
-
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Barco / Naviera</label>
-          <input id="t-vessel" class="swal2-input" value="${t.vessel || ''}"
-            placeholder="Ej: Maersk Line · V0924"
-            style="margin-top:0;margin-bottom:14px;width:100%;box-sizing:border-box;">
-
-          <label style="display:block;margin-bottom:5px;font-size:0.8rem;color:#9ca3af;">Descripción del Estado</label>
-          <select id="t-text" class="swal2-input"
-            style="margin-top:0;margin-bottom:4px;width:100%;box-sizing:border-box;background:#222;color:#fff;">
-            <option value="Compra procesada correctamente"  ${t.statusText === 'Compra procesada correctamente' ? 'selected' : ''}>Compra procesada correctamente</option>
-            <option value="Vehículo en tránsito marítimo"  ${t.statusText === 'Vehículo en tránsito marítimo' ? 'selected' : ''}>Vehículo en tránsito marítimo</option>
-            <option value="En trámite aduanal"             ${t.statusText === 'En trámite aduanal' ? 'selected' : ''}>En trámite aduanal</option>
-            <option value="Listo para entrega al cliente"  ${t.statusText === 'Listo para entrega al cliente' ? 'selected' : ''}>Listo para entrega al cliente</option>
-          </select>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#eab308',
-      background: '#141414',
-      color: '#fff',
-      width: '540px',
-      preConfirm: () => ({
-        vehicleName: document.getElementById('t-vehicle').value.trim(),
-        importStatus: parseInt(document.getElementById('t-status').value),
-        estimatedDate: document.getElementById('t-date').value.trim(),
-        location: document.getElementById('t-location').value.trim(),
-        vessel: document.getElementById('t-vessel').value.trim(),
-        statusText: document.getElementById('t-text').value,
-      }),
-    }).then(async (result) => {
-      if (!result.isConfirmed) return;
-      try {
-        await usersService.updateTracking(user.id, result.value);
-        Swal.fire({
-          icon: 'success',
-          title: '¡Actualizado!',
-          text: `El tracking de ${user.nombre} fue guardado correctamente.`,
-          confirmButtonColor: '#eab308',
-          background: '#141414',
-          color: '#fff',
-          timer: 2000,
-          showConfirmButton: false,
-        });
-        invalidateUsers();
-        refetch();
-        setExpanded(null);
-      } catch {
-        Swal.fire('Error', 'No se pudo guardar en el servidor.', 'error');
-      }
-    });
+  const handleSaveTracking = async (formData) => {
+    if (!editingUser) return;
+    setIsSaving(true);
+    try {
+      await usersService.updateTracking(editingUser.id, formData);
+      Swal.fire({
+        icon: 'success',
+        title: '¡Actualizado!',
+        text: `El tracking de ${editingUser.nombre} fue guardado correctamente.`,
+        confirmButtonColor: '#eab308',
+        background: '#141414',
+        color: '#fff',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      fetchUsers();
+      setExpanded(null);
+      setEditingUser(null);
+    } catch {
+      Swal.fire('Error', 'No se pudo guardar en el servidor.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const clearFilters = () => {
@@ -318,6 +272,14 @@ const TrackingManagement = () => {
   /* ══════════════════ RENDER ══════════════════ */
   return (
     <div className="admin-container tracking-mgmt">
+      <TrackingEditModal 
+        isOpen={!!editingUser} 
+        user={editingUser} 
+        vehicles={availableVehicles}
+        onClose={() => setEditingUser(null)}
+        onSave={handleSaveTracking}
+        isSaving={isSaving}
+      />
       <header className="tracking-header">
         <div className="tracking-title-row">
           <div className="tracking-icon-wrapper">

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { branchesService } from '../../admin/services';
 import AdminLoader from '../../components/admin/AdminLoader';
+import BranchEditModal from '../../admin/components/BranchManagement/BranchEditModal';
 import './Admin.css';
 
 const darkSwal = {
@@ -222,91 +223,14 @@ const BranchManagement = () => {
         )}
       </div>
 
-      {showModal && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content admin-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{isEditing ? 'Editar Sede' : 'Nueva Sede'}</h2>
-              <button className="close-btn" onClick={closeModal}>
-                <X size={24} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="admin-form">
-              <div className="form-group">
-                <label>Nombre de la Sede</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={currentBranch.name}
-                  onChange={handleInputChange}
-                  placeholder="Ej. Sede Central San José"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Dirección Exacta</label>
-                <textarea
-                  name="location"
-                  value={currentBranch.location}
-                  onChange={handleInputChange}
-                  placeholder="Provincia, Cantón, señas exactas..."
-                  className="admin-textarea"
-                  required
-                />
-              </div>
-
-              <div className="form-row branch-form-row">
-                <div className="form-group flex-1">
-                  <label>Teléfono</label>
-                  <input
-                    type="text"
-                    name="phone"
-                    value={currentBranch.phone}
-                    onChange={handleInputChange}
-                    placeholder="+506 ...."
-                  />
-                </div>
-                <div className="form-group flex-1">
-                  <label>Horario</label>
-                  <input
-                    type="text"
-                    name="schedule"
-                    value={currentBranch.schedule}
-                    onChange={handleInputChange}
-                    placeholder="L-V 8am-5pm"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>URL del Mapa (Google Maps Embed)</label>
-                <input
-                  type="text"
-                  name="map_embed"
-                  value={currentBranch.map_embed}
-                  onChange={handleInputChange}
-                  placeholder="https://www.google.com/maps/embed?..."
-                />
-                <small className="form-help-text">
-                  Copia el enlace del 'src' del iframe de Google Maps.
-                </small>
-              </div>
-
-              <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={closeModal}>
-                  Cancelar
-                </button>
-                <button type="submit" className="btn-primary-gold">
-                  <Save size={18} />
-                  <span>{isEditing ? 'Actualizar' : 'Crear Sede'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <BranchEditModal
+        isOpen={showModal}
+        isEditing={isEditing}
+        currentBranch={currentBranch}
+        onClose={closeModal}
+        onSave={handleSubmit}
+        onChange={handleInputChange}
+      />
     </div>
   );
 };

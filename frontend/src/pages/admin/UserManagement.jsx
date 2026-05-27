@@ -20,6 +20,8 @@ import { useUsersQuery, useInvalidateUsers } from '../../hooks/queries/useUsersQ
 import { CatalogSkeletonGrid } from '../../components/ui/Skeleton';
 import './UserManagement.css';
 
+const getRoleName = (r) => (typeof r === 'object' ? r?.nombre : r) || 'Cliente';
+
 const UserManagement = () => {
   const { data: users = [], isLoading } = useUsersQuery();
   const invalidateUsers = useInvalidateUsers();
@@ -29,7 +31,7 @@ const UserManagement = () => {
   const isGerente = currentUser.rol === 'gerente';
 
   const handleEditUser = (user) => {
-    if (user.rol?.nombre === 'gerente' && !isGerente) {
+    if (getRoleName(user.rol).toLowerCase() === 'gerente' && !isGerente) {
       return Swal.fire(
         'Acceso Denegado',
         'No tienes permisos para modificar a un Gerente.',
@@ -82,7 +84,7 @@ const UserManagement = () => {
       );
     }
 
-    if (user.rol?.nombre === 'gerente' && currentUser.rol !== 'gerente') {
+    if (getRoleName(user.rol).toLowerCase() === 'gerente' && currentUser.rol !== 'gerente') {
       return Swal.fire(
         'Acceso Denegado',
         'No tienes permisos para eliminar a un Gerente.',
@@ -116,7 +118,7 @@ const UserManagement = () => {
   const handleToggleAdmin = async (user) => {
     if (!isGerente) return;
 
-    const isPromoting = user.rol?.nombre !== 'admin';
+    const isPromoting = getRoleName(user.rol).toLowerCase() !== 'admin';
     const newRole = isPromoting ? 'admin' : 'Cliente';
     const newRolId = isPromoting ? 1 : 3;
 
@@ -230,20 +232,20 @@ const UserManagement = () => {
                     </div>
                   </td>
                   <td data-label="Rol / Rango">
-                    <span className={`role-badge ${(user.rol?.nombre || 'cliente').toLowerCase()}`}>
-                      {user.rol?.nombre === 'admin' ? (
+                    <span className={`role-badge ${getRoleName(user.rol).toLowerCase()}`}>
+                      {getRoleName(user.rol).toLowerCase() === 'admin' ? (
                         <Shield size={14} />
-                      ) : user.rol?.nombre === 'gerente' ? (
+                      ) : getRoleName(user.rol).toLowerCase() === 'gerente' ? (
                         <ShieldAlert size={14} />
                       ) : (
                         <UserCheck size={14} />
                       )}
-                      {user.rol?.nombre || 'Cliente'}
+                      {getRoleName(user.rol)}
                     </span>
                   </td>
                   <td data-label="Acciones">
                     <div className="actions-cell">
-                      {(isGerente || user.rol?.nombre !== 'gerente') && (
+                      {(isGerente || getRoleName(user.rol).toLowerCase() !== 'gerente') && (
                         <button
                           className="action-btn"
                           onClick={() => handleEditUser(user)}
@@ -255,12 +257,12 @@ const UserManagement = () => {
 
                       {isGerente &&
                         user.id !== currentUser.id &&
-                        user.rol?.nombre !== 'gerente' && (
+                        getRoleName(user.rol).toLowerCase() !== 'gerente' && (
                           <button
-                            className={`action-btn ${user.rol?.nombre === 'admin' ? 'demote' : 'promote-shine'}`}
+                            className={`action-btn ${getRoleName(user.rol).toLowerCase() === 'admin' ? 'demote' : 'promote-shine'}`}
                             onClick={() => handleToggleAdmin(user)}
                             title={
-                              user.rol?.nombre === 'admin'
+                              getRoleName(user.rol).toLowerCase() === 'admin'
                                 ? 'Quitar Admin'
                                 : 'Promover a Administrador'
                             }
@@ -270,7 +272,7 @@ const UserManagement = () => {
                         )}
 
                       {(isGerente ||
-                        (user.rol?.nombre !== 'gerente' && user.id !== currentUser.id)) && (
+                        (getRoleName(user.rol).toLowerCase() !== 'gerente' && user.id !== currentUser.id)) && (
                         <button
                           className="action-btn delete"
                           onClick={() => handleDeleteUser(user)}

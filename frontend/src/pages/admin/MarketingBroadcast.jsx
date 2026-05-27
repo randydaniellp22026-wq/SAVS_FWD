@@ -129,6 +129,11 @@ const MarketingBroadcast = () => {
       }
     } catch (e) {
       console.error('Error IA:', e);
+      const errMsg = e.response?.data?.error || 'No se pudo generar el texto del anuncio.';
+      Swal.fire({ ...darkSwal, title: 'Error con IA', text: errMsg, icon: 'error' });
+      setImagenFile(null);
+      setImagenPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } finally {
       setGeneratingIA(false);
     }

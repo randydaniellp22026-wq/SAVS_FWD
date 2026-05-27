@@ -171,6 +171,6 @@ router.patch('/:id', verificarToken, validate(updateUserSchema), userController.
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete('/:id', verificarToken, esAdmin, userController.remove);
+router.delete('/:id', verificarToken, esAdminOGerente, userController.remove);
 
 module.exports = router;
