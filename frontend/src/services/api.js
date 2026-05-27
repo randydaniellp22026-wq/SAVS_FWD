@@ -153,8 +153,8 @@ export const appointmentService = {
   // v1: /appointments
   getMine: () => api.get('/appointments').then((r) => r.data),
   create: (data) => api.post('/appointments', data).then((r) => r.data),
-  // Legacy cancel flow no existe en v1; mantenemos legacy como fallback.
-  cancel: (id) => apiLegacy.patch(`/appointments/${id}/cancel`).then((r) => r.data),
+  // v1: /appointments/:id (PATCH) para actualizar el estado
+  cancel: (id) => api.patch(`/appointments/${id}`, { estado: 'cancelada' }).then((r) => r.data),
 };
 
 export const pointsService = {
