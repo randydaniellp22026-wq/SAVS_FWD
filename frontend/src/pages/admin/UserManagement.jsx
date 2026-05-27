@@ -16,6 +16,8 @@ import Swal from 'sweetalert2';
 import { usersService } from '../../admin/services';
 import { getStoredAdminUser } from '../../admin/utils/auth';
 import AdminLoader from '../../components/admin/AdminLoader';
+import { useUsersQuery, useInvalidateUsers } from '../../hooks/queries/useUsersQuery';
+import { CatalogSkeletonGrid } from '../../components/ui/Skeleton';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -25,22 +27,6 @@ const UserManagement = () => {
   
   const currentUser = getStoredAdminUser();
   const isGerente = currentUser.rol === 'gerente';
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const data = await usersService.getAll();
-      setUsers(data);
-    } catch (error) {
-      console.error('Error loading users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleEditUser = (user) => {
     if (user.rol?.nombre === 'gerente' && !isGerente) {
@@ -79,7 +65,7 @@ const UserManagement = () => {
         try {
           await usersService.update(user.id, result.value);
           Swal.fire('Actualizado', 'El usuario ha sido modificado con éxito.', 'success');
-          fetchUsers();
+          invalidateUsers();
         } catch (error) {
           Swal.fire('Error', 'No se pudo actualizar el usuario.', 'error');
         }

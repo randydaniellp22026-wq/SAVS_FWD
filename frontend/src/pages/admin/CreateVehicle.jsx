@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useVehiclesAdminQuery, useVehicleMutation } from '../../hooks/queries/useVehiclesQuery';
 import Swal from 'sweetalert2';
 import { adminVehiclesService } from '../../admin/services';
 import { CarFront, Plus, RefreshCcw, ArrowLeft, ChevronRight } from 'lucide-react';
@@ -37,30 +38,7 @@ const CreateVehicle = () => {
   const vehiculos = vehiclesData?.data || [];
   const [currentVehicle, setCurrentVehicle] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
-  const fetchVehicles = async () => {
-    setLoading(true);
-    try {
-      // Tarea 2: Obtener datos reales con paginación (traemos los primeros 100 para el admin)
-      const response = await adminVehiclesService.getAll({ limit: 100 });
-      setVehiculos(response.data || []);
-    } catch (error) {
-      console.error('Error fetching vehicles:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error de conexión',
-        text: 'No se pudieron cargar los vehículos desde el servidor.',
-        background: '#1a1a1a',
-        color: '#fff',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [submitting, setSubmitting] = useState(false);
 
   const handleAddNew = () => {
     setCurrentVehicle(initialFormState);
@@ -89,7 +67,7 @@ const CreateVehicle = () => {
     if (result.isConfirmed) {
       try {
         await adminVehiclesService.delete(vehicle.id);
-        setVehiculos((prev) => prev.filter((v) => v.id !== vehicle.id));
+        refetch();
         Swal.fire({
           icon: 'success',
           title: 'Eliminado',
@@ -129,6 +107,7 @@ const CreateVehicle = () => {
         formData.append('modelo', parts.slice(1).join(' '));
       }
 
+      let response;
       if (isEditing) {
         response = await adminVehiclesService.update(data.id, formData);
         Swal.fire({
