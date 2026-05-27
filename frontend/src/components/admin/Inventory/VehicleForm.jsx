@@ -10,7 +10,7 @@ import {
   Loader2,
   DollarSign,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import Swal from 'sweetalert2';
 import { vehicleService } from '../../../services/api';
 import BasicInfoSection from './sections/BasicInfoSection';

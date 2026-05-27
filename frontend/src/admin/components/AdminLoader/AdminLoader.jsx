@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Loader2 } from 'lucide-react';
 
 const AdminLoader = ({ message = 'Cargando datos del sistema...', height = '400px' }) => {

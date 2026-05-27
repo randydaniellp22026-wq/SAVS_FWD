@@ -10,7 +10,7 @@ import {
   ChevronRight,
   Plus,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 
 const VehicleList = ({ vehicles, onEdit, onDelete, onAddNew }) => {
   const [searchTerm, setSearchTerm] = useState('');
