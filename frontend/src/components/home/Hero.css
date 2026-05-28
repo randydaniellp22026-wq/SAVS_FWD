@@ -13,15 +13,15 @@
 
 .hero-slider {
   display: flex;
-  width: 200%;
+  width: 100%;
   height: 100%;
   transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .hero-slide {
   position: relative;
-  flex: 0 0 50%;
-  width: 50%;
+  flex: 0 0 100%;
+  width: 100%;
   height: 100%;
   overflow: hidden;
 }
