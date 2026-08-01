@@ -9,7 +9,7 @@ import FacebookPromo from '../../components/FacebookPromo/FacebookPromo';
 import styles from './VehicleDetails.module.css';
 import './VehicleDetails.css';
 
-const localImages = import.meta.glob('../../carros/*.{jpg,jpeg,png,webp,avif}', {
+const localImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', {
   eager: true,
   import: 'default',
 });
@@ -71,6 +71,17 @@ const VehicleDetails = () => {
           alt={vehicle.name || vehicle.modelo}
           className="hero-background-img"
           referrerPolicy="no-referrer"
+          onError={(e) => {
+            const fallbackKey = Object.keys(localImages).find(
+              (k) => vehicle.galleryPath && k.includes(vehicle.galleryPath)
+            );
+            const newSrc = fallbackKey
+              ? localImages[fallbackKey]
+              : 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop';
+            if (e.target.src !== newSrc && e.target.src !== window.location.origin + newSrc) {
+              e.target.src = newSrc;
+            }
+          }}
         />
         <div className="details-hero-overlay"></div>
         <div className="container details-hero-content">

@@ -4,6 +4,10 @@ import api from '../../services/api';
 import { Car, Truck, Zap, Flame, ChevronLeft, ChevronRight, X, Bus, ArrowLeft } from 'lucide-react';
 import './VehicleSelectionModal.css';
 
+const localImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+  import: 'default',
+});
 const categoriesData = [
   { id: 'Sedán', label: 'Autos', icon: Car },
   { id: 'SUV', label: 'SUV', icon: Car },
@@ -27,8 +31,9 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   // Fetch all vehicles once when the modal opens
   useEffect(() => {
     if (isOpen) {
-      api.get('/vehicles')
-        .then(res => {
+      api
+        .get('/vehicles')
+        .then((res) => {
           const vehicleArray = res.data.data || res.data || [];
           setAllVehicles(Array.isArray(vehicleArray) ? vehicleArray : []);
         })
@@ -93,11 +98,7 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="vehicle-selection-overlay"
-      onClick={onClose}
-      role="presentation"
-    >
+    <div className="vehicle-selection-overlay" onClick={onClose} role="presentation">
       <div
         className="vehicle-selection-modal"
         role="dialog"
@@ -115,8 +116,10 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
               <button className="vehicle-selection-back" onClick={onClose} aria-label="Volver">
                 <ArrowLeft size={20} /> Volver
               </button>
-              <h2 id="vehicle-modal-title" className="vehicle-selection-title">Selecioná el tipo de vehículo</h2>
-              
+              <h2 id="vehicle-modal-title" className="vehicle-selection-title">
+                Selecioná el tipo de vehículo
+              </h2>
+
               <div className="category-grid" role="list">
                 {categoriesData.map((cat) => {
                   const Icon = cat.icon;
@@ -145,10 +148,16 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
               <button className="vehicle-selection-back" onClick={handleGoBack} aria-label="Volver">
                 <ArrowLeft size={20} /> Volver
               </button>
-              <h2 id="vehicle-modal-title" className="vehicle-selection-title">Selecioná el vehículo de interés</h2>
-              
+              <h2 id="vehicle-modal-title" className="vehicle-selection-title">
+                Selecioná el vehículo de interés
+              </h2>
+
               <div className="models-carousel-wrapper">
-                <button className="carousel-nav-btn" onClick={() => scrollCarousel('left')} aria-label="Anterior">
+                <button
+                  className="carousel-nav-btn"
+                  onClick={() => scrollCarousel('left')}
+                  aria-label="Anterior"
+                >
                   <ChevronLeft size={48} aria-hidden="true" />
                 </button>
 
@@ -168,6 +177,20 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                           alt={vehicle.name}
                           className="model-image"
                           referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            const fallbackKey = Object.keys(localImages).find(
+                              (k) => vehicle.galleryPath && k.includes(vehicle.galleryPath)
+                            );
+                            const newSrc = fallbackKey
+                              ? localImages[fallbackKey]
+                              : 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop';
+                            if (
+                              e.target.src !== newSrc &&
+                              e.target.src !== window.location.origin + newSrc
+                            ) {
+                              e.target.src = newSrc;
+                            }
+                          }}
                         />
                       </div>
                       <span className="model-name">{vehicle.name}</span>
@@ -175,7 +198,11 @@ const VehicleSelectionModal = ({ isOpen, onClose }) => {
                   ))}
                 </div>
 
-                <button className="carousel-nav-btn" onClick={() => scrollCarousel('right')} aria-label="Siguiente">
+                <button
+                  className="carousel-nav-btn"
+                  onClick={() => scrollCarousel('right')}
+                  aria-label="Siguiente"
+                >
                   <ChevronRight size={48} aria-hidden="true" />
                 </button>
               </div>

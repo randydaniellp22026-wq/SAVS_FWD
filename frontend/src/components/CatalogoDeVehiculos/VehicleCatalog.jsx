@@ -35,7 +35,7 @@ import { CatalogSkeletonGrid } from '../ui/Skeleton';
 import './VehicleCatalog.css';
 
 // Glob para imágenes locales (fallback si no hay imagen en el servidor)
-const localImages = import.meta.glob('../../img/*.{jpg,jpeg,png,webp,avif}', {
+const localImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', {
   eager: true,
   import: 'default',
 });
@@ -465,7 +465,26 @@ const VehicleCatalog = ({ title, showFilters = false }) => {
                       >
                         <BorderBeam duration={10} size={25} borderWidth={1.2} />
                         <div className="vehicle-image-container">
-                          <img src={imageSrc} alt={car.name} className="vehicle-image" />
+                          <img
+                            src={imageSrc}
+                            alt={car.name}
+                            className="vehicle-image"
+                            onError={(e) => {
+                              const fallbackKey = Object.keys(localImages).find(
+                                (k) => car.galleryPath && k.includes(car.galleryPath)
+                              );
+                              const newSrc = fallbackKey
+                                ? localImages[fallbackKey]
+                                : 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop';
+                              // Only change src if it's different to prevent infinite loop
+                              if (
+                                e.target.src !== newSrc &&
+                                e.target.src !== window.location.origin + newSrc
+                              ) {
+                                e.target.src = newSrc;
+                              }
+                            }}
+                          />
                           <PromocionBadge tag={car.tag} promoActiva={isVehiclePromo(car)} />
                           <div
                             className="vehicle-tag"

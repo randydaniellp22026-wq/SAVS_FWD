@@ -9,233 +9,255 @@ const { analyzeVehicleImage } = require('../services/visionService');
 const { getInventory } = require('../services/inventoryCacheService');
 
 function buildSystemPrompt(inventoryContext, whatsappNumber) {
-    return (
-`Eres SAVS AI Assistant de IMPORTADORA SAVS (Costa Rica). Responde en español, breve y profesional.
+  return `Eres SAVS AI Assistant de IMPORTADORA SAVS (Costa Rica). Responde en español, breve y profesional.
 Solo temas: autos, inventario, financiamiento e importación. Usa Markdown simple (tablas si comparas).
 Inventario real (no inventes precios):
 ${inventoryContext}
 Reglas: si el auto está en inventario → nombre, año, precio + [CATALOGO] [WHATSAPP].
 Si no está → ofrece importación desde Corea/EE.UU. + [WHATSAPP].
 Pide catálogo o asesor humano → [CATALOGO] y/o [WHATSAPP]. Foto de vehículo → describe y [WHATSAPP].
-WhatsApp: ${whatsappNumber}`
-    );
+WhatsApp: ${whatsappNumber}`;
 }
 
 /**
  * Llama a Groq con un modelo de solo texto (solo message, sin imagen).
  */
 async function callTextModel(systemPrompt, userMessage, apiKey) {
-    const response = await axios.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-            model: "llama-3.3-70b-versatile",
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userMessage }
-            ],
-            temperature: 0.3,
-            max_tokens: 400
-        },
-        {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            }
-        }
-    );
-    return response.data.choices[0].message.content.trim();
+  const response = await axios.post(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      model: 'llama-3.3-70b-versatile',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage },
+      ],
+      temperature: 0.3,
+      max_tokens: 400,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+  return response.data.choices[0].message.content.trim();
 }
 
 /**
  * Llama a Groq con un modelo de vision (message + image_url).
  */
 async function callVisionModel(systemPrompt, userText, base64Data, mimeType, apiKey) {
-    const response = await axios.post(
-        "https://api.groq.com/openai/v1/chat/completions",
+  const response = await axios.post(
+    'https://api.groq.com/openai/v1/chat/completions',
+    {
+      model: 'llama-3.2-90b-vision-preview',
+      messages: [
+        { role: 'system', content: systemPrompt },
         {
-            model: "llama-3.2-90b-vision-preview",
-            messages: [
-                { role: "system", content: systemPrompt },
-                {
-                    role: "user",
-                    content: [
-                        {
-                            type: "image_url",
-                            image_url: { url: `data:${mimeType};base64,${base64Data}` }
-                        },
-                        { type: "text", text: userText }
-                    ]
-                }
-            ],
-            temperature: 0.2,
-            max_tokens: 1024
-        },
-        {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${base64Data}` },
             },
-            timeout: 30000
-        }
-    );
-    return response.data.choices[0].message.content.trim();
+            { type: 'text', text: userText },
+          ],
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 1024,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      timeout: 30000,
+    }
+  );
+  return response.data.choices[0].message.content.trim();
 }
 
 exports.chat = async (req, res) => {
-    try {
-        // ── Aceptar tanto JSON como multipart ───────────────────────────────
-        let message = '';
-        let imageFile = null;
+  let whatsappNumber = '+506 6476-9091';
+  try {
+    // ── Aceptar tanto JSON como multipart ───────────────────────────────
+    let message = '';
+    let imageFile = null;
 
-        if (req.file) {
-            // Viene como multipart/form-data (con imagen)
-            message = req.body.message || '';
-            imageFile = req.file;
-        } else {
-            // Viene como application/json (solo texto, comportamiento anterior)
-            message = req.body.message || '';
+    if (req.file) {
+      // Viene como multipart/form-data (con imagen)
+      message = req.body.message || '';
+      imageFile = req.file;
+    } else {
+      // Viene como application/json (solo texto, comportamiento anterior)
+      message = req.body.message || '';
+    }
+
+    if (!message && !imageFile) {
+      return res.status(400).json({ error: 'El mensaje o la imagen son requeridos' });
+    }
+
+    // ── Obtener contexto de la base de datos (con caché de 5 min) ────────
+    const vehicles = await getInventory();
+    const settings = await Setting.findAll();
+
+    const companySettings = settings.reduce((acc, s) => {
+      acc[s.key] = s.value;
+      return acc;
+    }, {});
+
+    whatsappNumber = companySettings.company?.whatsapp || '+506 6476-9091';
+
+    const normalize = (text) =>
+      String(text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    const tokens = normalize(message)
+      .split(/[\s,.;:!?()[\]-]+/)
+      .filter((t) => t.length > 2);
+    const scored = vehicles
+      .map((v) => {
+        const haystack = normalize(
+          [v.name, v.marca, v.modelo, v.type, v.fuel, v.transmission, v.color, v.summary].join(' ')
+        );
+        let score = 0;
+        for (const token of tokens) {
+          if (haystack.includes(token)) score += 2;
         }
+        if (tokens.length === 0) score = 1;
+        return { vehicle: v, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 12)
+      .map((item) => item.vehicle);
 
-        if (!message && !imageFile) {
-            return res.status(400).json({ error: 'El mensaje o la imagen son requeridos' });
-        }
+    const contextVehicles = scored.length ? scored : vehicles.slice(0, 12);
 
-        // ── Obtener contexto de la base de datos (con caché de 5 min) ────────
-        const vehicles = await getInventory();
-        const settings = await Setting.findAll();
+    const inventoryContext =
+      contextVehicles.length > 0
+        ? contextVehicles
+            .map(
+              (v) =>
+                `- ${v.name} (${v.anio || v.year}) [${v.type || 'N/A'}] ID:${v.id} ₡${parseFloat(v.precio || v.price || 0).toLocaleString()}`
+            )
+            .join('\n')
+        : 'Sin vehículos cargados.';
 
-        const companySettings = settings.reduce((acc, s) => {
-            acc[s.key] = s.value;
-            return acc;
-        }, {});
+    const systemPrompt = buildSystemPrompt(inventoryContext, whatsappNumber);
+    const apiKey = process.env.GROQ_API_KEY;
 
-        const whatsappNumber = companySettings.company?.whatsapp || '+506 6476-9091';
+    if (!apiKey) {
+      console.warn('⚠️ GROQ_API_KEY no configurada. Usando fallback en chatbotController.');
+      return res.json({
+        reply:
+          'En este momento estoy operando en modo limitado porque no hay una llave de API configurada. Por favor, comunícate directamente con uno de nuestros asesores por WhatsApp para que te brinden toda la información.',
+        whatsapp: whatsappNumber,
+        showWhatsapp: true,
+        showCatalog: true,
+      });
+    }
 
-        const normalize = (text) =>
-            String(text || '')
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '');
-        const tokens = normalize(message).split(/[\s,.;:!?()[\]-]+/).filter((t) => t.length > 2);
-        const scored = vehicles
-            .map((v) => {
-                const haystack = normalize(
-                    [v.name, v.marca, v.modelo, v.type, v.fuel, v.transmission, v.color, v.summary].join(' ')
-                );
-                let score = 0;
-                for (const token of tokens) {
-                    if (haystack.includes(token)) score += 2;
-                }
-                if (tokens.length === 0) score = 1;
-                return { vehicle: v, score };
-            })
-            .filter((item) => item.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 12)
-            .map((item) => item.vehicle);
+    let reply;
 
-        const contextVehicles = scored.length ? scored : vehicles.slice(0, 12);
+    // ── Caso 1: Hay imagen → modelo de vision ───────────────────────────
+    if (imageFile) {
+      const base64Data = imageFile.buffer.toString('base64');
+      const userText = message || 'Describe este vehiculo en detalle.';
 
-        const inventoryContext = contextVehicles.length > 0
-            ? contextVehicles
-                .map((v) => `- ${v.name} (${v.anio || v.year}) [${v.type || 'N/A'}] ID:${v.id} ₡${parseFloat(v.precio || v.price || 0).toLocaleString()}`)
-                .join('\n')
-            : 'Sin vehículos cargados.';
+      // Paso A: analizar imagen con el modelo de vision para extraer datos estructurados
+      let detectedData;
+      try {
+        detectedData = await analyzeVehicleImage(base64Data, imageFile.mimetype);
+      } catch (e) {
+        console.warn('Vision analysis failed, continuing with generic prompt:', e.message);
+      }
 
-        const systemPrompt = buildSystemPrompt(inventoryContext, whatsappNumber);
-        const apiKey = process.env.GROQ_API_KEY;
+      // Paso B: enriquecer el prompt del usuario con los datos detectados
+      let enrichedUserText = userText;
+      if (detectedData) {
+        const detectedBlock = [
+          detectedData.name ? `Nombre detectado: ${detectedData.name}` : null,
+          detectedData.marca ? `Marca detectada: ${detectedData.marca}` : null,
+          detectedData.modelo ? `Modelo detectado: ${detectedData.modelo}` : null,
+          detectedData.type ? `Tipo detectado: ${detectedData.type}` : null,
+          detectedData.year ? `Anio detectado: ${detectedData.year}` : null,
+          detectedData.color ? `Color detectado: ${detectedData.color}` : null,
+          detectedData.transmission ? `Transmision detectada: ${detectedData.transmission}` : null,
+          detectedData.fuel ? `Combustible detectado: ${detectedData.fuel}` : null,
+          detectedData.mileage ? `Kilometraje detectado: ${detectedData.mileage}` : null,
+          detectedData.motor ? `Motor detectado: ${detectedData.motor}` : null,
+        ]
+          .filter(Boolean)
+          .join('\n');
 
-        if (!apiKey) {
-            return res.status(503).json({
-                error: 'GROQ_API_KEY no configurada. Agrégala en .env (raíz del proyecto) y reinicia el backend.'
-            });
-        }
-
-        let reply;
-
-        // ── Caso 1: Hay imagen → modelo de vision ───────────────────────────
-        if (imageFile) {
-            const base64Data = imageFile.buffer.toString('base64');
-            const userText = message || 'Describe este vehiculo en detalle.';
-
-            // Paso A: analizar imagen con el modelo de vision para extraer datos estructurados
-            let detectedData;
-            try {
-                detectedData = await analyzeVehicleImage(base64Data, imageFile.mimetype);
-            } catch (e) {
-                console.warn('Vision analysis failed, continuing with generic prompt:', e.message);
-            }
-
-            // Paso B: enriquecer el prompt del usuario con los datos detectados
-            let enrichedUserText = userText;
-            if (detectedData) {
-                const detectedBlock = [
-                    detectedData.name        ? `Nombre detectado: ${detectedData.name}`                   : null,
-                    detectedData.marca       ? `Marca detectada: ${detectedData.marca}`                    : null,
-                    detectedData.modelo      ? `Modelo detectado: ${detectedData.modelo}`                   : null,
-                    detectedData.type        ? `Tipo detectado: ${detectedData.type}`                       : null,
-                    detectedData.year        ? `Anio detectado: ${detectedData.year}`                       : null,
-                    detectedData.color       ? `Color detectado: ${detectedData.color}`                     : null,
-                    detectedData.transmission? `Transmision detectada: ${detectedData.transmission}`         : null,
-                    detectedData.fuel        ? `Combustible detectado: ${detectedData.fuel}`                 : null,
-                    detectedData.mileage     ? `Kilometraje detectado: ${detectedData.mileage}`              : null,
-                    detectedData.motor       ? `Motor detectado: ${detectedData.motor}`                      : null,
-                ].filter(Boolean).join('\n');
-
-                if (detectedBlock) {
-                    enrichedUserText =
-`El usuario envia una imagen y tambien un mensaje de texto.
+        if (detectedBlock) {
+          enrichedUserText = `El usuario envia una imagen y tambien un mensaje de texto.
 
 IMPORTANTE: antes de responder, aqui tienes los datos que un modelo de vision
 detecto automaticamente de la imagen (NO los inventes, usalos como referencia):
 ${detectedBlock}
 
 Mensaje del usuario: ${userText}`;
-                }
-            }
-
-            reply = await callVisionModel(systemPrompt, enrichedUserText, base64Data, imageFile.mimetype, apiKey);
         }
-        // ── Caso 2: Solo texto → modelo de texto ────────────────────────────
-        else {
-            reply = await callTextModel(systemPrompt, message, apiKey);
-        }
+      }
 
-        // ── Parsear etiquetas [WHATSAPP] y [CATALOGO] ───────────────────────
-        let showWhatsapp = false;
-        let showCatalog    = false;
-
-        if (reply.includes('[WHATSAPP]') || reply.toLowerCase().includes('whatsapp') || reply.toLowerCase().includes('asesor')) {
-            showWhatsapp = true;
-            reply = reply.replace(/\[WHATSAPP\]/gi, '').trim();
-        }
-
-        if (
-            reply.includes('[CATALOGO]') ||
-            reply.toLowerCase().includes('catálogo') ||
-            reply.toLowerCase().includes('catalogo') ||
-            reply.toLowerCase().includes('inventario') ||
-            reply.toLowerCase().includes('selección actual')
-        ) {
-            showCatalog = true;
-            reply = reply.replace(/\[CATALOGO\]/gi, '').trim();
-        }
-
-        res.json({
-            reply,
-            whatsapp: whatsappNumber,
-            showWhatsapp,
-            showCatalog
-        });
-
-    } catch (error) {
-        const groqErr = error.response?.data?.error;
-        console.error('Error en Chatbot Controller:', groqErr || error.message);
-        if (groqErr?.code === 'invalid_api_key') {
-            return res.status(503).json({
-                error: 'API key de Groq inválida. Revisa GROQ_API_KEY en .env (sin espacios) y reinicia el servidor.'
-            });
-        }
-        res.status(500).json({ error: 'Error al procesar la respuesta de la IA' });
+      reply = await callVisionModel(
+        systemPrompt,
+        enrichedUserText,
+        base64Data,
+        imageFile.mimetype,
+        apiKey
+      );
     }
+    // ── Caso 2: Solo texto → modelo de texto ────────────────────────────
+    else {
+      reply = await callTextModel(systemPrompt, message, apiKey);
+    }
+
+    // ── Parsear etiquetas [WHATSAPP] y [CATALOGO] ───────────────────────
+    let showWhatsapp = false;
+    let showCatalog = false;
+
+    if (
+      reply.includes('[WHATSAPP]') ||
+      reply.toLowerCase().includes('whatsapp') ||
+      reply.toLowerCase().includes('asesor')
+    ) {
+      showWhatsapp = true;
+      reply = reply.replace(/\[WHATSAPP\]/gi, '').trim();
+    }
+
+    if (
+      reply.includes('[CATALOGO]') ||
+      reply.toLowerCase().includes('catálogo') ||
+      reply.toLowerCase().includes('catalogo') ||
+      reply.toLowerCase().includes('inventario') ||
+      reply.toLowerCase().includes('selección actual')
+    ) {
+      showCatalog = true;
+      reply = reply.replace(/\[CATALOGO\]/gi, '').trim();
+    }
+
+    res.json({
+      reply,
+      whatsapp: whatsappNumber,
+      showWhatsapp,
+      showCatalog,
+    });
+  } catch (error) {
+    const groqErr = error.response?.data?.error;
+    console.error('Error en Chatbot Controller:', groqErr || error.message);
+
+    return res.json({
+      reply:
+        'Tuve un inconveniente al conectar con la inteligencia artificial. Por favor, comunícate con nosotros vía WhatsApp para una atención más rápida.',
+      whatsapp: whatsappNumber,
+      showWhatsapp: true,
+      showCatalog: true,
+    });
+  }
 };

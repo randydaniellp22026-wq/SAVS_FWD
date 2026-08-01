@@ -16,7 +16,7 @@ import { useCreditSimulatorLogica } from './CreditSimulatorLogica';
 import './CreditSimulator.css';
 
 // Pre-load images outside the component for performance and to avoid re-renders
-const localImages = import.meta.glob('../../img/*.{jpg,jpeg,png,webp,avif}', {
+const localImages = import.meta.glob('../../img/**/*.{jpg,jpeg,png,webp,avif}', {
   eager: true,
   import: 'default',
 });
@@ -65,7 +65,6 @@ const CreditSimulator = () => {
       // We clear the location state via history replace to prevent re-triggering on future internal navigations
       window.history.replaceState({}, document.title);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vehicles.length, location.state?.selectedVehicle]);
 
   // Helper for CRC display
@@ -129,13 +128,25 @@ const CreditSimulator = () => {
 
                 {selectedVehicle && (
                   <div className="vehicle-mini-preview">
-                    {(() => {
-                      const imgKey = Object.keys(localImages).find((k) =>
-                        k.includes(selectedVehicle.image)
-                      );
-                      const imageSrc = imgKey ? localImages[imgKey] : selectedVehicle.image;
-                      return <img src={imageSrc} alt={selectedVehicle.name} />;
-                    })()}
+                    <img
+                      src={selectedVehicle.image}
+                      alt={selectedVehicle.name}
+                      onError={(e) => {
+                        const fallbackKey = Object.keys(localImages).find(
+                          (k) =>
+                            selectedVehicle.galleryPath && k.includes(selectedVehicle.galleryPath)
+                        );
+                        const newSrc = fallbackKey
+                          ? localImages[fallbackKey]
+                          : 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=2070&auto=format&fit=crop';
+                        if (
+                          e.target.src !== newSrc &&
+                          e.target.src !== window.location.origin + newSrc
+                        ) {
+                          e.target.src = newSrc;
+                        }
+                      }}
+                    />
                     <div className="v-info">
                       <h4>{selectedVehicle.name}</h4>
                       <p>
